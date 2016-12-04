@@ -34,8 +34,14 @@ class GdbController():
         if verbose:
             print('Launching gdb: "%s"' % ' '.join(cmd))
 
-        self.gdb_process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        # Use pipes to the standard streams
+        self.gdb_process = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        # Change the file status flag (F_SETFL) on the pipes to be non-blocking
+        # so we can attempt to read from a pipe with no new data without locking
+        # the program up
         fcntl.fcntl(self.gdb_process.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
+        fcntl.fcntl(self.gdb_process.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
 
     def write(self, mi_cmd_to_write,
                                     timeout_sec=GDB_TIMEOUT_SEC,
@@ -95,9 +101,15 @@ class GdbController():
             line = None
 
             try:
+                # Read from standard out
                 line = self.gdb_process.stdout.read()
             except IOError:
-                pass
+                try:
+                    # Didn't find anything at standard out, check
+                    # standard error
+                    line = self.gdb_process.stderr.read()
+                except IOError:
+                    pass
 
             if line:
                 stripped_raw_response_list = [x.strip() for x in line.decode().split('\n')]

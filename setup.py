@@ -4,7 +4,7 @@ from pygdbmi.tests import test_app
 
 # from distutils.core import setup,
 EXCLUDE_FROM_PACKAGES = []
-version = '0.0.1.8'
+version = '0.0.1.9'
 
 
 class TestCommand (Command):
