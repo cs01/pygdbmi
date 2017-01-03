@@ -1,55 +1,88 @@
 # pygdbmi - Get Structured Output from GDB's Machine Interface
-## pip install pygdbmi
+
 [![Build Status](https://travis-ci.org/cs01/pygdbmi.svg?branch=master)](https://travis-ci.org/cs01/pygdbmi)
 
-## Purpose
-Parses gdb machine interface string output and returns structured data types. Run gdb with the `--interpreter=mi2` flag.
+Parse gdb machine interface string output and return structured data types (Python dicts) that are JSON serializable. Useful for writing the backend to a gdb frontend. For example, [gdbgui](https://github.com/cs01/gdbgui) uses pygdbmi on the backend.
 
-Also implements a class to control gdb, `GdbController`, which allows programmatic control of gdb using Python, which can be used to create a front end.
+Also implements a class to control gdb, `GdbController`, which allows programmatic control of gdb using Python, which is also useful if creating a front end.
+
+To get [machine interface](https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html) output from gdb, run gdb with the `--interpreter=mi2` flag.
+
 
 ## Examples
-Using `pygdbmi.parse_response`, turn gdb machine interface string output
+gdb mi has the following type of ugly, but structured, [example output](https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Simple-Examples.html#GDB_002fMI-Simple-Examples):
 
-    =thread-group-added,id="i1"
+     -> -break-insert main
+     <- ^done,bkpt={number="1",type="breakpoint",disp="keep",
+         enabled="y",addr="0x08048564",func="main",file="myprog.c",
+         fullname="/home/nickrob/myprog.c",line="68",thread-groups=["i1"],
+         times="0"}
+     <- (gdb)
 
-into this dictionary:
 
-    {'message': 'thread-group-added',
-    'payload': {
-        'id': 'i1'
-        },
-    'type': 'notify'}
+Use `pygdbmi.parse_response` to turn that string output into a JSON serializable dictionary
 
-Run gdb as subprocess and write/read from it:
+    from pygdbmi import gdbmiparser
+    from pprint import pprint
+    response = gdbmiparser.parse_response('^done,bkpt={number="1",type="breakpoint",disp="keep", enabled="y",addr="0x08048564",func="main",file="myprog.c",fullname="/home/nickrob/myprog.c",line="68",thread-groups=["i1"],times="0"')
+    pprint(response)
+    > {'message': 'done',
+     'payload': {'bkpt': {'addr': '0x08048564',
+                          'disp': 'keep',
+                          'enabled': 'y',
+                          'file': 'myprog.c',
+                          'fullname': '/home/nickrob/myprog.c',
+                          'func': 'main',
+                          'line': '68',
+                          'number': '1',
+                          'thread-groups': ['i1'],
+                          'times': '0',
+                          'type': 'breakpoint'}},
+     'type': 'result'}
+
+Ain't that better[?](https://www.youtube.com/watch?v=9-6GuttRWGE)
+
+But how do you get the gdb output into Python in the first place? If you want, `pygdbmi` also has a class to control gdb as subprocess. You can write commands, and get structured output back:
 
     from pygdbmi.gdbcontroller import GdbController
     from pprint import pprint
+
     # Start gdb process
     gdbmi = GdbController()
+
     # Load binary a.out and get structured response
-    response = gdbmi.write('file a.out')
+    response = gdbmi.write('-file-exec-file a.out')
     pprint(response)
-    [
-     {'message': None,
-      'payload': 'Reading symbols from ../pygdbmi/tests/sample_c_app/a.out...',
-      'type': 'console'},
-     {'message': 'done', 'payload': None, 'type': 'result'}
-    ]
+    [{'message': u'thread-group-added',
+      'payload': {u'id': u'i1'},
+      'type': 'notify'},
+     {'message': u'done', 'payload': None, 'type': 'result'}]
 
-Now do whatever you want with gdb
+Now do whatever you want with gdb. All gdb commands, as well as gdb [machine interface commands]((https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Input-Syntax.html#GDB_002fMI-Input-Syntax)) are acceptable. gdb mi commands give better structured output that is machine readable, rather than gdb console output. mi commands begin with a `-`.
 
+    response = gdbmi.write('-break-insert main')
     response = gdbmi.write('-exec-run')
+    response = gdbmi.write('next')
+    response = gdbmi.write('next')
+    response = gdbmi.write('continue')
+    response = gdbmi.exit()
 
-## Commands
+## API
+There are two main functions/classes of interest.
 
-All regular gdb commands are valid, plus additional "machine interface" gdb commands. See https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Input-Syntax.html#GDB_002fMI-Input-Syntax.
+* `function pygdbmi.gdbmiparser.parse_response(gdb_mi_text)`
 
-Example mi commands: https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Simple-Examples.html#GDB_002fMI-Simple-Examples
+Parse gdb mi text and turn it into a dictionary. See Parsed Output for more information.
 
-## Parsed Output
+* `Class pygdbmi.gdbcontroller.GdbController`
+
+Run gdb as a subprocess using the `GdbController` class. Send commands and recieve structured output that is JSON serializable. See source code for methods and documentation.
+
+
+## Parsed Output Description
 Each parsed gdb response consists of a list of dictionaries. Each dictionary has keys `type`, `message`, and `payload`.
 
-The `type` can be
+The `type` is defined based on gdb's various [mi output record types]((https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Output-Records.html#GDB_002fMI-Output-Records)), and can be
 
 * result - the result of a gdb command, such as `done`, `running`, `error`, etc.
 * notify - additional async changes that have occurred, such as breakpoint modified
@@ -59,20 +92,31 @@ The `type` can be
 * target - output from remote target
 * done - when gdb has finished its output
 
-see https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Output-Records.html#GDB_002fMI-Output-Records for more information
+In addition to the `type` key, `pygdbmi` also adds two more fields:
 
-The `message` contains a textual message from gdb,  which is not always present. When missing, this is `None`.
+* `message` contains a textual message from gdb,  which is not always present. When missing, this is `None`.
 
-The `payload` contains the content of gdb's output, which can contain any of the following: `dictionary`, `list`, `string`. This too is not always present, and can be `None` depending on the response.
+* `payload` contains the content of gdb's output, which can contain any of the following: `dictionary`, `list`, `string`. This too is not always present, and can be `None` depending on the response.
 
 ## Installation
 
     pip install pygdbmi
 
-or clone, then run
+## Development
 
-    python setup.py install
+To get started with development, set up a new virtual environment, then clone this repo. Test changes are still working with `python setup.py test`. Add to tests at pygdbmi/tests/test_app.py
 
-## Further Reading
+## Contributing
 
-https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html
+Contributions and bug fixes are welcome!
+
+## Credits
+
+Inspiration was drawn from the following projects
+
+* [sirnewton01 / godbg](https://github.com/sirnewton01/godbg)
+* [cyrus-and / gdb](https://github.com/cyrus-and/gdb)
+
+## See Also
+
+* [gdbgui](https://github.com/cs01/gdbgui) implements a browser-based frontend to gdb, using pygdbmi on the backend
