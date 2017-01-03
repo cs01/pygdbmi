@@ -8,6 +8,9 @@ Also implements a class to control gdb, `GdbController`, which allows programmat
 
 To get [machine interface](https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html) output from gdb, run gdb with the `--interpreter=mi2` flag.
 
+## Installation
+
+    pip install pygdbmi
 
 ## Examples
 gdb mi has the following type of ugly, but structured, [example output](https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Simple-Examples.html#GDB_002fMI-Simple-Examples):
@@ -20,7 +23,7 @@ gdb mi has the following type of ugly, but structured, [example output](https://
      <- (gdb)
 
 
-Use `pygdbmi.parse_response` to turn that string output into a JSON serializable dictionary
+Use `pygdbmi.gdbmiparser.parse_response` to turn that string output into a JSON serializable dictionary
 
     from pygdbmi import gdbmiparser
     from pprint import pprint
@@ -97,10 +100,6 @@ In addition to the `type` key, `pygdbmi` also adds two more fields:
 * `message` contains a textual message from gdb,  which is not always present. When missing, this is `None`.
 
 * `payload` contains the content of gdb's output, which can contain any of the following: `dictionary`, `list`, `string`. This too is not always present, and can be `None` depending on the response.
-
-## Installation
-
-    pip install pygdbmi
 
 ## Development
 
