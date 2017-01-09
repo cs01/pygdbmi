@@ -1,10 +1,9 @@
-from setuptools import find_packages, setup, Command
 import sys
+from setuptools import find_packages, setup, Command
 from pygdbmi.tests import test_app
 
-# from distutils.core import setup,
 EXCLUDE_FROM_PACKAGES = []
-version = '0.0.1.9'
+version = '0.6'
 
 
 class TestCommand (Command):
