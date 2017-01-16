@@ -11,9 +11,10 @@ def main(verbose=True):
     subprocess.check_output(["make", "-C", SAMPLE_C_CODE_DIR, '--quiet'])
 
     # Initialize gdb with C binary
-    gdbmi = GdbController(SAMPLE_C_BINARY, verbose=verbose)
+    gdbmi = GdbController(verbose=verbose)
     # Send gdb machine interface commands, and get responses. Responses are
     # automatically printed as they are received if verbose is True
+    response = gdbmi.write('-file-exec-and-symbols %s' % SAMPLE_C_BINARY)
     response = gdbmi.write('-file-list-exec-source-files')
     response = gdbmi.write('-break-insert main')
     response = gdbmi.write('-exec-run')
