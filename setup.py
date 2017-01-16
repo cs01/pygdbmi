@@ -3,7 +3,7 @@ from setuptools import find_packages, setup, Command
 from pygdbmi.tests import test_app
 
 EXCLUDE_FROM_PACKAGES = []
-version = '0.6'
+version = '0.7'
 
 
 class TestCommand (Command):
