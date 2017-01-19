@@ -158,8 +158,6 @@ class GdbController():
         verbose = self.verbose or verbose
 
         self.mutex.acquire(MUTEX_AQUIRE_WAIT_TIME_SEC)
-        self.gdb_process.stdout.flush()
-
 
         retval = []
         timeout_msec = timeout_sec * SEC_TO_MSEC
@@ -168,9 +166,11 @@ class GdbController():
             if event == select.EPOLLIN:
                 # new data is ready to read
                 if fileno == self.stdout_fileno:
+                    self.gdb_process.stdout.flush()
                     line = self.gdb_process.stdout.read()
 
                 elif fileno == self.stderr_fileno:
+                    self.gdb_process.stderr.flush()
                     line = self.gdb_process.stderr.read()
 
                 else:
