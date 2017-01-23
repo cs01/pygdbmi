@@ -37,6 +37,7 @@ class GdbController():
         self.mutex = Lock()
         self.abs_gdb_path = None  # abs path to gdb executable
         self.cmd = []  # the shell command to run gdb
+        self.buffer = ''
 
         if not gdb_path:
             raise ValueError('a valid path to gdb must be specified')
@@ -53,6 +54,8 @@ class GdbController():
             print('Launching gdb: "%s"' % ' '.join(self.cmd))
 
         # Use pipes to the standard streams
+        # In UNIX a newline will typically only flush the buffer if stdout is a terminal. 
+        # If the output is being redirected to a file, a newline won't flush
         self.gdb_process = subprocess.Popen(self.cmd, shell=False, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # Set the file status flag (F_SETFL) on the pipes to be non-blocking
@@ -167,11 +170,13 @@ class GdbController():
                 # new data is ready to read
                 if fileno == self.stdout_fileno:
                     self.gdb_process.stdout.flush()
-                    line = self.gdb_process.stdout.read()
+                    raw_output = self.gdb_process.stdout.read()
+                    stream = 'stdout'
 
                 elif fileno == self.stderr_fileno:
                     self.gdb_process.stderr.flush()
-                    line = self.gdb_process.stderr.read()
+                    raw_output = self.gdb_process.stderr.read()
+                    stream = 'stderr'
 
                 else:
                     self.mutex.release()
@@ -180,11 +185,10 @@ class GdbController():
                 # This is unexpected
                 print('unexpected event ' + EVENT_LOOKUP[event])
 
-            # Split output on newlines
-            stripped_raw_response_list = [x.strip() for x in line.decode().split('\n')]
+            stripped_raw_response_list = [x.strip() for x in raw_output.decode().split('\n')]
 
-            # Remove empty responses
             raw_response_list = list(filter(lambda x: x, stripped_raw_response_list))
+            raw_response_list, self.buffer = buffer_incomplete_responses(raw_response_list, self.buffer)
 
             # parse each response from gdb and put into a list
             for response in raw_response_list:
@@ -192,6 +196,8 @@ class GdbController():
                     pass
                 else:
                     parsed_response = gdbmiparser.parse_response(response)
+                    parsed_response['stream'] = stream
+
                     retval.append(parsed_response)
                     if verbose:
                         pprint(parsed_response)
@@ -209,3 +215,49 @@ class GdbController():
             self.gdb_process.terminate()
         self.gdb_process = None
         return None
+
+
+def buffer_incomplete_responses(raw_response_list, buf):
+    """It is possible poll() returns EPOLLIN before gdb finished writing its response. In that
+    case, a partial mi response was read, which cannot be parsed into structured data.
+    We want to ALWAYS parse complete mi records. To do this, we store a buffer of gdb's
+    output if gdb did not tell us it finished.
+
+    @param raw_response_list: List of gdb responses
+    @param buf (str): Buffered gdb response from the past. This is incomplete and needs to be prepended to
+        gdb's next output.
+
+    @returns (buffered_response_list, buffer)
+    """
+
+    if buf:
+        # We have a partial response in our buffer. Combine it with
+        # this response to hopefully form a complete response.
+        raw_response_list[0] = buf + raw_response_list[0]
+        # Erase buffer since we put it back into the output to be parsed.
+        # If it's still not complete, it will be set back in this buffer with the
+        # new output.
+        buf = ''
+
+    num_responses = len(raw_response_list)
+    for i, response in enumerate(raw_response_list):
+        # i is zero indexed
+        # num_responses is one indexed
+        if response.startswith('^done'):
+            # we got a response from gdb, but we need to make sure
+            # the entire gdb completed writing it's response and there isn't some more
+            # mi output that we need. Output is ready to be parsed ONLY when we get (gdb) in
+            # the next response.
+            if (i + 1) > (num_responses - 1):
+                # This was the last response, but it's missing the "finished"
+                # response! We got an incomplete result, which won't be parsed
+                # correctly!
+
+                # Store the partial response in a buffer and combine it with the next
+                # response
+                buf = response
+                # don't process this incomplete response!
+                raw_response_list = raw_response_list[1:-1]
+                print('Buffering output. Please wait.')
+
+    return (raw_response_list, buf)
