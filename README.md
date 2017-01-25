@@ -1,7 +1,9 @@
-# pygdbmi - Get Structured Output from GDB's Machine Interface
-
 [![Build Status](https://travis-ci.org/cs01/pygdbmi.svg?branch=master)](https://travis-ci.org/cs01/pygdbmi)
+[![pypi](https://img.shields.io/badge/pypi-v0.7.1-blue.svg)](https://pypi.python.org/pypi/pygdbmi/0.7)
+[![pypi](https://img.shields.io/badge/python-2.7, 3.2, 3.3, 3.4, 3.5, pypy-blue.svg)]()
+[![Say Thanks!](https://img.shields.io/badge/SayThanks.io-☼-blue.svg)](https://saythanks.io/to/grassfedcode)
 
+# pygdbmi - Get Structured Output from GDB's Machine Interface
 Parse gdb machine interface string output and return structured data types (Python dicts) that are JSON serializable. Useful for writing the backend to a gdb frontend. For example, [gdbgui](https://github.com/cs01/gdbgui) uses pygdbmi on the backend.
 
 Also implements a class to control gdb, `GdbController`, which allows programmatic control of gdb using Python, which is also useful if creating a front end.
