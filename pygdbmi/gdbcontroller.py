@@ -37,7 +37,7 @@ class GdbController():
         self.mutex = Lock()
         self.abs_gdb_path = None  # abs path to gdb executable
         self.cmd = []  # the shell command to run gdb
-        self.buffer = ''
+        self._buffer = ''  # string buffer for unifinished gdb output
 
         if not gdb_path:
             raise ValueError('a valid path to gdb must be specified')
@@ -54,7 +54,7 @@ class GdbController():
             print('Launching gdb: "%s"' % ' '.join(self.cmd))
 
         # Use pipes to the standard streams
-        # In UNIX a newline will typically only flush the buffer if stdout is a terminal. 
+        # In UNIX a newline will typically only flush the buffer if stdout is a terminal.
         # If the output is being redirected to a file, a newline won't flush
         self.gdb_process = subprocess.Popen(self.cmd, shell=False, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -188,7 +188,7 @@ class GdbController():
             stripped_raw_response_list = [x.strip() for x in raw_output.decode().split('\n')]
 
             raw_response_list = list(filter(lambda x: x, stripped_raw_response_list))
-            raw_response_list, self.buffer = buffer_incomplete_responses(raw_response_list, self.buffer)
+            raw_response_list, self._buffer = buffer_incomplete_responses(raw_response_list, self._buffer)
 
             # parse each response from gdb and put into a list
             for response in raw_response_list:
@@ -258,6 +258,5 @@ def buffer_incomplete_responses(raw_response_list, buf):
                 buf = response
                 # don't process this incomplete response!
                 raw_response_list = raw_response_list[1:-1]
-                print('Buffering output. Please wait.')
 
     return (raw_response_list, buf)
