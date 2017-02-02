@@ -59,7 +59,7 @@ class TestPyGdbMi(unittest.TestCase):
         # Build C program
         subprocess.check_output(["make", "-C", SAMPLE_C_CODE_DIR, '--quiet'])
 
-        # Launch manages gdb subprocess via GdbController
+        # Initialize object that manages gdb subprocess
         gdbmi = GdbController()
 
         # Load the binary and its symbols in the gdb subprocess
