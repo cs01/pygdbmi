@@ -1,9 +1,15 @@
 import sys
+import re
 from setuptools import find_packages, setup, Command
 from pygdbmi.tests import test_app
 
 EXCLUDE_FROM_PACKAGES = []
-version = '0.7.1'
+
+readme = open('README.rst', 'r').read()
+
+with open('pygdbmi/__init__.py', 'r') as fd:
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+                        fd.read(), re.MULTILINE).group(1)
 
 
 class TestCommand (Command):
@@ -26,6 +32,7 @@ setup(
     author='Chad Smith',
     author_email='grassfedcode@gmail.com',
     description=('Parse gdb machine interface output with Python'),
+    long_description=readme,
     url='https://github.com/cs01/pygdbmi',
     license='MIT',
     packages=find_packages(exclude=EXCLUDE_FROM_PACKAGES),
@@ -44,6 +51,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',

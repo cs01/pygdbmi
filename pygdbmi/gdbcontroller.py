@@ -13,8 +13,6 @@ GDB_TIMEOUT_SEC = 1
 MUTEX_AQUIRE_WAIT_TIME_SEC = int(1)
 unicode = str if PYTHON3 else unicode
 
-SEC_TO_MSEC = 1000
-
 EVENT_LOOKUP = {
     select.POLLIN: 'POLLIN',
     select.POLLPRI: 'POLLPRI',
@@ -79,7 +77,7 @@ class GdbController():
                                     timeout_sec=GDB_TIMEOUT_SEC,
                                     verbose=False,
                                     raise_error_on_timeout=True,
-                                    read_response=False):
+                                    read_response=True):
         """Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
 
         A mutex is obtained before writing and released before returning
@@ -116,16 +114,16 @@ class GdbController():
         if not mi_cmd_to_write.endswith('\n'):
             mi_cmd_to_write_nl = mi_cmd_to_write + '\n'
 
-        timeout_msec = timeout_sec * SEC_TO_MSEC
-        events = self.epoll_write.poll(timeout_msec)
+        events = self.epoll_write.poll(timeout_sec)
         for fileno, event in events:
             if event == select.EPOLLOUT and fileno == self.stdin_fileno:
                 # ready to write
-                # self.gdb_process.stdin.flush()
                 self.gdb_process.stdin.write(mi_cmd_to_write_nl.encode())
-                # line = self.gdb_process.stdout.read()
+                # don't forget to flush for Python3, otherwise gdb won't realize there is data
+                # to evaluate, and we won't get a response
+                self.gdb_process.stdin.flush()
             else:
-                raise ValueError('got fileno %d, event %d' % (fileno, event))
+                print('developer error: got unexpected fileno %d, event %d' % (fileno, event))
 
         if read_response is True:
             return self.get_gdb_response(timeout_sec=timeout_sec,
@@ -163,8 +161,7 @@ class GdbController():
         self.mutex.acquire(MUTEX_AQUIRE_WAIT_TIME_SEC)
 
         retval = []
-        timeout_msec = timeout_sec * SEC_TO_MSEC
-        events = self.epoll.poll(timeout_msec)
+        events = self.epoll.poll(timeout_sec)
         for fileno, event in events:
             if event == select.EPOLLIN:
                 # new data is ready to read
