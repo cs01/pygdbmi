@@ -5,6 +5,8 @@ from pygdbmi.tests import test_app
 
 EXCLUDE_FROM_PACKAGES = []
 
+readme = open('README.rst', 'r').read()
+
 with open('pygdbmi/__init__.py', 'r') as fd:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
                         fd.read(), re.MULTILINE).group(1)
@@ -30,6 +32,7 @@ setup(
     author='Chad Smith',
     author_email='grassfedcode@gmail.com',
     description=('Parse gdb machine interface output with Python'),
+    long_description=readme,
     url='https://github.com/cs01/pygdbmi',
     license='MIT',
     packages=find_packages(exclude=EXCLUDE_FROM_PACKAGES),
