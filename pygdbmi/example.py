@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 from pygdbmi.gdbcontroller import GdbController
 import subprocess
 import os
@@ -15,14 +15,24 @@ def main(verbose=True):
     # Send gdb machine interface commands, and get responses. Responses are
     # automatically printed as they are received if verbose is True
     response = gdbmi.write('-file-exec-and-symbols %s' % SAMPLE_C_BINARY)
+    print(response)
     response = gdbmi.write('-file-list-exec-source-files')
+    print(response)
     response = gdbmi.write('-break-insert main')
+    print(response)
     response = gdbmi.write('-exec-run')
+    print(response)
     response = gdbmi.write('next')
+    print(response)
     response = gdbmi.write('next')
+    print(response)
+    print(response)
     response = gdbmi.write('whatis i')
+    print(response)
     response = gdbmi.write('continue')
+    print(response)
     response = gdbmi.exit()
+    print(response)
 
 if __name__ == '__main__':
     main()

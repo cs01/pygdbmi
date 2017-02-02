@@ -1,9 +1,13 @@
 import sys
+import re
 from setuptools import find_packages, setup, Command
 from pygdbmi.tests import test_app
 
 EXCLUDE_FROM_PACKAGES = []
-version = '0.7.1'
+
+with open('pygdbmi/__init__.py', 'r') as fd:
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+                        fd.read(), re.MULTILINE).group(1)
 
 
 class TestCommand (Command):

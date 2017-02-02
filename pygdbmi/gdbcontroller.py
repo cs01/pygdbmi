@@ -79,7 +79,7 @@ class GdbController():
                                     timeout_sec=GDB_TIMEOUT_SEC,
                                     verbose=False,
                                     raise_error_on_timeout=True,
-                                    read_response=False):
+                                    read_response=True):
         """Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
 
         A mutex is obtained before writing and released before returning
@@ -121,9 +121,9 @@ class GdbController():
         for fileno, event in events:
             if event == select.EPOLLOUT and fileno == self.stdin_fileno:
                 # ready to write
-                # self.gdb_process.stdin.flush()
                 self.gdb_process.stdin.write(mi_cmd_to_write_nl.encode())
-                # line = self.gdb_process.stdout.read()
+                # don't forget to flush for Python3
+                self.gdb_process.stdin.flush()
             else:
                 raise ValueError('got fileno %d, event %d' % (fileno, event))
 
