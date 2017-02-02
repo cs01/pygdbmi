@@ -63,7 +63,7 @@ class TestPyGdbMi(unittest.TestCase):
         gdbmi = GdbController()
 
         # Load the binary and its symbols in the gdb subprocess
-        responses = gdbmi.write('-file-exec-and-symbols %s' % SAMPLE_C_BINARY)
+        responses = gdbmi.write('-file-exec-and-symbols %s' % SAMPLE_C_BINARY, timeout_sec=2)
 
         # Verify output was parsed into a list of responses
         assert(len(responses) != 0)
