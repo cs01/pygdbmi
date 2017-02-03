@@ -10,6 +10,8 @@
 .. image:: https://img.shields.io/badge/SayThanks.io-☼-blue.svg
   :target: https://saythanks.io/to/grassfedcode
 
+.. image:: https://img.shields.io/gratipay/cs01.svg
+  :target: https://gratipay.com/cs01/
 
 pygdbmi - Get Structured Output from GDB's Machine Interface
 ============================================================
