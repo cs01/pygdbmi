@@ -1,7 +1,17 @@
+.. pygdbmi documentation master file, created by
+   sphinx-quickstart on Sun Feb  5 07:59:05 2017.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+pygdbmi - Get Structured Output from GDB's Machine Interface
+============================================================
+
+Release v\ |version|
+
 .. image:: https://travis-ci.org/cs01/pygdbmi.svg?branch=master
   :target: https://travis-ci.org/cs01/pygdbmi
 
-.. image:: https://img.shields.io/badge/pypi-v0.7.2.0-blue.svg
+.. image:: https://img.shields.io/badge/pypi-v0.7.2.1-blue.svg
   :target: https://pypi.python.org/pypi/pygdbmi/
 
 .. image:: https://img.shields.io/badge/python-2.7, 3.3, 3.4, 3.5, pypy-blue.svg
@@ -13,12 +23,16 @@
 .. image:: https://img.shields.io/gratipay/cs01.svg
   :target: https://gratipay.com/cs01/
 
-pygdbmi - Get Structured Output from GDB's Machine Interface
-============================================================
 
-`Official Homepage and Documentation <http://grassfedcode.com/pygdbmi>`_
+Installation
+------------
 
+::
 
+    pip install pygdbmi
+
+Description
+------------
 Parse gdb machine interface string output and return structured data
 types (Python dicts) that are JSON serializable. Useful for writing the
 backend to a gdb frontend. For example,
@@ -32,12 +46,6 @@ To get `machine
 interface <https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html>`__
 output from gdb, run gdb with the ``--interpreter=mi2`` flag.
 
-Installation
-------------
-
-::
-
-    pip install pygdbmi
 
 Examples
 --------
@@ -115,6 +123,13 @@ a ``-``.
     response = gdbmi.write('continue')
     response = gdbmi.exit()
 
+API
+---
+.. toctree::
+   :maxdepth: 2
+
+   api/pygdbmi
+
 
 Parsed Output Description
 -------------------------
@@ -153,7 +168,6 @@ Set up a new virtual environment, then clone this repo and run
 ``python setup.py test``, then begin development.
 
 Update unit tests as necessary: pygdbmi/tests/test\_app.py
-
 
 
 See Also

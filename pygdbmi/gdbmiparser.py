@@ -17,10 +17,17 @@ from pprint import pprint
 def parse_response(gdb_mi_text):
     """Parse gdb mi text and turn it into a dictionary.
 
-    Output types include: notify, result, console, log, target, done
-
     See https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
     for details on types of gdb mi output.
+
+    Args:
+        gdb_mi_text (str): String output from gdb
+
+    Returns:
+        dict with the following keys:
+        type (either 'notify', 'result', 'console', 'log', 'target', 'done'),
+        message (str or None),
+        payload (str, list, dict, or None)
     """
     if _GDB_MI_NOTIFY_RE.match(gdb_mi_text):
         message, payload = _get_notify_msg_and_payload(gdb_mi_text)
@@ -63,7 +70,8 @@ def parse_response(gdb_mi_text):
 
 
 def response_is_finished(gdb_mi_text):
-    """Return true if the gdb mi response is ending"""
+    """Return true if the gdb mi response is ending
+    Returns: True if gdb response is finished"""
     if _GDB_MI_RESPONSE_FINISHED_RE.match(gdb_mi_text):
         return True
     else:
@@ -72,7 +80,8 @@ def response_is_finished(gdb_mi_text):
 
 def assert_match(actual_char_or_str, expected_char_or_str):
     """If values don't match, print them and raise a ValueError, otherwise,
-    continue"""
+    continue
+    Raises: ValueError if argumetns do not match"""
     if expected_char_or_str != actual_char_or_str:
         print('Expected')
         pprint(expected_char_or_str)

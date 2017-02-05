@@ -26,6 +26,14 @@ EVENT_LOOKUP = {
 class GdbController():
     """
     Run gdb as a subprocess. Send commands and recieve structured output.
+    Create new object, along with a gdb subprocess
+
+    Args:
+        gdb_path (str): Command to run in shell to spawn new gdb subprocess
+        gdb_args (list): Arguments to pass to shell when spawning new gdb subprocess
+        verbose (bool): Print verbose output if True
+    Returns:
+        New GdbController object
     """
 
     def __init__(self, gdb_path='gdb', gdb_args=['--nx', '--quiet', '--interpreter=mi2'], verbose=False):
@@ -86,11 +94,14 @@ class GdbController():
             mi_cmd_to_write (str or list): String to write to gdb. If list, it is joined by newlines.
             timeout_sec (int): Maximum number of seconds to wait for response before exiting. Must be >= 0.
             verbose (bool): Be verbose in what is being written
-            flush_child_output (bool): call fflush(0)
+            raise_error_on_timeout (bool): If read_response is True, raise error if no response is received
             read_response (bool): Block and read response. If there is a separate thread running,
-                                    this can be false, and the reading thread can just pick up the output.
+            this can be false, and the reading thread read the output.
         Returns:
             List of parsed gdb responses if read_response is True, otherwise []
+        Raises:
+            ValueError if there is no gdb subprocess running
+            ValueError if mi_cmd_to_write is not valid
         """
         if not self.gdb_process:
             raise ValueError('gdb process is not attached')
@@ -136,17 +147,23 @@ class GdbController():
         """Get response from GDB, and block while doing so. If GDB does not have any response ready to be read
         by timeout_sec, a ValueError is raised.
 
-        A mutex is obtained before reading and released before returning
+        A lock (mutex) is obtained before reading and released before returning. If the lock cannot
+        be obtained, no data is read and an empty list is returned.
 
         Args:
             timeout_sec (float): Time to wait for reponse. Must be >= 0.
             raise_error_on_timeout (bool): Whether an exception should be raised if no response was found
-                after timeout_sec
+            after timeout_sec
             verbose (bool): If true, more output it printed
 
         Returns:
-            List of parsed GDB responses
-            Raises ValueError if response is not recieved within timeout_sec
+            List of parsed GDB responses, returned from gdbmiparser.parse_response, with the
+            additional key 'stream' which is either 'stdout' or 'stderr'
+
+        Raises:
+            ValueError if response is not recieved within timeout_sec
+            ValueError if epoll returned unexpected file number
+            ValueError if there is no gdb subprocess running
         """
 
         # validate inputs
@@ -185,7 +202,7 @@ class GdbController():
             stripped_raw_response_list = [x.strip() for x in raw_output.decode().split('\n')]
 
             raw_response_list = list(filter(lambda x: x, stripped_raw_response_list))
-            raw_response_list, self._buffer = buffer_incomplete_responses(raw_response_list, self._buffer)
+            raw_response_list, self._buffer = _buffer_incomplete_responses(raw_response_list, self._buffer)
 
             # parse each response from gdb and put into a list
             for response in raw_response_list:
@@ -207,24 +224,27 @@ class GdbController():
             return retval
 
     def exit(self):
-        """Terminate gdb process"""
+        """Terminate gdb process
+        Returns: None"""
         if self.gdb_process:
             self.gdb_process.terminate()
         self.gdb_process = None
         return None
 
 
-def buffer_incomplete_responses(raw_response_list, buf):
+def _buffer_incomplete_responses(raw_response_list, buf):
     """It is possible poll() returns EPOLLIN before gdb finished writing its response. In that
     case, a partial mi response was read, which cannot be parsed into structured data.
     We want to ALWAYS parse complete mi records. To do this, we store a buffer of gdb's
     output if gdb did not tell us it finished.
 
-    @param raw_response_list: List of gdb responses
-    @param buf (str): Buffered gdb response from the past. This is incomplete and needs to be prepended to
+    Args:
+        raw_response_list: List of gdb responses
+        buf (str): Buffered gdb response from the past. This is incomplete and needs to be prepended to
         gdb's next output.
 
-    @returns (buffered_response_list, buffer)
+    Returns:
+        (buffered_response_list, buffer)
     """
 
     if buf:
