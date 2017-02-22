@@ -19,7 +19,7 @@ class TestPyGdbMi(unittest.TestCase):
         """Test that the parser returns dictionaries from gdb mi strings as expected"""
 
         # Test basic types
-        assert_match(parse_response('^done'), {'type': 'result', 'payload': None, 'message': 'done'})
+        assert_match(parse_response('^done'), {'type': 'result', 'payload': None, 'message': 'done', "token": None})
         assert_match(parse_response('~"done"'), {'type': 'console', 'payload': 'done', 'message': None})
         assert_match(parse_response('@"done"'), {"type": 'target', "payload": 'done', 'message': None})
         assert_match(parse_response('&"done"'), {"type": 'log', "payload": 'done', 'message': None})
@@ -49,7 +49,12 @@ class TestPyGdbMi(unittest.TestCase):
                                                          'thread-groups': ['i1'],
                                                          'times': '1',
                                                          'type': 'breakpoint'}},
-                                    'type': 'notify'})
+                                     'type' : 'notify',
+                                     'token': None})
+
+        #Test records with token
+        assert_match(parse_response('1342^done'), {'type': 'result', 'payload': None, 'message': 'done', "token": 1342})
+
 
     def test_controller(self):
         """Build a simple C program, then run it with GdbController and verify the output is parsed
@@ -68,11 +73,12 @@ class TestPyGdbMi(unittest.TestCase):
         # Verify output was parsed into a list of responses
         assert(len(responses) != 0)
         response = responses[0]
-        assert(set(response.keys()) == set(['message', 'type', 'payload', 'stream']))
+        assert(set(response.keys()) == set(['message', 'type', 'payload', 'stream', 'token']))
         assert(response['message'] == 'thread-group-added')
         assert(response['type'] == 'notify')
         assert(response['payload'] == {'id': 'i1'})
         assert(response['stream'] == 'stdout')
+        assert(response['token'] == None)
 
         responses = gdbmi.write(['-file-list-exec-source-files', '-break-insert main'])
         assert(len(responses) != 0)
