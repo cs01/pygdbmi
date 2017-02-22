@@ -30,16 +30,18 @@ def parse_response(gdb_mi_text):
         payload (str, list, dict, or None)
     """
     if _GDB_MI_NOTIFY_RE.match(gdb_mi_text):
-        message, payload = _get_notify_msg_and_payload(gdb_mi_text)
+        token, message, payload = _get_notify_msg_and_payload(gdb_mi_text)
         return {'type': 'notify',
                 'message': message,
-                'payload': payload}
+                'payload': payload,
+                'token'  : token}
 
     elif _GDB_MI_RESULT_RE.match(gdb_mi_text):
-        message, payload = _get_result_msg_and_paylod(gdb_mi_text)
+        token, message, payload = _get_result_msg_and_paylod(gdb_mi_text)
         return {'type': 'result',
                 'message': message,
-                'payload': payload}
+                'payload': payload,
+                'token'  : token}
 
     elif _GDB_MI_CONSOLE_RE.match(gdb_mi_text):
         return {'type': 'console',
@@ -106,14 +108,14 @@ _DEBUG = False
 # In addition to a number of out-of-band notifications,
 # the response to a gdb/mi command includes one of the following result indications:
 # done, running, connected, error, exit
-_GDB_MI_RESULT_RE = re.compile('^\^(\S+?)(,(.*))?$')
+_GDB_MI_RESULT_RE = re.compile('^(\d*)\^(\S+?)(,(.*))?$')
 
 # https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Async-Records.html#GDB_002fMI-Async-Records
 # Async records are used to notify the gdb/mi client of additional
 # changes that have occurred. Those changes can either be a consequence
 # of gdb/mi commands (e.g., a breakpoint modified) or a result of target activity
 # (e.g., target stopped).
-_GDB_MI_NOTIFY_RE = re.compile('^[*=](\S+?),(.*)$')
+_GDB_MI_NOTIFY_RE = re.compile('^(\d*)[*=](\S+?),(.*)$')
 
 # https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
 # "~" string-output
@@ -147,22 +149,24 @@ _GDB_MI_VALUE_START_CHARS = [_GDB_MI_CHAR_DICT_START, _GDB_MI_CHAR_ARRAY_START, 
 def _get_notify_msg_and_payload(result):
     """Get notify message and payload dict"""
     groups = _GDB_MI_NOTIFY_RE.match(result).groups()
-    message = groups[0].strip()
-    result_of_status = groups[1].strip()
+    token  = int(groups[0]) if groups[0] != '' else None
+    message = groups[1].strip()
+    result_of_status = groups[2].strip()
     _, payload = _parse_dict(result_of_status)
-    return message, payload
+    return token, message, payload
 
 
 def _get_result_msg_and_paylod(result):
     """Get result message and payload dict"""
     groups = _GDB_MI_RESULT_RE.match(result).groups()
-    message = groups[0]
-    if groups[1] is None:
+    token  = int(groups[0]) if groups[0] != '' else None
+    message = groups[1]
+    if groups[2] is None:
         payload = None
     else:
-        str_to_parse = groups[1].strip()
+        str_to_parse = groups[2].strip()
         i, payload = _parse_dict(str_to_parse)
-    return message, payload
+    return token, message, payload
 
 
 def _parse_dict(to_parse):
