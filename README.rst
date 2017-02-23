@@ -1,7 +1,7 @@
 .. image:: https://travis-ci.org/cs01/pygdbmi.svg?branch=master
   :target: https://travis-ci.org/cs01/pygdbmi
 
-.. image:: https://img.shields.io/badge/pypi-v0.7.2.0-blue.svg
+.. image:: https://img.shields.io/badge/pypi-v0.7.3.0-blue.svg
   :target: https://pypi.python.org/pypi/pygdbmi/
 
 .. image:: https://img.shields.io/badge/python-2.7, 3.3, 3.4, 3.5, pypy-blue.svg
@@ -120,7 +120,16 @@ Parsed Output Description
 -------------------------
 
 Each parsed gdb response consists of a list of dictionaries. Each
-dictionary has keys ``type``, ``message``, and ``payload``.
+dictionary has keys ``message``, ``payload``, ``token``, and ``type``.
+
+-  ``message`` contains a textual message from gdb, which is not always
+   present. When missing, this is ``None``.
+
+-  ``payload`` contains the content of gdb's output, which can contain
+   any of the following: ``dictionary``, ``list``, ``string``. This too
+   is not always present, and can be ``None`` depending on the response.
+
+-  ``token`` If an input command was prefixed with a (optional) token then the corresponding output for that command will also be prefixed by that same token. This field is only present for pygdbmi output types ``nofity`` and ``result``. When missing, this is ``None``.
 
 The ``type`` is defined based on gdb's various `mi output record
 types <(https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Output-Records.html#GDB_002fMI-Output-Records)>`__,
@@ -135,15 +144,6 @@ and can be
 -  output - output from target
 -  target - output from remote target
 -  done - when gdb has finished its output
-
-In addition to the ``type`` key, ``pygdbmi`` also adds two more fields:
-
--  ``message`` contains a textual message from gdb, which is not always
-   present. When missing, this is ``None``.
-
--  ``payload`` contains the content of gdb's output, which can contain
-   any of the following: ``dictionary``, ``list``, ``string``. This too
-   is not always present, and can be ``None`` depending on the response.
 
 Contributing
 -----------
