@@ -13,16 +13,6 @@ GDB_TIMEOUT_SEC = 1
 MUTEX_AQUIRE_WAIT_TIME_SEC = int(1)
 unicode = str if PYTHON3 else unicode
 
-EVENT_LOOKUP = {
-    select.POLLIN: 'POLLIN',
-    select.POLLPRI: 'POLLPRI',
-    select.POLLOUT: 'POLLOUT',
-    select.POLLERR: 'POLLERR',
-    select.POLLHUP: 'POLLHUP',
-    select.POLLNVAL: 'POLLNVAL',
-}
-
-
 class GdbController():
     """
     Run gdb as a subprocess. Send commands and recieve structured output.
@@ -155,7 +145,7 @@ class GdbController():
 
         Raises:
             ValueError if response is not recieved within timeout_sec
-            ValueError if epoll returned unexpected file number
+            ValueError if select returned unexpected file number
             ValueError if there is no gdb subprocess running
         """
 
