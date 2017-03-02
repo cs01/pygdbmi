@@ -63,7 +63,7 @@ class GdbController():
         self.stderr_fileno = self.gdb_process.stderr.fileno()
         self.stdin_fileno = self.gdb_process.stdin.fileno()
 
-        self.read_list = [self.stdin_fileno, self.stdout_fileno, self.stderr_fileno]
+        self.read_list =  [self.stdout_fileno, self.stderr_fileno]
         self.write_list = [self.stdin_fileno]
 
     def write(self, mi_cmd_to_write,
