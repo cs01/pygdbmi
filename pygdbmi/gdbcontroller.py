@@ -13,16 +13,6 @@ GDB_TIMEOUT_SEC = 1
 MUTEX_AQUIRE_WAIT_TIME_SEC = int(1)
 unicode = str if PYTHON3 else unicode
 
-EVENT_LOOKUP = {
-    select.POLLIN: 'POLLIN',
-    select.POLLPRI: 'POLLPRI',
-    select.POLLOUT: 'POLLOUT',
-    select.POLLERR: 'POLLERR',
-    select.POLLHUP: 'POLLHUP',
-    select.POLLNVAL: 'POLLNVAL',
-}
-
-
 class GdbController():
     """
     Run gdb as a subprocess. Send commands and recieve structured output.
@@ -38,8 +28,6 @@ class GdbController():
 
     def __init__(self, gdb_path='gdb', gdb_args=['--nx', '--quiet', '--interpreter=mi2'], verbose=False):
         self.verbose = verbose
-        self.epoll = select.epoll()
-        self.epoll_write = select.epoll()
         self.mutex = Lock()
         self.abs_gdb_path = None  # abs path to gdb executable
         self.cmd = []  # the shell command to run gdb
@@ -75,11 +63,8 @@ class GdbController():
         self.stderr_fileno = self.gdb_process.stderr.fileno()
         self.stdin_fileno = self.gdb_process.stdin.fileno()
 
-        # register stdout and stderr for epoll
-        self.epoll.register(self.gdb_process.stdout.fileno(), select.EPOLLIN)  # There is data to read
-        self.epoll.register(self.gdb_process.stderr.fileno(), select.EPOLLIN)  # There is data to read
-        self.epoll_write.register(self.gdb_process.stdin.fileno(), select.POLLOUT)  # Ready for output: writing will not block
-
+        self.read_list =  [self.stdout_fileno, self.stderr_fileno]
+        self.write_list = [self.stdin_fileno]
 
     def write(self, mi_cmd_to_write,
                                     timeout_sec=GDB_TIMEOUT_SEC,
@@ -125,9 +110,9 @@ class GdbController():
         if not mi_cmd_to_write.endswith('\n'):
             mi_cmd_to_write_nl = mi_cmd_to_write + '\n'
 
-        events = self.epoll_write.poll(timeout_sec)
-        for fileno, event in events:
-            if event == select.EPOLLOUT and fileno == self.stdin_fileno:
+        _, outputready, _ = select.select([], self.write_list, [], timeout_sec)
+        for fileno in outputready:
+            if fileno == self.stdin_fileno:
                 # ready to write
                 self.gdb_process.stdin.write(mi_cmd_to_write_nl.encode())
                 # don't forget to flush for Python3, otherwise gdb won't realize there is data
@@ -137,9 +122,7 @@ class GdbController():
                 print('developer error: got unexpected fileno %d, event %d' % (fileno, event))
 
         if read_response is True:
-            return self.get_gdb_response(timeout_sec=timeout_sec,
-                    raise_error_on_timeout=raise_error_on_timeout,
-                    verbose=verbose)
+            return self.get_gdb_response(timeout_sec=timeout_sec, raise_error_on_timeout=raise_error_on_timeout, verbose=verbose)
         else:
             return []
 
@@ -162,7 +145,7 @@ class GdbController():
 
         Raises:
             ValueError if response is not recieved within timeout_sec
-            ValueError if epoll returned unexpected file number
+            ValueError if select returned unexpected file number
             ValueError if there is no gdb subprocess running
         """
 
@@ -178,26 +161,22 @@ class GdbController():
         self.mutex.acquire(MUTEX_AQUIRE_WAIT_TIME_SEC)
 
         retval = []
-        events = self.epoll.poll(timeout_sec)
-        for fileno, event in events:
-            if event == select.EPOLLIN:
-                # new data is ready to read
-                if fileno == self.stdout_fileno:
-                    self.gdb_process.stdout.flush()
-                    raw_output = self.gdb_process.stdout.read()
-                    stream = 'stdout'
+        events, _, _ = select.select(self.read_list, [], [], timeout_sec)
+        for fileno in events:
+            # new data is ready to read
+            if fileno == self.stdout_fileno:
+                self.gdb_process.stdout.flush()
+                raw_output = self.gdb_process.stdout.read()
+                stream = 'stdout'
 
-                elif fileno == self.stderr_fileno:
-                    self.gdb_process.stderr.flush()
-                    raw_output = self.gdb_process.stderr.read()
-                    stream = 'stderr'
+            elif fileno == self.stderr_fileno:
+                self.gdb_process.stderr.flush()
+                raw_output = self.gdb_process.stderr.read()
+                stream = 'stderr'
 
-                else:
-                    self.mutex.release()
-                    raise ValueError('Developer error. Got unexpected file number %d' % fileno)
             else:
-                # This is unexpected
-                print('unexpected event ' + EVENT_LOOKUP[event])
+                self.mutex.release()
+                raise ValueError('Developer error. Got unexpected file number %d' % fileno)
 
             stripped_raw_response_list = [x.strip() for x in raw_output.decode().split('\n')]
 
