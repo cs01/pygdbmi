@@ -13,9 +13,10 @@ GDB_TIMEOUT_SEC = 1
 MUTEX_AQUIRE_WAIT_TIME_SEC = int(1)
 unicode = str if PYTHON3 else unicode
 
+
 class GdbController():
     """
-    Run gdb as a subprocess. Send commands and recieve structured output.
+    Run gdb as a subprocess. Send commands and receive structured output.
     Create new object, along with a gdb subprocess
 
     Args:
@@ -144,7 +145,7 @@ class GdbController():
             additional key 'stream' which is either 'stdout' or 'stderr'
 
         Raises:
-            ValueError if response is not recieved within timeout_sec
+            ValueError if response is not received within timeout_sec
             ValueError if select returned unexpected file number
             ValueError if there is no gdb subprocess running
         """
