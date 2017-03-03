@@ -43,7 +43,8 @@ Compatibility
 -------------
 Ubuntu 14.04, 16.04
 
-OSX
+OSX:
+ Follow `these instructions <https://gcc.gnu.org/onlinedocs/gnat_ugn/Codesigning-the-Debugger.html>`__  to codesign gdb if you get an error about `(please check gdb is codesigned - see taskgated(8))`
 
 Windows compatibility is unknown
 
