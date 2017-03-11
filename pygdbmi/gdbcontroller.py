@@ -1,3 +1,5 @@
+"""GdbController class to programatically run gdb and get structured output"""
+
 import sys
 import select
 import subprocess
@@ -12,34 +14,6 @@ GDB_TIMEOUT_SEC = 1
 MUTEX_AQUIRE_WAIT_TIME_SEC = int(1)
 USING_WINDOWS = os.name == 'nt'
 unicode = str if PYTHON3 else unicode
-
-
-
-def make_non_blocking(file_handle):
-    if USING_WINDOWS:
-        import msvcrt
-        from ctypes import windll, byref, wintypes, GetLastError, WinError
-        from ctypes.wintypes import HANDLE, DWORD, POINTER, BOOL
-        LPDWORD = POINTER(DWORD)
-        PIPE_NOWAIT = wintypes.DWORD(0x00000001)
-
-        SetNamedPipeHandleState = windll.kernel32.SetNamedPipeHandleState
-        SetNamedPipeHandleState.argtypes = [HANDLE, LPDWORD, LPDWORD, LPDWORD]
-        SetNamedPipeHandleState.restype = BOOL
-
-        h = msvcrt.get_osfhandle(file_handle)
-
-        res = windll.kernel32.SetNamedPipeHandleState(h, byref(PIPE_NOWAIT), None, None)
-        if res == 0:
-            raise ValueError(WinError())
-
-    else:
-        import fcntl
-        # Set the file status flag (F_SETFL) on the pipes to be non-blocking
-        # so we can attempt to read from a pipe with no new data without locking
-        # the program up
-        fcntl.fcntl(file_handle, fcntl.F_SETFL, os.O_NONBLOCK)
-
 
 
 class GdbController():
@@ -81,8 +55,8 @@ class GdbController():
         # If the output is being redirected to a file, a newline won't flush
         self.gdb_process = subprocess.Popen(self.cmd, shell=False, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        make_non_blocking(self.gdb_process.stdout)
-        make_non_blocking(self.gdb_process.stderr)
+        _make_non_blocking(self.gdb_process.stdout)
+        _make_non_blocking(self.gdb_process.stderr)
 
         # save file numbers for use later
         self.stdout_fileno = self.gdb_process.stdout.fileno()
@@ -204,7 +178,7 @@ class GdbController():
             return retval
 
     def _get_responses_windows(self, timeout_sec, verbose):
-        """Get responses on windows. Assume no support for select and use a while loop"""
+        """Get responses on windows. Assume no support for select and use a while loop."""
         import time
         timeout_time_sec = time.time() + timeout_sec
         responses = []
@@ -255,7 +229,7 @@ class GdbController():
         """Get parsed response list from string output
         Args:
             raw_output (unicode): gdb output to parse
-            stream (str): eitehr stdout or stderr
+            stream (str): either stdout or stderr
             verbose (bool): add verbose output when true
         """
         responses = []
@@ -289,8 +263,8 @@ class GdbController():
 
 
 def _buffer_incomplete_responses(raw_response_list, buf):
-    """It is possible poll() returns EPOLLIN before gdb finished writing its response. In that
-    case, a partial mi response was read, which cannot be parsed into structured data.
+    """It is possible for some of gdb's output to be read before it completely finished its response.
+    In that case, a partial mi response was read, which cannot be parsed into structured data.
     We want to ALWAYS parse complete mi records. To do this, we store a buffer of gdb's
     output if gdb did not tell us it finished.
 
@@ -323,13 +297,44 @@ def _buffer_incomplete_responses(raw_response_list, buf):
             # the next response.
             if (i + 1) > (num_responses - 1):
                 # This was the last response, but it's missing the "finished"
-                # response! We got an incomplete result, which won't be parsed
-                # correctly!
+                # response. Therefore we got an incomplete result which won't be parsed
+                # correctly.
 
                 # Store the partial response in a buffer and combine it with the next
                 # response
                 buf = response
-                # don't process this incomplete response!
+                # don't process this incomplete response
                 raw_response_list = raw_response_list[1:-1]
 
     return (raw_response_list, buf)
+
+
+def _make_non_blocking(file_obj):
+    """make file object non-blocking
+    Windows doesn't have the fcntl module, but someone on
+    stack overflow supplied this code as an answer, and it works
+    http://stackoverflow.com/a/34504971/2893090"""
+
+    if USING_WINDOWS:
+        import msvcrt
+        from ctypes import windll, byref, wintypes, WinError
+        from ctypes.wintypes import HANDLE, DWORD, POINTER, BOOL
+        LPDWORD = POINTER(DWORD)
+        PIPE_NOWAIT = wintypes.DWORD(0x00000001)
+
+        SetNamedPipeHandleState = windll.kernel32.SetNamedPipeHandleState
+        SetNamedPipeHandleState.argtypes = [HANDLE, LPDWORD, LPDWORD, LPDWORD]
+        SetNamedPipeHandleState.restype = BOOL
+
+        h = msvcrt.get_osfhandle(file_obj.fileno())
+
+        res = windll.kernel32.SetNamedPipeHandleState(h, byref(PIPE_NOWAIT), None, None)
+        if res == 0:
+            raise ValueError(WinError())
+
+    else:
+        import fcntl
+        # Set the file status flag (F_SETFL) on the pipes to be non-blocking
+        # so we can attempt to read from a pipe with no new data without locking
+        # the program up
+        fcntl.fcntl(file_obj, fcntl.F_SETFL, os.O_NONBLOCK)

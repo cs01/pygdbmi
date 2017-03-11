@@ -1,7 +1,7 @@
 .. image:: https://travis-ci.org/cs01/pygdbmi.svg?branch=master
   :target: https://travis-ci.org/cs01/pygdbmi
 
-.. image:: https://img.shields.io/badge/pypi-v0.7.3.2-blue.svg
+.. image:: https://img.shields.io/badge/pypi-v0.7.3.3-blue.svg
   :target: https://pypi.python.org/pypi/pygdbmi/
 
 .. image:: https://img.shields.io/badge/python-2.7, 3.3, 3.4, 3.5, pypy-blue.svg
@@ -41,11 +41,18 @@ Installation
 
 Compatibility
 -------------
-Ubuntu 14.04, 16.04
+
+Operating Systems
+^^^^^^^^^^^^^^^^^
+
+Ubuntu 14.04+
 
 OSX
 
-Windows compatibility is unknown
+Windows
+
+gdb versions
+^^^^^^^^^^^^
 
 gdb 7.7+
 
@@ -159,10 +166,12 @@ Contributing
 ------------
 
 Set up a new virtual environment, then clone this repo and run
-``pip install -r requirements.txt``. Confirm unit tests are working with
+``pip install -r requirements.txt``.
+
+Confirm unit tests are working with
 ``python setup.py test``, then begin development.
 
-Update unit tests as necessary: pygdbmi/tests/test\_app.py
+Update unit tests as necessary at ``pygdbmi/tests/test\_app.py``.
 
 
 

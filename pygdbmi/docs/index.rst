@@ -161,7 +161,7 @@ In addition to the ``type`` key, ``pygdbmi`` also adds two more fields:
    is not always present, and can be ``None`` depending on the response.
 
 Contributing
------------
+------------
 
 Set up a new virtual environment, then clone this repo and run
 ``pip install -r requirements.txt``. Confirm unit tests are working with
