@@ -6,9 +6,23 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
+  - "3.6"
+  - "3.6-dev"
+  - "3.7-dev"
+  - "nightly"
   - "pypy"
 before_install:
+  # install collective.checkdocs to allow for python setup.py test command to work
+  - pip install collective.checkdocs
   - sudo apt-get install gdb
 # command to run tests
 script:
   - python setup.py test
+
+  # ensure README.rst has no syntax errors so it displays nicely
+  # on the pypi website
+  - python setup.py checkdocs
+cache:
+    directories:
+        # avoid using pyPI's bandwidth when pip packages are already cached
+        - $HOME/.cache/pip
