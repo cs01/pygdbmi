@@ -167,10 +167,10 @@ Contributing
 ------------
 
 Set up a new virtual environment, then clone this repo and run
-``pip install -r requirements.txt``.
+``pip install -r requirements.txt`` and ``pip install -r dev_requirements.txt``.
 
 Confirm unit tests are working with
-``python setup.py test``, then begin development.
+``make test``, then begin development.
 
 Update unit tests as necessary at ``pygdbmi/tests/test\_app.py``.
 

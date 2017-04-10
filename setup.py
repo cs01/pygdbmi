@@ -24,7 +24,11 @@ class TestCommand (Command):
         pass
 
     def run(self):
-        sys.exit(test_app.main())
+        num_failures = test_app.main()
+        if num_failures == 0:
+            sys.exit(0)
+        else:
+            sys.exit(1)
 
 
 setup(
