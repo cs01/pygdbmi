@@ -22,7 +22,7 @@ class NoGdbProcessError(ValueError):
     pass
 
 
-class NoGdbResponseError(ValueError):
+class GdbTimeoutError(ValueError):
     """Raised when no response is recieved from gdb after the timeout has been triggered"""
     pass
 
@@ -160,7 +160,7 @@ class GdbController():
             additional key 'stream' which is either 'stdout' or 'stderr'
 
         Raises:
-            NoGdbResponseError if response is not received within timeout_sec
+            GdbTimeoutError if response is not received within timeout_sec
             ValueError if select returned unexpected file number
             NoGdbProcessError if there is no gdb subprocess running
         """
@@ -184,7 +184,7 @@ class GdbController():
         self.mutex.release()
 
         if not retval and raise_error_on_timeout:
-            raise NoGdbResponseError('Did not get response from gdb after %s seconds' % DEFAULT_GDB_TIMEOUT_SEC)
+            raise GdbTimeoutError('Did not get response from gdb after %s seconds' % DEFAULT_GDB_TIMEOUT_SEC)
         else:
             return retval
 
