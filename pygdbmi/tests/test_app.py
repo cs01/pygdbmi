@@ -7,11 +7,11 @@ Run from top level directory: ./tests/test_app.py
 """
 
 import os
+import sys
 import unittest
 import subprocess
 from pygdbmi.gdbmiparser import parse_response, assert_match
-from pygdbmi.gdbcontroller import GdbController
-
+from pygdbmi.gdbcontroller import GdbController, NoGdbResponseError, NoGdbProcessError
 
 class TestPyGdbMi(unittest.TestCase):
 
@@ -68,7 +68,7 @@ class TestPyGdbMi(unittest.TestCase):
         gdbmi = GdbController()
 
         # Load the binary and its symbols in the gdb subprocess
-        responses = gdbmi.write('-file-exec-and-symbols %s' % SAMPLE_C_BINARY, timeout_sec=2)
+        responses = gdbmi.write('-file-exec-and-symbols %s' % SAMPLE_C_BINARY, timeout_sec=1)
 
         # Verify output was parsed into a list of responses
         assert(len(responses) != 0)
@@ -83,10 +83,27 @@ class TestPyGdbMi(unittest.TestCase):
         responses = gdbmi.write(['-file-list-exec-source-files', '-break-insert main'])
         assert(len(responses) != 0)
 
+        # Test NoGdbResponseError exception
+        got_no_response_exception = False
+        try:
+            responses = gdbmi.write('-file-exec-and-symbols %s' % SAMPLE_C_BINARY, timeout_sec=sys.float_info.epsilon)
+        except NoGdbResponseError:
+            got_no_response_exception = True
+        assert(got_no_response_exception)
+
         # Close gdb subprocess
         responses = gdbmi.exit()
         assert(responses is None)
         assert(gdbmi.gdb_process is None)
+
+
+        # Test NoGdbProcessError exception
+        got_no_process_exception = False
+        try:
+            responses = gdbmi.write('-file-exec-and-symbols %s' % SAMPLE_C_BINARY)
+        except NoGdbProcessError:
+            got_no_process_exception = True
+        assert(got_no_process_exception)
 
 
 def main():
@@ -97,7 +114,9 @@ def main():
 
     runner = unittest.TextTestRunner(verbosity=1)
     result = runner.run(suite)
-    return len(result.errors) + len(result.failures)
+
+    num_failures = len(result.errors) + len(result.failures)
+    return num_failures
 
 
 if __name__ == '__main__':

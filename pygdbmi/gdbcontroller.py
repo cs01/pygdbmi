@@ -10,10 +10,21 @@ from distutils.spawn import find_executable
 from multiprocessing import Lock
 
 PYTHON3 = sys.version_info.major == 3
-GDB_TIMEOUT_SEC = 1
+DEFAULT_GDB_TIMEOUT_SEC = 1
 MUTEX_AQUIRE_WAIT_TIME_SEC = int(1)
 USING_WINDOWS = os.name == 'nt'
 unicode = str if PYTHON3 else unicode
+
+
+class NoGdbProcessError(ValueError):
+    """Raise when trying to interact with gdb subprocess, but it does not exist.
+    It may have been killed and removed, or failed to initialize for some reason."""
+    pass
+
+class NoGdbResponseError(ValueError):
+    """Raised when no response is recieved from gdb after the timeout has been triggered"""
+    pass
+
 
 
 class GdbController():
@@ -67,7 +78,7 @@ class GdbController():
         self.write_list = [self.stdin_fileno]
 
     def write(self, mi_cmd_to_write,
-                                    timeout_sec=GDB_TIMEOUT_SEC,
+                                    timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
                                     verbose=False,
                                     raise_error_on_timeout=True,
                                     read_response=True):
@@ -85,11 +96,11 @@ class GdbController():
         Returns:
             List of parsed gdb responses if read_response is True, otherwise []
         Raises:
-            ValueError if there is no gdb subprocess running
-            ValueError if mi_cmd_to_write is not valid
+            NoGdbProcessError if there is no gdb subprocess running
+            TypeError if mi_cmd_to_write is not valid
         """
         if not self.gdb_process:
-            raise ValueError('gdb process is not attached')
+            raise NoGdbProcessError('gdb process is not attached')
         elif timeout_sec < 0:
             print('warning: timeout_sec was negative, replacing with 0')
             timeout_sec = 0
@@ -102,7 +113,7 @@ class GdbController():
         elif type(mi_cmd_to_write) == list:
             mi_cmd_to_write = '\n'.join(mi_cmd_to_write)
         else:
-            raise ValueError('The gdb mi command must a be str or list. Got ' + str(type(mi_cmd_to_write)))
+            raise TypeError('The gdb mi command must a be str or list. Got ' + str(type(mi_cmd_to_write)))
 
         if verbose:
             print('\nwriting: %s' % mi_cmd_to_write)
@@ -131,9 +142,9 @@ class GdbController():
         else:
             return []
 
-    def get_gdb_response(self, timeout_sec=GDB_TIMEOUT_SEC, raise_error_on_timeout=True, verbose=False):
+    def get_gdb_response(self, timeout_sec=DEFAULT_GDB_TIMEOUT_SEC, raise_error_on_timeout=True, verbose=False):
         """Get response from GDB, and block while doing so. If GDB does not have any response ready to be read
-        by timeout_sec, a ValueError is raised.
+        by timeout_sec, an exception is raised.
 
         A lock (mutex) is obtained before reading and released before returning. If the lock cannot
         be obtained, no data is read and an empty list is returned.
@@ -149,14 +160,14 @@ class GdbController():
             additional key 'stream' which is either 'stdout' or 'stderr'
 
         Raises:
-            ValueError if response is not received within timeout_sec
+            NoGdbResponseError if response is not received within timeout_sec
             ValueError if select returned unexpected file number
-            ValueError if there is no gdb subprocess running
+            NoGdbProcessError if there is no gdb subprocess running
         """
 
         # validate inputs
         if not self.gdb_process:
-            raise ValueError('gdb process is not attached')
+            raise NoGdbProcessError('gdb process is not attached')
         elif timeout_sec < 0:
             print('warning: timeout_sec was negative, replacing with 0')
             timeout_sec = 0
@@ -173,7 +184,7 @@ class GdbController():
         self.mutex.release()
 
         if not retval and raise_error_on_timeout:
-            raise ValueError('Did not get response from gdb after %s seconds' % GDB_TIMEOUT_SEC)
+            raise NoGdbResponseError('Did not get response from gdb after %s seconds' % DEFAULT_GDB_TIMEOUT_SEC)
         else:
             return retval
 
@@ -292,7 +303,7 @@ def _buffer_incomplete_responses(raw_response_list, buf):
         # num_responses is one indexed
         if response.startswith('^done'):
             # we got a response from gdb, but we need to make sure
-            # the entire gdb completed writing it's response and there isn't some more
+            # gdb completed writing its response and there isn't some more
             # mi output that we need. Output is ready to be parsed ONLY when we get (gdb) in
             # the next response.
             if (i + 1) > (num_responses - 1):
