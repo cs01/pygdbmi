@@ -11,18 +11,11 @@ Release v\ |version|
 .. image:: https://travis-ci.org/cs01/pygdbmi.svg?branch=master
   :target: https://travis-ci.org/cs01/pygdbmi
 
-.. image:: https://img.shields.io/badge/pypi-v0.7.2.1-blue.svg
+.. image:: https://img.shields.io/badge/pypi-v0.7.4.0-blue.svg
   :target: https://pypi.python.org/pypi/pygdbmi/
 
 .. image:: https://img.shields.io/badge/python-2.7, 3.3, 3.4, 3.5, pypy-blue.svg
   :target: https://pypi.python.org/pypi/pygdbmi/
-
-.. image:: https://img.shields.io/badge/SayThanks.io-☼-blue.svg
-  :target: https://saythanks.io/to/grassfedcode
-
-.. image:: https://img.shields.io/gratipay/cs01.svg
-  :target: https://gratipay.com/cs01/
-
 
 Installation
 ------------
