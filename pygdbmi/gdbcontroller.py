@@ -109,6 +109,8 @@ class GdbController():
 
         if not mi_cmd_to_write.endswith('\n'):
             mi_cmd_to_write_nl = mi_cmd_to_write + '\n'
+        else:
+            mi_cmd_to_write_nl = mi_cmd_to_write
 
         if USING_WINDOWS:
             # select not implemented in windows for pipes
