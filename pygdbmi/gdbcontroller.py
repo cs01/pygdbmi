@@ -110,7 +110,7 @@ class GdbController():
         if not mi_cmd_to_write.endswith('\n'):
             mi_cmd_to_write_nl = mi_cmd_to_write + '\n'
 
-        if True:
+        if USING_WINDOWS:
             # select not implemented in windows for pipes
             # assume it's always ready
             outputready = [self.stdin_fileno]
