@@ -1,11 +1,12 @@
 import sys
 import re
+from codecs import open
 from setuptools import find_packages, setup, Command
 from pygdbmi.tests import test_app
 
 EXCLUDE_FROM_PACKAGES = []
 
-readme = open('README.rst', 'r').read()
+readme = open('README.rst', 'rb', 'utf-8').read()
 
 with open('pygdbmi/__init__.py', 'r') as fd:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
