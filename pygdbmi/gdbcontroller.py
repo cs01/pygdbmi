@@ -21,10 +21,10 @@ class NoGdbProcessError(ValueError):
     It may have been killed and removed, or failed to initialize for some reason."""
     pass
 
+
 class NoGdbResponseError(ValueError):
     """Raised when no response is recieved from gdb after the timeout has been triggered"""
     pass
-
 
 
 class GdbController():
@@ -74,14 +74,14 @@ class GdbController():
         self.stderr_fileno = self.gdb_process.stderr.fileno()
         self.stdin_fileno = self.gdb_process.stdin.fileno()
 
-        self.read_list =  [self.stdout_fileno, self.stderr_fileno]
+        self.read_list = [self.stdout_fileno, self.stderr_fileno]
         self.write_list = [self.stdin_fileno]
 
     def write(self, mi_cmd_to_write,
-                                    timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
-                                    verbose=False,
-                                    raise_error_on_timeout=True,
-                                    read_response=True):
+            timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
+            verbose=False,
+            raise_error_on_timeout=True,
+            read_response=True):
         """Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
 
         A mutex is obtained before writing and released before returning

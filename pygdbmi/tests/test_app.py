@@ -7,11 +7,11 @@ Run from top level directory: ./tests/test_app.py
 """
 
 import os
-import sys
 import unittest
 import subprocess
 from pygdbmi.gdbmiparser import parse_response, assert_match
-from pygdbmi.gdbcontroller import GdbController, NoGdbResponseError, NoGdbProcessError
+from pygdbmi.gdbcontroller import GdbController, NoGdbProcessError
+
 
 class TestPyGdbMi(unittest.TestCase):
 
@@ -55,7 +55,6 @@ class TestPyGdbMi(unittest.TestCase):
         #Test records with token
         assert_match(parse_response('1342^done'), {'type': 'result', 'payload': None, 'message': 'done', "token": 1342})
 
-
     def test_controller(self):
         """Build a simple C program, then run it with GdbController and verify the output is parsed
         as expected"""
@@ -78,24 +77,15 @@ class TestPyGdbMi(unittest.TestCase):
         assert(response['type'] == 'notify')
         assert(response['payload'] == {'id': 'i1'})
         assert(response['stream'] == 'stdout')
-        assert(response['token'] == None)
+        assert(response['token'] is None)
 
         responses = gdbmi.write(['-file-list-exec-source-files', '-break-insert main'])
         assert(len(responses) != 0)
-
-        # Test NoGdbResponseError exception
-        got_no_response_exception = False
-        try:
-            responses = gdbmi.write('-file-exec-and-symbols %s' % SAMPLE_C_BINARY, timeout_sec=sys.float_info.epsilon)
-        except NoGdbResponseError:
-            got_no_response_exception = True
-        assert(got_no_response_exception)
 
         # Close gdb subprocess
         responses = gdbmi.exit()
         assert(responses is None)
         assert(gdbmi.gdb_process is None)
-
 
         # Test NoGdbProcessError exception
         got_no_process_exception = False
@@ -103,7 +93,7 @@ class TestPyGdbMi(unittest.TestCase):
             responses = gdbmi.write('-file-exec-and-symbols %s' % SAMPLE_C_BINARY)
         except NoGdbProcessError:
             got_no_process_exception = True
-        assert(got_no_process_exception)
+        assert(got_no_process_exception is True)
 
 
 def main():
