@@ -49,25 +49,31 @@ class TestPyGdbMi(unittest.TestCase):
                                                          'thread-groups': ['i1'],
                                                          'times': '1',
                                                          'type': 'breakpoint'}},
-                                     'type' : 'notify',
+                                     'type': 'notify',
                                      'token': None})
 
-        #Test records with token
+        # Test records with token
         assert_match(parse_response('1342^done'), {'type': 'result', 'payload': None, 'message': 'done', "token": 1342})
+
+    def _get_c_program(self):
+        """build c program and return path to binary"""
+        FILENAME = 'pygdbmiapp.a'
+        SAMPLE_C_CODE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sample_c_app')
+        SAMPLE_C_BINARY = os.path.join(SAMPLE_C_CODE_DIR, FILENAME)
+        # Build C program
+        subprocess.check_output(["make", "-C", SAMPLE_C_CODE_DIR, '--quiet'])
+        return SAMPLE_C_BINARY
 
     def test_controller(self):
         """Build a simple C program, then run it with GdbController and verify the output is parsed
         as expected"""
-        SAMPLE_C_CODE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sample_c_app')
-        SAMPLE_C_BINARY = os.path.join(SAMPLE_C_CODE_DIR, 'a.out')
-        # Build C program
-        subprocess.check_output(["make", "-C", SAMPLE_C_CODE_DIR, '--quiet'])
 
         # Initialize object that manages gdb subprocess
         gdbmi = GdbController()
 
+        c_binary_path = self._get_c_program()
         # Load the binary and its symbols in the gdb subprocess
-        responses = gdbmi.write('-file-exec-and-symbols %s' % SAMPLE_C_BINARY, timeout_sec=1)
+        responses = gdbmi.write('-file-exec-and-symbols %s' % c_binary_path, timeout_sec=1)
 
         # Verify output was parsed into a list of responses
         assert(len(responses) != 0)
@@ -82,6 +88,13 @@ class TestPyGdbMi(unittest.TestCase):
         responses = gdbmi.write(['-file-list-exec-source-files', '-break-insert main'])
         assert(len(responses) != 0)
 
+        responses = gdbmi.write(['-exec-run', '-exec-continue'], timeout_sec=3)
+        found_match = False
+        for r in responses:
+            if r.get('payload', '') == '  leading spaces should be preserved. So should trailing spaces.  ':
+                found_match = True
+        assert(found_match is True)
+
         # Close gdb subprocess
         responses = gdbmi.exit()
         assert(responses is None)
@@ -90,10 +103,33 @@ class TestPyGdbMi(unittest.TestCase):
         # Test NoGdbProcessError exception
         got_no_process_exception = False
         try:
-            responses = gdbmi.write('-file-exec-and-symbols %s' % SAMPLE_C_BINARY)
+            responses = gdbmi.write('-file-exec-and-symbols %s' % c_binary_path)
         except NoGdbProcessError:
             got_no_process_exception = True
         assert(got_no_process_exception is True)
+
+    def test_controller_buffer(self):
+        """test that a partial response gets successfully buffered
+        by the controller, then fully read when more data arrives"""
+        gdbmi = GdbController()
+        to_be_buffered = b'^done,BreakpointTable={nr_rows="1",nr_'
+
+        stream = 'teststream'
+        verbose = False
+        response = gdbmi._get_responses_list(to_be_buffered, stream, verbose)
+        # Nothing should have been parsed yet
+        assert(len(response) == 0)
+        assert(gdbmi._buffer == to_be_buffered.decode())
+
+        remaining_gdb_output = b'cols="6"}\n(gdb) \n'
+        response = gdbmi._get_responses_list(remaining_gdb_output, stream, verbose)
+
+        # Should have parsed response at this point
+        assert(len(response) == 1)
+        r = response[0]
+        assert(r['stream'] == 'teststream')
+        assert(r['type'] == 'result')
+        assert(r['payload'] == {'BreakpointTable': {'nr_cols': '6', 'nr_rows': '1'}})
 
 
 def main():

@@ -1,4 +1,2 @@
-CC=gcc
 hello: hello.c bye.c
-	$(info $^)
-	$(CC) $^ -g
+	gcc hello.c bye.c -g -o pygdbmiapp.a

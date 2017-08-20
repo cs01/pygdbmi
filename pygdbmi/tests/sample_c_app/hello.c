@@ -14,7 +14,8 @@ void bye();
 
 int main()
 {
-    printf("oh hai world\n");
+    printf("Hello world\n");
+    printf("  leading spaces should be preserved. So should trailing spaces.  \n");
     struct my_type_t myvar= {
         .a = 1,
         .b = 1.2,
@@ -22,7 +23,7 @@ int main()
         .d = 6.7
     };
     int i = 0;
-    for(i = 0; i < 1; i++){
+    for(i = 0; i < 2; i++){
         printf("i = %d\n", i);
     }
     bye();

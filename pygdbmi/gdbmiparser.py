@@ -88,7 +88,7 @@ def assert_match(actual_char_or_str, expected_char_or_str):
         print('Expected')
         pprint(expected_char_or_str)
         print('')
-        print ('Got')
+        print('Got')
         pprint(actual_char_or_str)
         raise ValueError()
 

@@ -4,6 +4,7 @@ import sys
 import select
 import subprocess
 import os
+import time
 from pprint import pprint
 from pygdbmi import gdbmiparser
 from distutils.spawn import find_executable
@@ -13,6 +14,13 @@ PYTHON3 = sys.version_info.major == 3
 DEFAULT_GDB_TIMEOUT_SEC = 1
 MUTEX_AQUIRE_WAIT_TIME_SEC = int(1)
 USING_WINDOWS = os.name == 'nt'
+if USING_WINDOWS:
+    import msvcrt
+    from ctypes import windll, byref, wintypes, WinError
+    from ctypes.wintypes import HANDLE, DWORD, POINTER, BOOL
+else:
+    import fcntl
+
 unicode = str if PYTHON3 else unicode
 
 
@@ -77,6 +85,14 @@ class GdbController():
         self.read_list = [self.stdout_fileno, self.stderr_fileno]
         self.write_list = [self.stdin_fileno]
 
+    def verify_valid_gdb_subprocess(self):
+        """Verify there is a process object, and that it is still running.
+        Raise NoGdbProcessError if either of the above are not true."""
+        if not self.gdb_process:
+            raise NoGdbProcessError('gdb process is not attached')
+        elif self.gdb_process.poll() is not None:
+            raise NoGdbProcessError('gdb process has already finished with return code: %s' % str(self.gdb_process.poll()))
+
     def write(self, mi_cmd_to_write,
             timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
             verbose=False,
@@ -99,9 +115,8 @@ class GdbController():
             NoGdbProcessError if there is no gdb subprocess running
             TypeError if mi_cmd_to_write is not valid
         """
-        if not self.gdb_process:
-            raise NoGdbProcessError('gdb process is not attached')
-        elif timeout_sec < 0:
+        self.verify_valid_gdb_subprocess()
+        if timeout_sec < 0:
             print('warning: timeout_sec was negative, replacing with 0')
             timeout_sec = 0
 
@@ -167,10 +182,8 @@ class GdbController():
             NoGdbProcessError if there is no gdb subprocess running
         """
 
-        # validate inputs
-        if not self.gdb_process:
-            raise NoGdbProcessError('gdb process is not attached')
-        elif timeout_sec < 0:
+        self.verify_valid_gdb_subprocess()
+        if timeout_sec < 0:
             print('warning: timeout_sec was negative, replacing with 0')
             timeout_sec = 0
 
@@ -186,13 +199,12 @@ class GdbController():
         self.mutex.release()
 
         if not retval and raise_error_on_timeout:
-            raise GdbTimeoutError('Did not get response from gdb after %s seconds' % DEFAULT_GDB_TIMEOUT_SEC)
+            raise GdbTimeoutError('Did not get response from gdb after %s seconds' % timeout_sec)
         else:
             return retval
 
     def _get_responses_windows(self, timeout_sec, verbose):
         """Get responses on windows. Assume no support for select and use a while loop."""
-        import time
         timeout_time_sec = time.time() + timeout_sec
         responses = []
         while(True):
@@ -218,24 +230,36 @@ class GdbController():
         """Get responses on unix-like system. Use select to wait for output."""
         events, _, _ = select.select(self.read_list, [], [], timeout_sec)
 
+        # timeout_sec can be zero, in which case we won't waste the CPU cycles retrieving and computing a timeout time
+        if timeout_sec != 0:
+            timeout_time_sec = time.time() + timeout_sec
         responses = []
-        for fileno in events:
-            # new data is ready to read
-            if fileno == self.stdout_fileno:
-                self.gdb_process.stdout.flush()
-                raw_output = self.gdb_process.stdout.read()
-                stream = 'stdout'
+        while(True):
+            try:
+                for fileno in events:
+                    # new data is ready to read
+                    if fileno == self.stdout_fileno:
+                        self.gdb_process.stdout.flush()
+                        raw_output = self.gdb_process.stdout.read()
+                        stream = 'stdout'
 
-            elif fileno == self.stderr_fileno:
-                self.gdb_process.stderr.flush()
-                raw_output = self.gdb_process.stderr.read()
-                stream = 'stderr'
+                    elif fileno == self.stderr_fileno:
+                        self.gdb_process.stderr.flush()
+                        raw_output = self.gdb_process.stderr.read()
+                        stream = 'stderr'
 
-            else:
-                self.mutex.release()
-                raise ValueError('Developer error. Got unexpected file number %d' % fileno)
+                    else:
+                        self.mutex.release()
+                        raise ValueError('Developer error. Got unexpected file number %d' % fileno)
+                    r = self._get_responses_list(raw_output, stream, verbose)
+                    responses += r
+            except IOError:  # only occurs in python 2.7
+                pass
 
-            responses += self._get_responses_list(raw_output, stream, verbose)
+            if timeout_sec == 0:  # just exit immediately
+                break
+            elif time.time() > timeout_time_sec:
+                break
         return responses
 
     def _get_responses_list(self, raw_output, stream, verbose):
@@ -248,13 +272,11 @@ class GdbController():
         responses = []
         if not raw_output:
             return responses
+        response_list = list(filter(lambda x: x, raw_output.decode().split('\n')))  # remove blank lines
+        buffered_response_list, self._buffer = _buffer_incomplete_responses(response_list, self._buffer)
 
-        stripped_raw_response_list = [x.strip() for x in raw_output.decode().split('\n')]
-        raw_response_list = list(filter(lambda x: x, stripped_raw_response_list))
-        raw_response_list, self._buffer = _buffer_incomplete_responses(raw_response_list, self._buffer)
-
-        # parse each response from gdb and put into a list
-        for response in raw_response_list:
+        # parse each response from gdb into a dict, and store in a list
+        for response in buffered_response_list:
             if gdbmiparser.response_is_finished(response):
                 pass
             else:
@@ -294,30 +316,13 @@ def _buffer_incomplete_responses(raw_response_list, buf):
         # We have a partial response in our buffer. Combine it with
         # this response to hopefully form a complete response.
         raw_response_list[0] = buf + raw_response_list[0]
-        # Erase buffer since we put it back into the output to be parsed.
-        # If it's still not complete, it will be set back in this buffer with the
-        # new output.
         buf = ''
 
-    num_responses = len(raw_response_list)
-    for i, response in enumerate(raw_response_list):
-        # i is zero indexed
-        # num_responses is one indexed
-        if response.startswith('^done'):
-            # we got a response from gdb, but we need to make sure
-            # gdb completed writing its response and there isn't some more
-            # mi output that we need. Output is ready to be parsed ONLY when we get (gdb) in
-            # the next response.
-            if (i + 1) > (num_responses - 1):
-                # This was the last response, but it's missing the "finished"
-                # response. Therefore we got an incomplete result which won't be parsed
-                # correctly.
-
-                # Store the partial response in a buffer and combine it with the next
-                # response
-                buf = response
-                # don't process this incomplete response
-                raw_response_list = raw_response_list[1:-1]
+    if len(raw_response_list) >= 1 and raw_response_list[-1].startswith('^done'):
+        # last response is partially complete. Store it in buffer, and process all prior
+        # responses.
+        buf = raw_response_list[-1]
+        raw_response_list = raw_response_list[0:-1]
 
     return (raw_response_list, buf)
 
@@ -329,9 +334,6 @@ def _make_non_blocking(file_obj):
     http://stackoverflow.com/a/34504971/2893090"""
 
     if USING_WINDOWS:
-        import msvcrt
-        from ctypes import windll, byref, wintypes, WinError
-        from ctypes.wintypes import HANDLE, DWORD, POINTER, BOOL
         LPDWORD = POINTER(DWORD)
         PIPE_NOWAIT = wintypes.DWORD(0x00000001)
 
@@ -346,7 +348,6 @@ def _make_non_blocking(file_obj):
             raise ValueError(WinError())
 
     else:
-        import fcntl
         # Set the file status flag (F_SETFL) on the pipes to be non-blocking
         # so we can attempt to read from a pipe with no new data without locking
         # the program up

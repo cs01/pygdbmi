@@ -1,7 +1,7 @@
 .. image:: https://travis-ci.org/cs01/pygdbmi.svg?branch=master
   :target: https://travis-ci.org/cs01/pygdbmi
 
-.. image:: https://img.shields.io/badge/pypi-v0.7.4.0-blue.svg
+.. image:: https://img.shields.io/badge/pypi-v0.7.4.1-blue.svg
   :target: https://pypi.python.org/pypi/pygdbmi/
 
 .. image:: https://img.shields.io/badge/python-2.7, 3.3, 3.4, 3.5, pypy-blue.svg
@@ -10,8 +10,7 @@
 pygdbmi - Get Structured Output from GDB's Machine Interface
 ============================================================
 
-`Homepage and API Documentation <http://grassfedcode.com/pygdbmi>`_
-
+`API Documentation <http://grassfedcode.com/pygdbmi/>`_
 
 Parse gdb machine interface string output and return structured data
 types (Python dicts) that are JSON serializable. Useful for writing the
@@ -23,7 +22,7 @@ programmatic control of gdb using Python, which is also useful if
 creating a front end.
 
 To get `machine
-interface <https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html>`__
+interface <https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html>`_
 output from gdb, run gdb with the ``--interpreter=mi2`` flag.
 
 Installation
@@ -54,7 +53,7 @@ gdb 7.7+
 Examples
 --------
 
-gdb mi has the following type of ugly, but structured, `example
+gdb mi defines a syntax for its output that is suitable for machine readability and scripting: `example
 output <https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Simple-Examples.html#GDB_002fMI-Simple-Examples>`__:
 
 ::
@@ -62,7 +61,7 @@ output <https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Simple-Examples.htm
      -> -break-insert main
      <- ^done,bkpt={number="1",type="breakpoint",disp="keep",
          enabled="y",addr="0x08048564",func="main",file="myprog.c",
-         fullname="/home/nickrob/myprog.c",line="68",thread-groups=["i1"],
+         fullname="/home/myprog.c",line="68",thread-groups=["i1"],
          times="0"}
      <- (gdb)
 
@@ -73,14 +72,14 @@ into a JSON serializable dictionary
 
     from pygdbmi import gdbmiparser
     from pprint import pprint
-    response = gdbmiparser.parse_response('^done,bkpt={number="1",type="breakpoint",disp="keep", enabled="y",addr="0x08048564",func="main",file="myprog.c",fullname="/home/nickrob/myprog.c",line="68",thread-groups=["i1"],times="0"')
+    response = gdbmiparser.parse_response('^done,bkpt={number="1",type="breakpoint",disp="keep", enabled="y",addr="0x08048564",func="main",file="myprog.c",fullname="/home/myprog.c",line="68",thread-groups=["i1"],times="0"')
     pprint(response)
     > {'message': 'done',
      'payload': {'bkpt': {'addr': '0x08048564',
                           'disp': 'keep',
                           'enabled': 'y',
                           'file': 'myprog.c',
-                          'fullname': '/home/nickrob/myprog.c',
+                          'fullname': '/home/myprog.c',
                           'func': 'main',
                           'line': '68',
                           'number': '1',
@@ -170,9 +169,10 @@ Update unit tests as necessary at ``pygdbmi/tests/test\_app.py``.
 
 
 
-See Also
---------
+Projects Using pygdbmi
+----------------------
 
 -  `gdbgui <https://github.com/cs01/gdbgui>`__ implements a
    browser-based frontend to gdb, using pygdbmi on the backend
+- Know of another project? Create a PR and add it here.
 
