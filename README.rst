@@ -174,5 +174,9 @@ Projects Using pygdbmi
 
 -  `gdbgui <https://github.com/cs01/gdbgui>`__ implements a
    browser-based frontend to gdb, using pygdbmi on the backend
+-  `PINCE <https://github.com/korcankaraokcu/PINCE>`__ is a
+   gdb frontend that aims to provide a reverse engineering tool
+   and a reusable library focused on games. It uses pygdbmi to
+   parse gdb/mi based output for some functions
 - Know of another project? Create a PR and add it here.
 
