@@ -88,6 +88,10 @@ class GdbController():
         self.incomplete_packet['stdout'] = None
         self.incomplete_packet['stderr'] = None
 
+    def discard_incomplete_packets(self):
+        for stream in self.incomplete_packet.keys():
+            self.incomplete_packet[stream] = None
+
     def verify_valid_gdb_subprocess(self):
         """Verify there is a process object, and that it is still running.
         Raise NoGdbProcessError if either of the above are not true."""

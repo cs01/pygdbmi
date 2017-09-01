@@ -6,7 +6,9 @@ Unit tests
 Run from top level directory: ./tests/test_app.py
 """
 
+import math
 import os
+import random
 import unittest
 import subprocess
 from pygdbmi.gdbmiparser import parse_response, assert_match
@@ -130,6 +132,66 @@ class TestPyGdbMi(unittest.TestCase):
         assert(r['stream'] == 'teststream')
         assert(r['type'] == 'result')
         assert(r['payload'] == {'BreakpointTable': {'nr_cols': '6', 'nr_rows': '1'}})
+
+        """
+        The following code loads the sample corpus, extracts a random set of
+        responses and for each one it parses them both as a single packet
+        and a series of randomly split packets. 
+
+        Each packet size will range between 25% and 50% of the complete packet.
+        """
+        test_directory = os.path.dirname(os.path.abspath(__file__))
+        datafile_path = '%s/response_samples.txt' % (test_directory)
+
+        with open(datafile_path, 'rb') as datafile:
+            samples = datafile.read()
+            samples = samples.strip()
+
+        samples = samples.splitlines()
+        samples = [b''.join([sample, b'\n']) for sample in samples]
+
+        random.shuffle(samples)
+
+        samples = [[sample, None, None] for sample in samples[:10]]
+
+        for sample in samples:
+            gdbmi.discard_incomplete_packets()
+
+            sample[1] = gdbmi._get_responses_list(sample[0], stream, False)
+
+        for sample in samples:
+            sample_data = sample[0]
+            packet_chunks = []
+            packet_chunk_count = random.randint(1, 10)
+            maximum_chunk_length = len(sample_data) * random.uniform(0.25, 0.50)
+            maximum_chunk_length = math.ceil(maximum_chunk_length)
+
+            for packet_chunk_index in range(packet_chunk_count):
+                packet_chunk_length = random.randint(1, maximum_chunk_length)
+                packet_chunk = sample_data[:packet_chunk_length]
+                packet_chunks.append(packet_chunk)
+
+                sample_data = sample_data[len(packet_chunk):]
+
+                if packet_chunk_length != len(packet_chunk):
+                    break
+
+            if sample_data:  # Append the remainder
+                packet_chunks.append(sample_data)
+
+            gdbmi.discard_incomplete_packets()
+
+            sample[1] = gdbmi._get_responses_list(sample[0], stream, False)
+
+            gdbmi.discard_incomplete_packets()
+
+            for packet_chunk in packet_chunks:
+                sample[2] = gdbmi._get_responses_list(packet_chunk, stream, False)
+
+            assert(sample[1] == sample[2])
+
+        samples = None
+
 
 
 def main():
