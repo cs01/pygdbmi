@@ -53,7 +53,6 @@ class GdbController():
         self.mutex = Lock()
         self.abs_gdb_path = None  # abs path to gdb executable
         self.cmd = []  # the shell command to run gdb
-        self._buffer = ''  # string buffer for unifinished gdb output
 
         if not gdb_path:
             raise ValueError('a valid path to gdb must be specified')
@@ -85,7 +84,7 @@ class GdbController():
         self.read_list = [self.stdout_fileno, self.stderr_fileno]
         self.write_list = [self.stdin_fileno]
 
-        self.incomplete_packet = {}
+        self.incomplete_packet = {} # string buffers for unifinished gdb output
         self.incomplete_packet['stdout'] = None
         self.incomplete_packet['stderr'] = None
 
@@ -256,21 +255,6 @@ class GdbController():
                         self.mutex.release()
                         raise ValueError('Developer error. Got unexpected file number %d' % fileno)
 
-                    # save partial packets for future calls instead of discarding them
-                    if raw_output:
-                        if self.incomplete_packet[stream]:
-                            raw_output = b''.join([self.incomplete_packet[stream], raw_output])
-                            self.incomplete_packet[stream] = None
-
-                        if b'\n' not in raw_output:
-                            self.incomplete_packet[stream] = raw_output
-                            raw_output = None
-
-                        elif not raw_output.endswith(b'\n'):
-                            remainder_offset = raw_output.rindex(b'\n') + 1
-                            self.incomplete_packet[stream] = raw_output[remainder_offset:]
-                            raw_output = raw_output[:remainder_offset]
-
                     r = self._get_responses_list(raw_output, stream, verbose)
 
                     responses += r
@@ -293,13 +277,20 @@ class GdbController():
             verbose (bool): add verbose output when true
         """
         responses = []
+
+        _buffer = self.incomplete_packet[stream]
+
+        raw_output, _buffer = _buffer_incomplete_responses(raw_output, _buffer)
+
+        self.incomplete_packet[stream] = _buffer
+
         if not raw_output:
             return responses
+
         response_list = list(filter(lambda x: x, raw_output.decode().split('\n')))  # remove blank lines
-        buffered_response_list, self._buffer = _buffer_incomplete_responses(response_list, self._buffer)
 
         # parse each response from gdb into a dict, and store in a list
-        for response in buffered_response_list:
+        for response in response_list:
             if gdbmiparser.response_is_finished(response):
                 pass
             else:
@@ -309,6 +300,7 @@ class GdbController():
                 responses.append(parsed_response)
                 if verbose:
                     pprint(parsed_response)
+
         return responses
 
     def exit(self):
@@ -320,34 +312,37 @@ class GdbController():
         return None
 
 
-def _buffer_incomplete_responses(raw_response_list, buf):
+def _buffer_incomplete_responses(raw_output, buf):
     """It is possible for some of gdb's output to be read before it completely finished its response.
     In that case, a partial mi response was read, which cannot be parsed into structured data.
     We want to ALWAYS parse complete mi records. To do this, we store a buffer of gdb's
     output if gdb did not tell us it finished.
 
     Args:
-        raw_response_list: List of gdb responses
+        raw_output: Contents of the packet
         buf (str): Buffered gdb response from the past. This is incomplete and needs to be prepended to
         gdb's next output.
 
     Returns:
-        (buffered_response_list, buffer)
+        (raw_output, buf)
     """
 
-    if buf:
-        # We have a partial response in our buffer. Combine it with
-        # this response to hopefully form a complete response.
-        raw_response_list[0] = buf + raw_response_list[0]
-        buf = ''
+    # save partial packets for future calls instead of discarding them
+    if raw_output:
+        if buf:
+            raw_output = b''.join([buf, raw_output])
+            buf = None
 
-    if len(raw_response_list) >= 1 and raw_response_list[-1].startswith('^done'):
-        # last response is partially complete. Store it in buffer, and process all prior
-        # responses.
-        buf = raw_response_list[-1]
-        raw_response_list = raw_response_list[0:-1]
+        if b'\n' not in raw_output:
+            buf = raw_output
+            raw_output = None
 
-    return (raw_response_list, buf)
+        elif not raw_output.endswith(b'\n'):
+            remainder_offset = raw_output.rindex(b'\n') + 1
+            buf = raw_output[remainder_offset:]
+            raw_output = raw_output[:remainder_offset]
+
+    return (raw_output, buf)
 
 
 def _make_non_blocking(file_obj):
