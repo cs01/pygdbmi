@@ -278,7 +278,7 @@ class GdbController():
         """
         responses = []
 
-        _buffer = self.incomplete_packet[stream]
+        _buffer = self.incomplete_packet.get(stream)
 
         raw_output, _buffer = _buffer_incomplete_responses(raw_output, _buffer)
 
