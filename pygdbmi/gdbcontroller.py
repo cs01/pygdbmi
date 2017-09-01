@@ -85,6 +85,10 @@ class GdbController():
         self.read_list = [self.stdout_fileno, self.stderr_fileno]
         self.write_list = [self.stdin_fileno]
 
+        self.incomplete_packet = {}
+        self.incomplete_packet['stdout'] = None
+        self.incomplete_packet['stderr'] = None
+
     def verify_valid_gdb_subprocess(self):
         """Verify there is a process object, and that it is still running.
         Raise NoGdbProcessError if either of the above are not true."""
@@ -251,13 +255,32 @@ class GdbController():
                     else:
                         self.mutex.release()
                         raise ValueError('Developer error. Got unexpected file number %d' % fileno)
+
+                    # save partial packets for future calls instead of discarding them
+                    if raw_output:
+                        if self.incomplete_packet[stream]:
+                            raw_output = b''.join([self.incomplete_packet[stream], raw_output])
+                            self.incomplete_packet[stream] = None
+
+                        if b'\n' not in raw_output:
+                            self.incomplete_packet[stream] = raw_output
+                            raw_output = None
+
+                        elif not raw_output.endswith(b'\n'):
+                            remainder_offset = raw_output.rindex(b'\n') + 1
+                            self.incomplete_packet[stream] = raw_output[remainder_offset:]
+                            raw_output = raw_output[:remainder_offset]
+
                     r = self._get_responses_list(raw_output, stream, verbose)
+
                     responses += r
+
             except IOError:  # only occurs in python 2.7
                 pass
 
             if timeout_sec == 0:  # just exit immediately
                 break
+
             elif time.time() > timeout_time_sec:
                 break
         return responses
