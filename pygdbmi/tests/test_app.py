@@ -119,7 +119,7 @@ class TestPyGdbMi(unittest.TestCase):
         response = gdbmi._get_responses_list(to_be_buffered, stream, verbose)
         # Nothing should have been parsed yet
         assert(len(response) == 0)
-        assert(gdbmi._buffer == to_be_buffered.decode())
+        assert(gdbmi.incomplete_packet[stream] == to_be_buffered.decode())
 
         remaining_gdb_output = b'cols="6"}\n(gdb) \n'
         response = gdbmi._get_responses_list(remaining_gdb_output, stream, verbose)
