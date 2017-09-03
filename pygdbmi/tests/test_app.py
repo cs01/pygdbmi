@@ -121,7 +121,7 @@ class TestPyGdbMi(unittest.TestCase):
         response = gdbmi._get_responses_list(to_be_buffered, stream, verbose)
         # Nothing should have been parsed yet
         assert(len(response) == 0)
-        assert(gdbmi.incomplete_packet[stream] == to_be_buffered)
+        assert(gdbmi._incomplete_output[stream] == to_be_buffered)
 
         remaining_gdb_output = b'cols="6"}\n(gdb) \n'
         response = gdbmi._get_responses_list(remaining_gdb_output, stream, verbose)
@@ -135,10 +135,10 @@ class TestPyGdbMi(unittest.TestCase):
 
         '''
         The following code loads the sample corpus, extracts a random set of
-        responses and for each one it parses them both as a single packet
-        and a series of randomly split packets. 
+        responses and for each one it parses them both as a single chunk
+        and a series of randomly sized chunks. 
 
-        Each packet size will range between 25% and 50% of the complete packet.
+        Each chunk size will range between 25% and 50% of the complete response.
         '''
         test_directory = os.path.dirname(os.path.abspath(__file__))
         datafile_path = '%s/response_samples.txt' % (test_directory)
@@ -162,23 +162,25 @@ class TestPyGdbMi(unittest.TestCase):
 
         for sample in samples:
             sample_data = sample[0]
-            packet_chunks = []
-            packet_chunk_count = random.randint(1, 10)
+            response_chunks = []
+            response_chunk_count = random.randint(1, 10)
             maximum_chunk_length = len(sample_data) * random.uniform(0.25, 0.50)
             maximum_chunk_length = math.ceil(maximum_chunk_length)
 
-            for packet_chunk_index in range(packet_chunk_count):
-                packet_chunk_length = random.randint(1, maximum_chunk_length)
-                packet_chunk = sample_data[:packet_chunk_length]
-                packet_chunks.append(packet_chunk)
+            for response_chunk_index in range(response_chunk_count):
+                response_chunk_length = random.randint(1, maximum_chunk_length)
+                response_chunk = sample_data[:response_chunk_length]
 
-                sample_data = sample_data[len(packet_chunk):]
+                if response_chunk:
+                    response_chunks.append(response_chunk)
 
-                if packet_chunk_length != len(packet_chunk):
+                sample_data = sample_data[len(response_chunk):]
+
+                if response_chunk_length != len(response_chunk):
                     break
 
             if sample_data:  # Append the remainder
-                packet_chunks.append(sample_data)
+                response_chunks.append(sample_data)
 
             for stream in gdbmi._incomplete_output.keys():
                 gdbmi._incomplete_output[stream] = None
@@ -188,8 +190,8 @@ class TestPyGdbMi(unittest.TestCase):
             for stream in gdbmi._incomplete_output.keys():
                 gdbmi._incomplete_output[stream] = None
 
-            for packet_chunk in packet_chunks:
-                sample[2] = gdbmi._get_responses_list(packet_chunk, stream, False)
+            for response_chunk in response_chunks:
+                sample[2] = gdbmi._get_responses_list(response_chunk, stream, False)
 
             assert(sample[1] == sample[2])
 
