@@ -84,13 +84,8 @@ class GdbController():
         self.read_list = [self.stdout_fileno, self.stderr_fileno]
         self.write_list = [self.stdin_fileno]
 
-        self.incomplete_packet = {} # string buffers for unifinished gdb output
-        self.incomplete_packet['stdout'] = None
-        self.incomplete_packet['stderr'] = None
-
-    def discard_incomplete_packets(self):
-        for stream in self.incomplete_packet.keys():
-            self.incomplete_packet[stream] = None
+        # string buffers for unifinished gdb output
+        self._incomplete_output = {'stdout': None, 'stderr': None}
 
     def verify_valid_gdb_subprocess(self):
         """Verify there is a process object, and that it is still running.
@@ -282,11 +277,7 @@ class GdbController():
         """
         responses = []
 
-        _buffer = self.incomplete_packet.get(stream)
-
-        raw_output, _buffer = _buffer_incomplete_responses(raw_output, _buffer)
-
-        self.incomplete_packet[stream] = _buffer
+        raw_output, self._incomplete_output[stream] = _buffer_incomplete_responses(raw_output, self._incomplete_output[stream])
 
         if not raw_output:
             return responses

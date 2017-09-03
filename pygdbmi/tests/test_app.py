@@ -133,13 +133,13 @@ class TestPyGdbMi(unittest.TestCase):
         assert(r['type'] == 'result')
         assert(r['payload'] == {'BreakpointTable': {'nr_cols': '6', 'nr_rows': '1'}})
 
-        """
+        '''
         The following code loads the sample corpus, extracts a random set of
         responses and for each one it parses them both as a single packet
         and a series of randomly split packets. 
 
         Each packet size will range between 25% and 50% of the complete packet.
-        """
+        '''
         test_directory = os.path.dirname(os.path.abspath(__file__))
         datafile_path = '%s/response_samples.txt' % (test_directory)
 
@@ -155,7 +155,8 @@ class TestPyGdbMi(unittest.TestCase):
         samples = [[sample, None, None] for sample in samples[:10]]
 
         for sample in samples:
-            gdbmi.discard_incomplete_packets()
+            for stream in gdbmi._incomplete_output.keys():
+                gdbmi._incomplete_output[stream] = None
 
             sample[1] = gdbmi._get_responses_list(sample[0], stream, False)
 
@@ -179,11 +180,13 @@ class TestPyGdbMi(unittest.TestCase):
             if sample_data:  # Append the remainder
                 packet_chunks.append(sample_data)
 
-            gdbmi.discard_incomplete_packets()
+            for stream in gdbmi._incomplete_output.keys():
+                gdbmi._incomplete_output[stream] = None
 
             sample[1] = gdbmi._get_responses_list(sample[0], stream, False)
 
-            gdbmi.discard_incomplete_packets()
+            for stream in gdbmi._incomplete_output.keys():
+                gdbmi._incomplete_output[stream] = None
 
             for packet_chunk in packet_chunks:
                 sample[2] = gdbmi._get_responses_list(packet_chunk, stream, False)
