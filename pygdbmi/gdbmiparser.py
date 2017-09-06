@@ -34,14 +34,14 @@ def parse_response(gdb_mi_text):
         return {'type': 'notify',
                 'message': message,
                 'payload': payload,
-                'token'  : token}
+                'token': token}
 
     elif _GDB_MI_RESULT_RE.match(gdb_mi_text):
         token, message, payload = _get_result_msg_and_paylod(gdb_mi_text)
         return {'type': 'result',
                 'message': message,
                 'payload': payload,
-                'token'  : token}
+                'token': token}
 
     elif _GDB_MI_CONSOLE_RE.match(gdb_mi_text):
         return {'type': 'console',
@@ -149,7 +149,7 @@ _GDB_MI_VALUE_START_CHARS = [_GDB_MI_CHAR_DICT_START, _GDB_MI_CHAR_ARRAY_START, 
 def _get_notify_msg_and_payload(result):
     """Get notify message and payload dict"""
     groups = _GDB_MI_NOTIFY_RE.match(result).groups()
-    token  = int(groups[0]) if groups[0] != '' else None
+    token = int(groups[0]) if groups[0] != '' else None
     message = groups[1].strip()
     result_of_status = groups[2].strip()
     _, payload = _parse_dict(result_of_status)
@@ -159,7 +159,7 @@ def _get_notify_msg_and_payload(result):
 def _get_result_msg_and_paylod(result):
     """Get result message and payload dict"""
     groups = _GDB_MI_RESULT_RE.match(result).groups()
-    token  = int(groups[0]) if groups[0] != '' else None
+    token = int(groups[0]) if groups[0] != '' else None
     message = groups[1]
     if groups[2] is None:
         payload = None

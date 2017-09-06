@@ -21,7 +21,7 @@ import sys
 # Insert 'pygdbmi' path into the system.
 sys.path.insert(0, os.path.abspath('../..'))
 
-from pygdbmi import __version__
+from pygdbmi import __version__  # noqa: E402
 
 
 # -- General configuration ------------------------------------------------

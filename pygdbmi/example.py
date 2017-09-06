@@ -34,11 +34,12 @@ def main(verbose=True):
     responses = gdbmi.write('-exec-run')
     responses = gdbmi.write('-exec-next')
     responses = gdbmi.write('-exec-next')
-    responses = gdbmi.write('-exec-continue')
+    responses = gdbmi.write('-exec-continue')  # noqa: F841
 
     gdbmi.exit()
     # gdbmi.gdb_process is None now because the gdb subprocess (and its inferior
     # program) have been terminated
+
 
 if __name__ == '__main__':
     main()
