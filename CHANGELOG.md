@@ -1,4 +1,7 @@
-# gdbgui release history
+# pygdbmi release history
+
+## 0.7.4.2
+* Improved buffering of incomplete gdb mi output (@trapito)
 
 ## 0.7.4.1
 * Preserve leading and trailing spaces in gdb/mi output (plus unit tests)

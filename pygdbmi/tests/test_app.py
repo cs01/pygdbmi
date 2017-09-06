@@ -148,7 +148,7 @@ class TestPyGdbMi(unittest.TestCase):
                     n = random.randint(1, 100)
                     # read random number of bytes to simulate incomplete responses
                     gdb_mi_simulated_output = f.read(n)
-                    if gdb_mi_simulated_output == '':
+                    if gdb_mi_simulated_output == b'':
                         break  # EOF
                     # let the controller try to parse this additional raw gdb output
                     responses += gdbmi._get_responses_list(gdb_mi_simulated_output, stream, False)
