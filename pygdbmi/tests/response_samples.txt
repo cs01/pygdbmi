@@ -80,6 +80,7 @@
 ^done,wpt={number="7",exp="*0x40000001f000"}
 ^done,wpt={number="8",exp="*0x400000026020"}
 ^done,wpt={number="9",exp="*0x40000002c538"}
+The inferior program printed this! Can you still parse it?
 ^error,msg="Function \"iemMemStoreDataU128AlignedSseJmp\" not defined."
 ^error,msg="Function \"iemMemStoreDataU16Jmp\" not defined."
 ^error,msg="Function \"iemMemStoreDataU16\" not defined."

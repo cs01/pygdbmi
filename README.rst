@@ -40,10 +40,10 @@ Operating Systems
 
 Ubuntu 14.04+
 
-OSX:
- Follow `these instructions <https://gcc.gnu.org/onlinedocs/gnat_ugn/Codesigning-the-Debugger.html>`__  to codesign gdb if you get an error about `(please check gdb is codesigned - see taskgated(8))`
-
-Windows
+macOS
+Note: macOS users must also codesign gdb. Follow [these
+instructions](http://andresabino.com/2015/04/14/codesign-gdb-on-mac-os-x-yosemite-10-10-2/). This will fix the error
+`please check gdb is codesigned - see taskgated(8)`.
 
 gdb versions
 ^^^^^^^^^^^^
@@ -88,7 +88,8 @@ into a JSON serializable dictionary
                           'type': 'breakpoint'}},
      'type': 'result'}
 
-Ain't that better\ `? <https://www.youtube.com/watch?v=9-6GuttRWGE>`__
+Programmatic Control Over gdb
+-----------------------------
 
 But how do you get the gdb output into Python in the first place? If you
 want, ``pygdbmi`` also has a class to control gdb as subprocess. You can
@@ -120,9 +121,12 @@ a ``-``.
 ::
 
     response = gdbmi.write('-break-insert main')
+    response = gdbmi.write('break main')
     response = gdbmi.write('-exec-run')
+    response = gdbmi.write('run')  # normal gdb command is okay too
+    response = gdbmi.write('-exec-next')
     response = gdbmi.write('next')
-    response = gdbmi.write('next')
+    response = gdbmi.write('-exec-continue')
     response = gdbmi.write('continue')
     response = gdbmi.exit()
 

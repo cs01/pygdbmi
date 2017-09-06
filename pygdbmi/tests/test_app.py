@@ -6,7 +6,6 @@ Unit tests
 Run from top level directory: ./tests/test_app.py
 """
 
-import math
 import os
 import random
 import unittest
@@ -133,70 +132,37 @@ class TestPyGdbMi(unittest.TestCase):
         assert(r['type'] == 'result')
         assert(r['payload'] == {'BreakpointTable': {'nr_cols': '6', 'nr_rows': '1'}})
 
-        '''
-        The following code loads the sample corpus, extracts a random set of
-        responses and for each one it parses them both as a single chunk
-        and a series of randomly sized chunks. 
-
-        Each chunk size will range between 25% and 50% of the complete response.
-        '''
+    def test_controller_buffer_randomized(self):
+        """
+        The following code reads a sample gdb mi stream randomly to ensure partial
+        output is read and that the buffer is working as expected on all streams.
+        """
         test_directory = os.path.dirname(os.path.abspath(__file__))
         datafile_path = '%s/response_samples.txt' % (test_directory)
 
-        with open(datafile_path, 'rb') as datafile:
-            samples = datafile.read()
-            samples = samples.strip()
+        gdbmi = GdbController()
+        for stream in gdbmi._incomplete_output.keys():
+            responses = []
+            with open(datafile_path, 'rb') as f:
+                while(True):
+                    n = random.randint(1, 100)
+                    # read random number of bytes to simulate incomplete responses
+                    gdb_mi_simulated_output = f.read(n)
+                    if gdb_mi_simulated_output == '':
+                        break  # EOF
+                    # let the controller try to parse this additional raw gdb output
+                    responses += gdbmi._get_responses_list(gdb_mi_simulated_output, stream, False)
+            assert(len(responses) == 139)
 
-        samples = samples.splitlines()
-        samples = [b''.join([sample, b'\n']) for sample in samples]
-
-        random.shuffle(samples)
-
-        samples = [[sample, None, None] for sample in samples[:10]]
-
-        for sample in samples:
-            for stream in gdbmi._incomplete_output.keys():
-                gdbmi._incomplete_output[stream] = None
-
-            sample[1] = gdbmi._get_responses_list(sample[0], stream, False)
-
-        for sample in samples:
-            sample_data = sample[0]
-            response_chunks = []
-            response_chunk_count = random.randint(1, 10)
-            maximum_chunk_length = len(sample_data) * random.uniform(0.25, 0.50)
-            maximum_chunk_length = math.ceil(maximum_chunk_length)
-
-            for response_chunk_index in range(response_chunk_count):
-                response_chunk_length = random.randint(1, maximum_chunk_length)
-                response_chunk = sample_data[:response_chunk_length]
-
-                if response_chunk:
-                    response_chunks.append(response_chunk)
-
-                sample_data = sample_data[len(response_chunk):]
-
-                if response_chunk_length != len(response_chunk):
-                    break
-
-            if sample_data:  # Append the remainder
-                response_chunks.append(sample_data)
+            # spot check a few
+            assert(responses[0] == {'message': None, 'type': 'console', 'payload': u'0x00007fe2c5c58920 in __nanosleep_nocancel () at ../sysdeps/unix/syscall-template.S:81\\n', 'stream': stream})
+            assert(responses[71] == {'stream': stream, 'message': u'done', 'type': 'result', 'payload': None, 'token': None})
+            assert(responses[82] == {'message': None, 'type': 'output', 'payload': u'The inferior program printed this! Can you still parse it?', 'stream': stream})
+            assert(responses[-2] == {'stream': stream, 'message': u'thread-group-exited', 'type': 'notify', 'payload': {u'exit-code': u'0', u'id': u'i1'}, 'token': None})
+            assert(responses[-1] == {'stream': stream, 'message': u'thread-group-started', 'type': 'notify', 'payload': {u'pid': u'48337', u'id': u'i1'}, 'token': None})
 
             for stream in gdbmi._incomplete_output.keys():
-                gdbmi._incomplete_output[stream] = None
-
-            sample[1] = gdbmi._get_responses_list(sample[0], stream, False)
-
-            for stream in gdbmi._incomplete_output.keys():
-                gdbmi._incomplete_output[stream] = None
-
-            for response_chunk in response_chunks:
-                sample[2] = gdbmi._get_responses_list(response_chunk, stream, False)
-
-            assert(sample[1] == sample[2])
-
-        samples = None
-
+                assert(gdbmi._incomplete_output[stream] is None)
 
 
 def main():
