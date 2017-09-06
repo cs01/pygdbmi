@@ -4,7 +4,7 @@
 .. image:: https://img.shields.io/badge/pypi-v0.7.4.2-blue.svg
   :target: https://pypi.python.org/pypi/pygdbmi/
 
-.. image:: https://img.shields.io/badge/python-2.7, 3.3, 3.4, 3.5, pypy-blue.svg
+.. image:: https://img.shields.io/badge/python-2.7,3.3,3.4,3.5,3.6 pypy-blue.svg
   :target: https://pypi.python.org/pypi/pygdbmi/
 
 pygdbmi - Get Structured Output from GDB's Machine Interface

@@ -21,7 +21,7 @@ if USING_WINDOWS:
 else:
     import fcntl
 
-unicode = str if PYTHON3 else unicode
+unicode = str if PYTHON3 else unicode  # noqa: F821
 
 
 class NoGdbProcessError(ValueError):
