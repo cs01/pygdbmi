@@ -155,6 +155,7 @@ class TestPyGdbMi(unittest.TestCase):
             assert(len(responses) == 139)
 
             # spot check a few
+            assert(responses[0] == {'message': None, 'type': 'console', 'payload': u'0x00007fe2c5c58920 in __nanosleep_nocancel () at ../sysdeps/unix/syscall-template.S:81\\n', 'stream': stream})
             assert(responses[71] == {'stream': stream, 'message': u'done', 'type': 'result', 'payload': None, 'token': None})
             assert(responses[82] == {'message': None, 'type': 'output', 'payload': u'The inferior program printed this! Can you still parse it?', 'stream': stream})
             assert(responses[-2] == {'stream': stream, 'message': u'thread-group-exited', 'type': 'notify', 'payload': {u'exit-code': u'0', u'id': u'i1'}, 'token': None})
