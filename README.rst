@@ -182,5 +182,9 @@ Projects Using pygdbmi
    gdb frontend that aims to provide a reverse engineering tool
    and a reusable library focused on games. It uses pygdbmi to
    parse gdb/mi based output for some functions
+-  `avatar² <https://github.com/avatartwo/avatar2>`__ is an orchestration
+   framework for reversing and analysing firmware of embedded devices.
+   It utilizes pygdbmi for internal communication to different analysis
+   targets.
 - Know of another project? Create a PR and add it here.
 
