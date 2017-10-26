@@ -1,5 +1,8 @@
 # pygdbmi release history
 
+## 0.7.4.3
+* Workaround gdb bug with repeated dictionary keys
+
 ## 0.7.4.2
 * Improved buffering of incomplete gdb mi output (@trapito)
 * Remove support of Python 3.2

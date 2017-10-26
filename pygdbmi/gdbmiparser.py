@@ -8,10 +8,12 @@ See more at https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html#GDB_002fMI
 
 """
 
-
 import re
 from pygdbmi.printcolor import print_cyan, print_red, print_green
 from pprint import pprint
+
+# Print text to console as it's being parsed to help debug
+_DEBUG = False
 
 
 def parse_response(gdb_mi_text):
@@ -97,9 +99,6 @@ def assert_match(actual_char_or_str, expected_char_or_str):
 # All functions and variables below are used internally to parse mi output
 # ========================================================================
 
-
-# Print text to console as it's being parsed to help debug
-_DEBUG = False
 
 # GDB machine interface output patterns to match
 # https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
@@ -192,7 +191,22 @@ def _parse_dict(to_parse):
         else:
             chars_used, key, val = _parse_key_val(to_parse[i:])
             i = i + chars_used
-            obj[key] = val
+            if key in obj:
+                # This is a gdb bug. We should never get repeated keys in a dict!
+                # See https://sourceware.org/bugzilla/show_bug.cgi?id=22217
+                # and https://github.com/cs01/pygdbmi/issues/19
+                # Example:
+                #   thread-ids={thread-id="1",thread-id="2"}
+                # Results in:
+                #   thread-ids: {{'thread-id': ['1', '2']}}
+                # Rather than the lossy
+                #   thread-ids: {'thread-id': 2}  # '1' got overwritten!
+                if isinstance(obj[key], list):
+                    obj[key].append(val)
+                else:
+                    obj[key] = [obj[key], val]
+            else:
+                obj[key] = val
         i += 1
     if _DEBUG:
         print_green(obj)

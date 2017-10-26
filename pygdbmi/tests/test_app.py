@@ -34,6 +34,18 @@ class TestPyGdbMi(unittest.TestCase):
         assert_match(parse_response('&""'), {"type": "log", "payload": "", 'message': None})
         assert_match(parse_response('&"\b\f\n\r\t\""'), {"type": "log", "payload": '\b\f\n\r\t\"', 'message': None})
 
+        # Test that a dictionary with repeated keys (a gdb bug) is gracefully worked-around  by pygdbmi
+        # See https://sourceware.org/bugzilla/show_bug.cgi?id=22217
+        # and https://github.com/cs01/pygdbmi/issues/19
+        assert_match(parse_response('^done,thread-ids={thread-id="3",thread-id="2",thread-id="1"}, current-thread-id="1",number-of-threads="3"'),
+                                    {"type": "result",
+                                        "payload": {'thread-ids': {'thread-id': ['3', '2', '1']},
+                                                    'current-thread-id': '1',
+                                                    'number-of-threads': '3',
+                                                    },
+                                        'message': 'done',
+                                        'token': None})
+
         # Test a real world Dictionary
         assert_match(parse_response('=breakpoint-modified,bkpt={number="1",empty_arr=[],type="breakpoint",disp="keep",enabled="y",addr="0x000000000040059c",func="main",file="hello.c",fullname="/home/git/pygdbmi/tests/sample_c_app/hello.c",line="9",thread-groups=["i1"],times="1",original-location="hello.c:9"}'),
                                     {'message': 'breakpoint-modified',
