@@ -16,8 +16,8 @@ MUTEX_AQUIRE_WAIT_TIME_SEC = int(1)
 USING_WINDOWS = os.name == 'nt'
 if USING_WINDOWS:
     import msvcrt
-    from ctypes import windll, byref, wintypes, WinError
-    from ctypes.wintypes import HANDLE, DWORD, POINTER, BOOL
+    from ctypes import windll, byref, wintypes, WinError, POINTER
+    from ctypes.wintypes import HANDLE, DWORD, BOOL
 else:
     import fcntl
 
