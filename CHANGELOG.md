@@ -1,5 +1,8 @@
 # pygdbmi release history
 
+## 0.7.4.4
+* Fix windows ctypes import (#23, @rudolfwalter)
+
 ## 0.7.4.3
 * Workaround gdb bug with repeated dictionary keys
 
