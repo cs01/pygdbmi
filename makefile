@@ -11,3 +11,6 @@ readme_test:
 
 style_test:
 	flake8 pygdbmi --ignore E501,E127,E128
+
+publish: test
+	python setup.py upload
