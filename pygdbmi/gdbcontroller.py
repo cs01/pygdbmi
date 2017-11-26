@@ -106,7 +106,7 @@ class GdbController():
 
         Args:
             mi_cmd_to_write (str or list): String to write to gdb. If list, it is joined by newlines.
-            timeout_sec (int): Maximum number of seconds to wait for response before exiting. Must be >= 0.
+            timeout_sec (float): Maximum number of seconds to wait for response before exiting. Must be >= 0.
             verbose (bool): Be verbose in what is being written
             raise_error_on_timeout (bool): If read_response is True, raise error if no response is received
             read_response (bool): Block and read response. If there is a separate thread running,
