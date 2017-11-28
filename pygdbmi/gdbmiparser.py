@@ -11,6 +11,7 @@ See more at https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html#GDB_002fMI
 import re
 from pygdbmi.printcolor import print_cyan, print_red, print_green
 from pprint import pprint
+from io import StringIO
 
 # Print text to console as it's being parsed to help debug
 _DEBUG = False
@@ -31,15 +32,17 @@ def parse_response(gdb_mi_text):
         message (str or None),
         payload (str, list, dict, or None)
     """
+    stream = StringIO(gdb_mi_text)
+
     if _GDB_MI_NOTIFY_RE.match(gdb_mi_text):
-        token, message, payload = _get_notify_msg_and_payload(gdb_mi_text)
+        token, message, payload = _get_notify_msg_and_payload(gdb_mi_text, stream)
         return {'type': 'notify',
                 'message': message,
                 'payload': payload,
                 'token': token}
 
     elif _GDB_MI_RESULT_RE.match(gdb_mi_text):
-        token, message, payload = _get_result_msg_and_paylod(gdb_mi_text)
+        token, message, payload = _get_result_msg_and_paylod(gdb_mi_text, stream)
         return {'type': 'result',
                 'message': message,
                 'payload': payload,
@@ -145,52 +148,54 @@ _GDB_MI_CHAR_STRING_START = '"'
 _GDB_MI_VALUE_START_CHARS = [_GDB_MI_CHAR_DICT_START, _GDB_MI_CHAR_ARRAY_START, _GDB_MI_CHAR_STRING_START]
 
 
-def _get_notify_msg_and_payload(result):
+def _get_notify_msg_and_payload(result, stream):
     """Get notify message and payload dict"""
-    groups = _GDB_MI_NOTIFY_RE.match(result).groups()
-    token = int(groups[0]) if groups[0] != '' else None
-    message = groups[1].strip()
-    result_of_status = groups[2].strip()
-    _, payload = _parse_dict(result_of_status)
-    return token, message, payload
+    token = advance_to_after_any(stream, ['=', '*'])
+    token = int(token) if token != '' else None
+    message = advance_to_after(stream, ',')
+
+    payload = _parse_dict(stream)
+    return token, message.strip(), payload
 
 
-def _get_result_msg_and_paylod(result):
+def _get_result_msg_and_paylod(result, stream):
     """Get result message and payload dict"""
+
     groups = _GDB_MI_RESULT_RE.match(result).groups()
     token = int(groups[0]) if groups[0] != '' else None
     message = groups[1]
+
     if groups[2] is None:
         payload = None
     else:
+        advance_to_after(stream, ',')
         str_to_parse = groups[2].strip()
-        i, payload = _parse_dict(str_to_parse)
+        payload = _parse_dict(stream)
+
     return token, message, payload
 
 
-def _parse_dict(to_parse):
+def _parse_dict(stream):
     """Parse dictionary, with optional starting character '{'
     return (tuple):
         Number of characters parsed from to_parse
         Parsed dictionary
     """
-    if _DEBUG:
-        print_red('obj')
-        print_red(to_parse)
-    i = 0
     obj = {}
-    while i < len(to_parse):
-        c = to_parse[i]
+
+    while True:
+        tell = stream.tell()
+        c = stream.read(1)
         if c in _WHITESPACE:
             pass
         elif c in ['{', ',']:
             pass
-        elif c == '}':
+        elif c in ['}', '']:
             # end of object, exit loop
             break
         else:
-            chars_used, key, val = _parse_key_val(to_parse[i:])
-            i = i + chars_used
+            stream.seek(tell)
+            key, val = _parse_key_val(stream)
             if key in obj:
                 # This is a gdb bug. We should never get repeated keys in a dict!
                 # See https://sourceware.org/bugzilla/show_bug.cgi?id=22217
@@ -207,125 +212,84 @@ def _parse_dict(to_parse):
                     obj[key] = [obj[key], val]
             else:
                 obj[key] = val
-        i += 1
+
     if _DEBUG:
         print_green(obj)
-    return i, obj
+    return obj
 
 
-def _parse_key_val(to_parse):
+def _parse_key_val(stream):
     """Parse key, value combination
     return (tuple):
-        Number of characters parsed from to_parse
         Parsed key (string)
         Parsed value (either a string, array, or dict)
     """
-    if _DEBUG:
-        print_red('keyval')
-        print_red(to_parse)
 
-    i = 0
-    size, key = _parse_key(to_parse[i:])
-    i += size
-    size, val = _parse_val(to_parse[i:])
-    i += size
+    key = _parse_key(stream)
+    val = _parse_val(stream)
+
     if _DEBUG:
         print_green(key)
         print_green(val)
-    return i, key, val
+    return key, val
 
 
-def _parse_key(to_parse):
+def _parse_key(stream):
     """Parse key, value combination
-    return (tuple):
-        Number of characters parsed from to_parse
+    returns :
         Parsed key (string)
     """
-    if _DEBUG:
-        print_red('key')
-        print_red(to_parse)
-
-    buf = ''
-    i = 0
-    key = ''
-    while i < len(to_parse) - 1:
-        c = to_parse[i]
-        if c == '=':
-            key = buf
-            # consume '=' sign so caller doesn't get it again
-            i += 1
-            break
-        buf += c
-        i += 1
+    key = advance_to_after(stream, '=')
     if _DEBUG:
         print_green(key)
-    return i, key
+    return key
 
 
-def _parse_val(to_parse):
+def _parse_val(stream):
     """Parse value from string
-    return (tuple):
-        Number of characters parsed from to_parse
+    returns:
         Parsed value (either a string, array, or dict)
     """
-    if _DEBUG:
-        print_red('val')
-        print_red(to_parse)
 
-    i = 0
-    val = ''
-    buf = ''
-    while i < len(to_parse) - 1:
-        c = to_parse[i]
+    while True:
+        c = stream.read(1)
 
         if c == '{':
             # Start object
-            size, val = _parse_dict(to_parse[i:])
-            i += size
+            val = _parse_dict(stream)
             break
         elif c == '[':
             # Start of an array
-            size, val = _parse_array(to_parse[i:])
-            i += size
+            val = _parse_array(stream)
             break
         elif c == '"':
             # Start of a string
-            size, val = _parse_str(to_parse[i:])
-            i += size
+            val = _parse_str(stream)
             break
         else:
             buf += c
-        i += 1
 
     if _DEBUG:
         print_green(val)
-    return i, val
+
+    return val
 
 
-def _parse_array(to_parse):
-    """Parse an array
-    return (tuple):
-        Number of characters parsed from to_parse
+def _parse_array(stream):
+    """Parse an array, stream should be passed the initial [
+    returns:
         Parsed array
     """
-    if _DEBUG:
-        print_red('array')
-        print_red(to_parse)
-
-    assert_match(_GDB_MI_CHAR_ARRAY_START, to_parse[0])
-
-    # Skip first open bracket so we don't end up in an
-    # endless loop trying to re-parse the array
-    i = 1
 
     arr = []
-    while i < len(to_parse) - 1:
-        c = to_parse[i]
+    while True:
+        tell = stream.tell()
+        c = stream.read(1)
 
         if c in _GDB_MI_VALUE_START_CHARS:
-            size, val = _parse_val(to_parse[i:])
+            stream.seek(tell)
+            val = _parse_val(stream)
             arr.append(val)
-            i += size
         elif c in _WHITESPACE:
             pass
         elif c == ',':
@@ -334,16 +298,15 @@ def _parse_array(to_parse):
             # Stop when this array has finished. Note
             # that elements of this array can be also be arrays.
             break
-        i += 1
+
     if _DEBUG:
         print_green(arr)
-    return i, arr
+    return arr
 
 
-def _parse_str(to_parse):
+def _parse_str(stream):
     """Parse a string
-    return (tuple):
-        Number of characters parsed from to_parse
+    returns:
         Parsed string, without surrounding quotes
     """
 
@@ -351,43 +314,48 @@ def _parse_str(to_parse):
     # escaped by this parser
     CHARS_TO_REMOVE_GDB_ESCAPE = ['"']
 
-    if _DEBUG:
-        print_red('string')
-        print_red(to_parse)
-
-    assert_match(_GDB_MI_CHAR_STRING_START, to_parse[0])
-    i = 1  # Skip the opening quote
     buf = ''
-    while i < len(to_parse) - 1:
-        c = to_parse[i]
+    while True:
+        c = stream.read(1)
         if _DEBUG:
             print_cyan(c)
 
-        if c == '\\' and i < (len(to_parse) - 1):
+        if c == '\\':
             # We are on a backslash and there is another character after the backslash
             # to parse. Handle this case specially since gdb escaped it for us
 
             # Get the next char that is being escaped
-            c2 = to_parse[i + 1]
+            c2 = stream.read(1)
             if c2 in CHARS_TO_REMOVE_GDB_ESCAPE:
                 # only store the escaped character in the buffer; don't store the backslash
                 # (don't leave it escaped)
-                buf += to_parse[i + 1]
+                buf += c2
             else:
                 # store the backslash and the following character in the buffer (leave it escaped)
-                buf += c + to_parse[i + 1]
-
-            # consume the backslash and the next character
-            i += 2
-
+                buf += c + c2
         else:
             # Quote is closed. Exit (and don't include the end quote).
             if c == '"':
                 break
             buf += c
-            i += 1
 
-    string = buf
     if _DEBUG:
-        print_green(string)
-    return i, string
+        print_green(buf)
+    return buf
+
+
+def advance_to_after(stream, char):
+    return advance_to_after_any(stream, [char])
+
+
+def advance_to_after_any(stream, chars):
+    data = []
+    while True:
+        chunk = stream.read(1)
+        if chunk in chars:
+            break
+        elif chars == '':
+            break
+        else:
+            data.append(chunk)
+    return ''.join(data)
