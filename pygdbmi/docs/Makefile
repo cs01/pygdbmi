@@ -28,4 +28,4 @@ clean:
 	rm -rf api
 
 publish: html
-	rsync --delete -pthrvz -c --rsh='ssh -p 22' _build/html/ root@grassfedcode.com:/var/www/grassfedcode.com/pygdbmi
+	rsync --delete -pthrvz -c --rsh='ssh -p 22' _build/html/ grassfedcode.com:/var/www/grassfedcode.com/pygdbmi

@@ -12,18 +12,13 @@ pygdbmi - Get Structured Output from GDB's Machine Interface
 
 `API Documentation <http://grassfedcode.com/pygdbmi/>`_
 
-Parse gdb machine interface string output and return structured data
-types (Python dicts) that are JSON serializable. Useful for writing the
-backend to a gdb frontend. For example,
-`gdbgui <https://github.com/cs01/gdbgui>`__ uses pygdbmi on the backend.
+What's in the box?
 
-Also implements a class to control gdb, ``GdbController``, which allows
-programmatic control of gdb using Python, which is also useful if
-creating a front end.
+1. Parse gdb machine interface string output and return structured data types (Python dicts) that are JSON serializable. Useful for writing the backend to a gdb frontend. For example, `gdbgui <https://github.com/cs01/gdbgui>`__ uses pygdbmi on the backend.
 
-To get `machine
-interface <https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html>`_
-output from gdb, run gdb with the ``--interpreter=mi2`` flag.
+2. Control gdb as a subprocess using Python with the ``GdbController`` class.
+
+To get `machine interface <https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html>`_ output from gdb, run gdb with the ``--interpreter=mi2`` flag like so: ``gdb --interpreter=mi2``.
 
 Installation
 ------------
@@ -38,17 +33,22 @@ Compatibility
 Operating Systems
 ^^^^^^^^^^^^^^^^^
 
-Ubuntu 14.04+
+- Linux/Unix
 
-macOS
-Note: macOS users must also codesign gdb. Follow [these
-instructions](http://andresabino.com/2015/04/14/codesign-gdb-on-mac-os-x-yosemite-10-10-2/). This will fix the error
-`please check gdb is codesigned - see taskgated(8)`.
+  Ubuntu 14.04 and 16.04 have been tested to work. Other versions likely work as well.
+
+- macOS
+
+  Note: the error ``please check gdb is codesigned - see taskgated(8)`` can be fixed by codesigning gdb with `these instructions <http://andresabino.com/2015/04/14/codesign-gdb-on-mac-os-x-yosemite-10-10-2/>`_. If the error is not fixed, please `create an issue in github <https://github.com/cs01/pygdbmi/issues>`_.
+
+- Windows
+
+  Windows 10 under cygwin has been tested to work.
 
 gdb versions
 ^^^^^^^^^^^^
 
-gdb 7.7+
+- gdb 7.7+ has been tested. Older versions may work as well.
 
 Examples
 --------
@@ -120,18 +120,18 @@ a ``-``.
 
 ::
 
-    response = gdbmi.write('-break-insert main')
-    response = gdbmi.write('break main')
+    response = gdbmi.write('-break-insert main')  # machine interface (MI) commands start with a '-'
+    response = gdbmi.write('break main')  # normal gdb commands work too, but the return value is slightly different
     response = gdbmi.write('-exec-run')
-    response = gdbmi.write('run')  # normal gdb command is okay too
-    response = gdbmi.write('-exec-next')
+    response = gdbmi.write('run')
+    response = gdbmi.write('-exec-next', timeout_sec=0.1)  # the wait time can be modified from the default of 1 second
     response = gdbmi.write('next')
     response = gdbmi.write('-exec-continue')
     response = gdbmi.write('continue')
     response = gdbmi.exit()
 
 
-Parsed Output Description
+Parsed Output Format
 -------------------------
 
 Each parsed gdb response consists of a list of dictionaries. Each
@@ -150,26 +150,27 @@ The ``type`` is defined based on gdb's various `mi output record
 types <(https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Output-Records.html#GDB_002fMI-Output-Records)>`__,
 and can be
 
--  result - the result of a gdb command, such as ``done``, ``running``,
+-  ``result`` - the result of a gdb command, such as ``done``, ``running``,
    ``error``, etc.
--  notify - additional async changes that have occurred, such as
+-  ``notify`` - additional async changes that have occurred, such as
    breakpoint modified
--  console - textual responses to cli commands
--  log - debugging messages from gdb's internals
--  output - output from target
--  target - output from remote target
--  done - when gdb has finished its output
+-  ``console`` - textual responses to cli commands
+-  ``log`` - debugging messages from gdb's internals
+-  ``output`` - output from target
+-  ``target`` - output from remote target
+-  ``done`` - when gdb has finished its output
 
 Contributing
 ------------
+Documentation fixes, bug fixes, performance improvements, and functional improvements are welcome. You may want to create an issue before beginning work to make sure I am interested in merging it to the master branch.
 
-Set up a new virtual environment, then clone this repo and run
+
+To develop, set up a new virtual environment, then clone this repo and run
 ``pip install -r requirements.txt`` and ``pip install -r dev_requirements.txt``.
 
-Confirm unit tests are working with
-``make test``, then begin development.
+Confirm unit tests are working with ``make test``, then begin development.
 
-Update unit tests as necessary at ``pygdbmi/tests/test\_app.py``.
+Update unit tests as necessary at ``pygdbmi/tests/test_app.py``.
 
 
 
