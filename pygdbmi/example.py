@@ -4,7 +4,7 @@ import subprocess
 import os
 
 SAMPLE_C_CODE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'tests/sample_c_app')
-SAMPLE_C_BINARY = os.path.join(SAMPLE_C_CODE_DIR, 'a.out')
+SAMPLE_C_BINARY = os.path.join(SAMPLE_C_CODE_DIR, 'pygdbmiapp.a')
 
 
 def main(verbose=True):
