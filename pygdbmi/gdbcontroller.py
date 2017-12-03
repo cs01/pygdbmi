@@ -8,11 +8,10 @@ import time
 from pprint import pprint
 from pygdbmi import gdbmiparser
 from distutils.spawn import find_executable
-from multiprocessing import Lock
 
 PYTHON3 = sys.version_info.major == 3
 DEFAULT_GDB_TIMEOUT_SEC = 1
-MUTEX_AQUIRE_WAIT_TIME_SEC = int(1)
+DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC = 0.1
 USING_WINDOWS = os.name == 'nt'
 if USING_WINDOWS:
     import msvcrt
@@ -43,16 +42,22 @@ class GdbController():
     Args:
         gdb_path (str): Command to run in shell to spawn new gdb subprocess
         gdb_args (list): Arguments to pass to shell when spawning new gdb subprocess
+        time_to_check_for_additional_output_sec (float): When parsing responses, wait this amout of time before exiting (exits before timeout is reached to save time). If <= 0, full timeout time is used.
         verbose (bool): Print verbose output if True
     Returns:
         New GdbController object
     """
 
-    def __init__(self, gdb_path='gdb', gdb_args=['--nx', '--quiet', '--interpreter=mi2'], verbose=False):
+    def __init__(self,
+                    gdb_path='gdb',
+                    gdb_args=['--nx', '--quiet', '--interpreter=mi2'],
+                    time_to_check_for_additional_output_sec=DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
+                    verbose=False):
         self.verbose = verbose
-        self.mutex = Lock()
         self.abs_gdb_path = None  # abs path to gdb executable
         self.cmd = []  # the shell command to run gdb
+        self.time_to_check_for_additional_output_sec = time_to_check_for_additional_output_sec
+        self._allow_overwrite_timeout_times = self.time_to_check_for_additional_output_sec > 0
 
         if not gdb_path:
             raise ValueError('a valid path to gdb must be specified')
@@ -101,8 +106,6 @@ class GdbController():
             raise_error_on_timeout=True,
             read_response=True):
         """Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
-
-        A mutex is obtained before writing and released before returning
 
         Args:
             mi_cmd_to_write (str or list): String to write to gdb. If list, it is joined by newlines.
@@ -165,11 +168,8 @@ class GdbController():
         """Get response from GDB, and block while doing so. If GDB does not have any response ready to be read
         by timeout_sec, an exception is raised.
 
-        A lock (mutex) is obtained before reading and released before returning. If the lock cannot
-        be obtained, no data is read and an empty list is returned.
-
         Args:
-            timeout_sec (float): Time to wait for reponse. Must be >= 0.
+            timeout_sec (float): Maximum time to wait for reponse. Must be >= 0. Will return after
             raise_error_on_timeout (bool): Whether an exception should be raised if no response was found
             after timeout_sec
             verbose (bool): If true, more output it printed
@@ -191,14 +191,10 @@ class GdbController():
 
         verbose = self.verbose or verbose
 
-        self.mutex.acquire(MUTEX_AQUIRE_WAIT_TIME_SEC)
-
         if USING_WINDOWS:
             retval = self._get_responses_windows(timeout_sec, verbose)
         else:
             retval = self._get_responses_unix(timeout_sec, verbose)
-
-        self.mutex.release()
 
         if not retval and raise_error_on_timeout:
             raise GdbTimeoutError('Did not get response from gdb after %s seconds' % timeout_sec)
@@ -251,12 +247,11 @@ class GdbController():
                         stream = 'stderr'
 
                     else:
-                        self.mutex.release()
                         raise ValueError('Developer error. Got unexpected file number %d' % fileno)
 
-                    r = self._get_responses_list(raw_output, stream, verbose)
+                    responses_list = self._get_responses_list(raw_output, stream, verbose)
 
-                    responses += r
+                    responses += responses_list
 
             except IOError:  # only occurs in python 2.7
                 pass
@@ -264,8 +259,13 @@ class GdbController():
             if timeout_sec == 0:  # just exit immediately
                 break
 
+            elif responses_list and self._allow_overwrite_timeout_times:
+                # update timeout time to potentially be closer to now to avoid lengthy wait times when nothing is being output by gdb
+                timeout_time_sec = min(time.time() + self.time_to_check_for_additional_output_sec, timeout_time_sec)
+
             elif time.time() > timeout_time_sec:
                 break
+
         return responses
 
     def _get_responses_list(self, raw_output, stream, verbose):

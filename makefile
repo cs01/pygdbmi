@@ -1,5 +1,5 @@
 # run pip install -r dev_requirements.txt before running make test
-.PHONY: test publish
+.PHONY: test publish clean
 
 test: functional_test style_test readme_test
 
@@ -14,3 +14,13 @@ style_test:
 
 publish: test
 	python setup.py upload
+
+
+clean:
+	find . -name '*.pyc' -exec rm -f {} +
+	find . -name '*.pyo' -exec rm -f {} +
+	find . -name '*~' -exec rm -f {} +
+	make -C ./pygdbmi/docs clean
+
+docs:
+	make -C ./pygdbmi/docs
