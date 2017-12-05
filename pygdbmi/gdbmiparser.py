@@ -9,12 +9,81 @@ See more at https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html#GDB_002fMI
 """
 
 import re
-from pygdbmi.printcolor import print_cyan, print_red, print_green
+from pygdbmi.printcolor import print_cyan, print_green
 from pprint import pprint
-from io import StringIO
 
 # Print text to console as it's being parsed to help debug
 _DEBUG = False
+
+
+class StringStream:
+    def __init__(self, data):
+        self.data = data
+        self.index = 0
+        self.len = len(data)
+
+    def read(self, count):
+        newIndex = self.index + count
+        char = None
+        if newIndex > self.len:
+            char = ''
+        elif count == 1:
+            char = self.data[self.index]
+        else:
+            char = self.data[self.index:newIndex]
+        self.index = newIndex
+
+        return char
+
+    def seek(self, offset):
+        self.index = self.index + offset
+
+    def advance_to_after(self, char):
+        return self.advance_to_after_any([char])
+
+    def advance_to_after_any(self, chars):
+        start_index = self.index
+        while True:
+            chunk = self.data[self.index]
+            self.index += 1
+            if chunk in chars:
+                break
+            elif self.index == self.len:
+                break
+        return self.data[start_index:self.index - 1]
+
+    def advance_to_after_with_gdb_escapes(self, char):
+        # characters that gdb escapes that should not be
+        # escaped by this parser
+        CHARS_TO_REMOVE_GDB_ESCAPE = ['"']
+
+        buf = ''
+        while True:
+            c = self.data[self.index]
+            self.index += 1
+            if _DEBUG:
+                print_cyan(c)
+
+            if c == '\\':
+                # We are on a backslash and there is another character after the backslash
+                # to parse. Handle this case specially since gdb escaped it for us
+
+                # Get the next char that is being escaped
+                c2 = self.data[self.index]
+                self.index += 1
+                if c2 in CHARS_TO_REMOVE_GDB_ESCAPE:
+                    # only store the escaped character in the buffer; don't store the backslash
+                    # (don't leave it escaped)
+                    buf += c2
+                else:
+                    # store the backslash and the following character in the buffer (leave it escaped)
+                    buf += c + c2
+            else:
+                # Quote is closed. Exit (and don't include the end quote).
+                if c == '"':
+                    break
+                buf += c
+        return buf
 
 
 def parse_response(gdb_mi_text):
@@ -32,7 +101,7 @@ def parse_response(gdb_mi_text):
         message (str or None),
         payload (str, list, dict, or None)
     """
-    stream = StringIO(gdb_mi_text)
+    stream = StringStream(gdb_mi_text)
 
     if _GDB_MI_NOTIFY_RE.match(gdb_mi_text):
         token, message, payload = _get_notify_msg_and_payload(gdb_mi_text, stream)
@@ -150,9 +219,9 @@ _GDB_MI_VALUE_START_CHARS = [_GDB_MI_CHAR_DICT_START, _GDB_MI_CHAR_ARRAY_START, 
 
 def _get_notify_msg_and_payload(result, stream):
     """Get notify message and payload dict"""
-    token = advance_to_after_any(stream, ['=', '*'])
+    token = stream.advance_to_after_any(['=', '*'])
     token = int(token) if token != '' else None
-    message = advance_to_after(stream, ',')
+    message = stream.advance_to_after(',')
 
     payload = _parse_dict(stream)
     return token, message.strip(), payload
@@ -168,8 +237,7 @@ def _get_result_msg_and_paylod(result, stream):
     if groups[2] is None:
         payload = None
     else:
-        advance_to_after(stream, ',')
-        str_to_parse = groups[2].strip()
+        stream.advance_to_after(',')
         payload = _parse_dict(stream)
 
     return token, message, payload
@@ -184,7 +252,6 @@ def _parse_dict(stream):
     obj = {}
 
     while True:
-        tell = stream.tell()
         c = stream.read(1)
         if c in _WHITESPACE:
             pass
@@ -194,7 +261,7 @@ def _parse_dict(stream):
             # end of object, exit loop
             break
         else:
-            stream.seek(tell)
+            stream.seek(-1)
             key, val = _parse_key_val(stream)
             if key in obj:
                 # This is a gdb bug. We should never get repeated keys in a dict!
@@ -239,7 +306,7 @@ def _parse_key(stream):
     returns :
         Parsed key (string)
     """
-    key = advance_to_after(stream, '=')
+    key = stream.advance_to_after('=')
     if _DEBUG:
         print_green(key)
     return key
@@ -264,10 +331,10 @@ def _parse_val(stream):
             break
         elif c == '"':
             # Start of a string
-            val = _parse_str(stream)
+            val = stream.advance_to_after_with_gdb_escapes('"')
             break
         else:
-            buf += c
+            raise ValueError()
 
     if _DEBUG:
         print_green(val)
@@ -283,11 +350,10 @@ def _parse_array(stream):
 
     arr = []
     while True:
-        tell = stream.tell()
         c = stream.read(1)
 
         if c in _GDB_MI_VALUE_START_CHARS:
-            stream.seek(tell)
+            stream.seek(-1)
             val = _parse_val(stream)
             arr.append(val)
         elif c in _WHITESPACE:
@@ -302,60 +368,3 @@ def _parse_array(stream):
     if _DEBUG:
         print_green(arr)
     return arr
-
-
-def _parse_str(stream):
-    """Parse a string
-    returns:
-        Parsed string, without surrounding quotes
-    """
-
-    # characters that gdb escapes that should not be
-    # escaped by this parser
-    CHARS_TO_REMOVE_GDB_ESCAPE = ['"']
-
-    buf = ''
-    while True:
-        c = stream.read(1)
-        if _DEBUG:
-            print_cyan(c)
-
-        if c == '\\':
-            # We are on a backslash and there is another character after the backslash
-            # to parse. Handle this case specially since gdb escaped it for us
-
-            # Get the next char that is being escaped
-            c2 = stream.read(1)
-            if c2 in CHARS_TO_REMOVE_GDB_ESCAPE:
-                # only store the escaped character in the buffer; don't store the backslash
-                # (don't leave it escaped)
-                buf += c2
-            else:
-                # store the backslash and the following character in the buffer (leave it escaped)
-                buf += c + c2
-        else:
-            # Quote is closed. Exit (and don't include the end quote).
-            if c == '"':
-                break
-            buf += c
-
-    if _DEBUG:
-        print_green(buf)
-    return buf
-
-
-def advance_to_after(stream, char):
-    return advance_to_after_any(stream, [char])
-
-
-def advance_to_after_any(stream, chars):
-    data = []
-    while True:
-        chunk = stream.read(1)
-        if chunk in chars:
-            break
-        elif chars == '':
-            break
-        else:
-            data.append(chunk)
-    return ''.join(data)
