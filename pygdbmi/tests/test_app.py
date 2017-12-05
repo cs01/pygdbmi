@@ -11,7 +11,7 @@ import random
 import unittest
 import subprocess
 from pygdbmi.gdbmiparser import parse_response, assert_match
-from pygdbmi.gdbcontroller import GdbController, NoGdbProcessError
+from pygdbmi.gdbcontroller import GdbController, NoGdbProcessError, GdbTimeoutError
 
 
 class TestPyGdbMi(unittest.TestCase):
@@ -107,6 +107,14 @@ class TestPyGdbMi(unittest.TestCase):
             if r.get('payload', '') == '  leading spaces should be preserved. So should trailing spaces.  ':
                 found_match = True
         assert(found_match is True)
+
+        # Test GdbTimeoutError exception
+        got_timeout_exception = False
+        try:
+            gdbmi.get_gdb_response(timeout_sec=0)
+        except GdbTimeoutError:
+            got_timeout_exception = True
+        assert(got_timeout_exception is True)
 
         # Close gdb subprocess
         responses = gdbmi.exit()

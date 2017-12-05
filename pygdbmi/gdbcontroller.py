@@ -11,7 +11,7 @@ from distutils.spawn import find_executable
 
 PYTHON3 = sys.version_info.major == 3
 DEFAULT_GDB_TIMEOUT_SEC = 1
-DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC = 0.1
+DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC = 0.2
 USING_WINDOWS = os.name == 'nt'
 if USING_WINDOWS:
     import msvcrt
@@ -233,6 +233,7 @@ class GdbController():
             timeout_time_sec = time.time() + timeout_sec
         responses = []
         while(True):
+            responses_list = None  # to avoid infinite loop if using Python 2
             try:
                 for fileno in events:
                     # new data is ready to read
