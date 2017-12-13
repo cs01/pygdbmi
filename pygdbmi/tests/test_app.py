@@ -10,6 +10,7 @@ import os
 import random
 import unittest
 import subprocess
+from time import time
 from pygdbmi.gdbmiparser import parse_response, assert_match
 from pygdbmi.gdbcontroller import GdbController, NoGdbProcessError
 
@@ -177,11 +178,48 @@ class TestPyGdbMi(unittest.TestCase):
                 assert(gdbmi._incomplete_output[stream] is None)
 
 
+class TestPerformance(unittest.TestCase):
+
+    def get_test_input(self, n_repetitions):
+        data = ', '.join(['"/a/path/to/parse/' + str(i) + '"' for i in range(n_repetitions)])
+        return '=test-message,test-data=[' + data + ']'
+
+    def get_avg_time_to_parse(self, input_str, num_runs):
+        avg_time = 0
+        for _ in range(num_runs):
+            t0 = time()
+            parse_response(input_str)
+            t1 = time()
+            time_to_run = t1 - t0
+            avg_time += time_to_run / num_runs
+        return avg_time
+
+    def test_big_o(self):
+        num_runs = 30
+
+        large_input_len = 1000
+
+        single_input = self.get_test_input(1)
+        large_input = self.get_test_input(large_input_len)
+
+        t_small = self.get_avg_time_to_parse(single_input, num_runs)
+        t_large = self.get_avg_time_to_parse(large_input, num_runs)
+        print('time complexity: O(%0.2f n)' % ((t_large / large_input_len) / t_small))
+
+
+class TestStringString(unittest.TestCase):
+
+    def test_api(self):
+        # TODO test String Stream
+        pass
+
+
 def main():
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
     suite.addTests(loader.loadTestsFromTestCase(TestPyGdbMi))
+    suite.addTests(loader.loadTestsFromTestCase(TestPerformance))
 
     runner = unittest.TextTestRunner(verbosity=1)
     result = runner.run(suite)
