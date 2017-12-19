@@ -1,5 +1,5 @@
 # run pip install -r dev_requirements.txt before running make test
-.PHONY: test publish clean
+.PHONY: test upload clean
 
 test: functional_test style_test readme_test
 
@@ -12,9 +12,13 @@ readme_test:
 style_test:
 	flake8 pygdbmi --ignore E501,E127,E128
 
-publish: test
+upload:
 	python setup.py upload
 
+testupload: test
+	rm -rf dist
+	python setup.py sdist bdist_wheel --universal
+	twine upload dist/* -r pypitest
 
 clean:
 	find . -name '*.pyc' -exec rm -f {} +
