@@ -71,14 +71,13 @@ class TestPyGdbMi(unittest.TestCase):
         # Test records with token
         assert_match(parse_response('1342^done'), {'type': 'result', 'payload': None, 'message': 'done', "token": 1342})
 
-    def _get_c_program(self):
+    def _get_c_program(self, makefile_target_name, binary_name):
         """build c program and return path to binary"""
-        FILENAME = 'pygdbmiapp.a'
         SAMPLE_C_CODE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sample_c_app')
-        SAMPLE_C_BINARY = os.path.join(SAMPLE_C_CODE_DIR, FILENAME)
+        binary_path = os.path.join(SAMPLE_C_CODE_DIR, binary_name)
         # Build C program
-        subprocess.check_output(["make", "-C", SAMPLE_C_CODE_DIR, '--quiet'])
-        return SAMPLE_C_BINARY
+        subprocess.check_output(["make", makefile_target_name, "-C", SAMPLE_C_CODE_DIR, '--quiet'])
+        return binary_path
 
     def test_controller(self):
         """Build a simple C program, then run it with GdbController and verify the output is parsed
@@ -87,9 +86,10 @@ class TestPyGdbMi(unittest.TestCase):
         # Initialize object that manages gdb subprocess
         gdbmi = GdbController()
 
-        c_binary_path = self._get_c_program()
+        c_hello_world_binary = self._get_c_program('hello', 'pygdbmiapp.a')
+
         # Load the binary and its symbols in the gdb subprocess
-        responses = gdbmi.write('-file-exec-and-symbols %s' % c_binary_path, timeout_sec=1)
+        responses = gdbmi.write('-file-exec-and-symbols %s' % c_hello_world_binary, timeout_sec=1)
 
         # Verify output was parsed into a list of responses
         assert(len(responses) != 0)
@@ -120,6 +120,9 @@ class TestPyGdbMi(unittest.TestCase):
         assert(got_timeout_exception is True)
 
         # Close gdb subprocess
+        gdbmi.send_signal_to_gdb('SIGINT')
+        gdbmi.send_signal_to_gdb(2)
+        gdbmi.interrupt_gdb()
         responses = gdbmi.exit()
         assert(responses is None)
         assert(gdbmi.gdb_process is None)
@@ -127,10 +130,26 @@ class TestPyGdbMi(unittest.TestCase):
         # Test NoGdbProcessError exception
         got_no_process_exception = False
         try:
-            responses = gdbmi.write('-file-exec-and-symbols %s' % c_binary_path)
+            responses = gdbmi.write('-file-exec-and-symbols %s' % c_hello_world_binary)
         except NoGdbProcessError:
             got_no_process_exception = True
         assert(got_no_process_exception is True)
+
+        # Respawn and test signal handling
+        gdbmi.spawn_new_gdb_subprocess()
+        responses = gdbmi.write('-file-exec-and-symbols %s' % c_hello_world_binary, timeout_sec=1)
+        responses = gdbmi.write(['-break-insert main', '-exec-run'])
+        gdbmi.interrupt_gdb()
+        gdbmi.send_signal_to_gdb(2)
+        gdbmi.send_signal_to_gdb('sigTeRm')
+        try:
+            gdbmi.send_signal_to_gdb('sigterms')
+            # exception must be raised
+            assert(False)
+        except ValueError:
+            assert(True)
+        responses = gdbmi.write('-exec-run')
+        gdbmi.send_signal_to_gdb('sigstop')
 
     def test_controller_buffer(self):
         """test that a partial response gets successfully buffered
@@ -234,11 +253,6 @@ class TestStringStream(unittest.TestCase):
         assert(stream.index == 0)
 
         buf = stream.advance_past_chars(['"'])
-        # assert_match(buf, 'abc- ')
-        # assert_match(raw_text[stream.index - 1], '-')
-        # assert_match(raw_text[stream.index], ' ')
-        # buf = stream.advance_past_chars(['"'])
-        # print(buf)
         buf = stream.advance_past_string_with_gdb_escapes()
         assert_match(buf, 'd')
 

@@ -5,6 +5,7 @@ import select
 import subprocess
 import os
 import time
+import signal
 from pprint import pprint
 from pygdbmi import gdbmiparser
 from distutils.spawn import find_executable
@@ -19,6 +20,11 @@ if USING_WINDOWS:
     from ctypes.wintypes import HANDLE, DWORD, BOOL
 else:
     import fcntl
+
+SIGNAL_NAME_TO_NUM = {}
+for n in dir(signal):
+    if n.startswith('SIG') and '_' not in n:
+        SIGNAL_NAME_TO_NUM[n.upper()] = getattr(signal, n)
 
 unicode = str if PYTHON3 else unicode  # noqa: F821
 
@@ -57,6 +63,7 @@ class GdbController():
         self.abs_gdb_path = None  # abs path to gdb executable
         self.cmd = []  # the shell command to run gdb
         self.time_to_check_for_additional_output_sec = time_to_check_for_additional_output_sec
+        self.gdb_process = None
         self._allow_overwrite_timeout_times = self.time_to_check_for_additional_output_sec > 0
 
         if not gdb_path:
@@ -69,8 +76,20 @@ class GdbController():
                 self.abs_gdb_path = abs_gdb_path
 
         self.cmd = [self.abs_gdb_path] + gdb_args
+        self.spawn_new_gdb_subprocess()
 
-        if verbose:
+    def spawn_new_gdb_subprocess(self):
+        """Spawn a new gdb subprocess with the arguments supplied to the object
+        during initialization. If gdb subprocess already exists, terminate it before
+        spanwing a new one.
+        Return int: gdb process id
+        """
+        if self.gdb_process:
+            if self.verbose:
+                print('Killing current gdb subprocess (pid %d)' % self.gdb_process.pid)
+            self.exit()
+
+        if self.verbose:
             print('Launching gdb: "%s"' % ' '.join(self.cmd))
 
         # Use pipes to the standard streams
@@ -91,6 +110,7 @@ class GdbController():
 
         # string buffers for unifinished gdb output
         self._incomplete_output = {'stdout': None, 'stderr': None}
+        return self.gdb_process.pid
 
     def verify_valid_gdb_subprocess(self):
         """Verify there is a process object, and that it is still running.
@@ -298,6 +318,32 @@ class GdbController():
                     pprint(parsed_response)
 
         return responses
+
+    def send_signal_to_gdb(self, signal_input):
+        """Send signal name (case insensitive) or number to gdb subprocess
+        gdbmi.send_signal_to_gdb(2)  # valid
+        gdbmi.send_signal_to_gdb('sigint')  # also valid
+        gdbmi.send_signal_to_gdb('SIGINT')  # also valid
+
+        raises ValueError if signal_input is invalie
+        raises NoGdbProcessError if there is no gdb process to send a signal to
+        """
+        try:
+            signal = int(signal_input)
+        except Exception:
+            signal = SIGNAL_NAME_TO_NUM.get(signal_input.upper())
+
+        if not signal:
+            raise ValueError('Could not find signal corresponding to "%s"' % str(signal))
+
+        if self.gdb_process:
+            os.kill(self.gdb_process.pid, signal)
+        else:
+            raise NoGdbProcessError('Cannot send signal to gdb process because no process exists.')
+
+    def interrupt_gdb(self):
+        """Send SIGINT (interrupt signal) to the gdb subprocess"""
+        self.send_signal_to_gdb('SIGINT')
 
     def exit(self):
         """Terminate gdb process
