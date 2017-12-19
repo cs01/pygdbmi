@@ -12,13 +12,16 @@ readme_test:
 style_test:
 	flake8 pygdbmi --ignore E501,E127,E128
 
-upload:
-	python setup.py upload
+clean:
+	rm -rf dist build
 
-testupload: test
-	rm -rf dist
+publish: test clean
 	python setup.py sdist bdist_wheel --universal
-	twine upload dist/* -r pypitest
+	twine upload dist/*
+
+testpublish: test clean
+	python setup.py sdist bdist_wheel --universal
+	twine upload dist/* -r testpypi
 
 clean:
 	find . -name '*.pyc' -exec rm -f {} +
