@@ -265,7 +265,7 @@ def _parse_val(stream):
             val = stream.advance_past_string_with_gdb_escapes()
             break
         else:
-            raise ValueError()
+            raise ValueError('unexpected character: %s' % c)
 
     if _DEBUG:
         print_green(val)
