@@ -228,14 +228,14 @@ class GdbController():
         while(True):
             try:
                 self.gdb_process.stdout.flush()
-                raw_output = self.gdb_process.stdout.read()
+                raw_output = self.gdb_process.stdout.readline()
                 responses += self._get_responses_list(raw_output, 'stdout', verbose)
             except IOError:
                 pass
 
             try:
                 self.gdb_process.stderr.flush()
-                raw_output = self.gdb_process.stderr.read()
+                raw_output = self.gdb_process.stderr.readline()
                 responses += self._get_responses_list(raw_output, 'stderr', verbose)
             except IOError:
                 pass
