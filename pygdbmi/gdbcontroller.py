@@ -229,13 +229,20 @@ class GdbController():
             try:
                 self.gdb_process.stdout.flush()
                 raw_output = self.gdb_process.stdout.readline()
+                if PYTHON3:
+                    raw_output = self.gdb_process.stdout.readline().decode('utf-8').replace('\r', '\n').encode('utf-8')
+                else:
+                    raw_output = self.gdb_process.stdout.readline().replace('\r', '\n').encode('utf-8')
                 responses += self._get_responses_list(raw_output, 'stdout', verbose)
             except IOError:
                 pass
 
             try:
                 self.gdb_process.stderr.flush()
-                raw_output = self.gdb_process.stderr.readline()
+                if PYTHON3:
+                    raw_output = self.gdb_process.stderr.readline().decode('utf-8').replace('\r', '\n').encode('utf-8')
+                else:
+                    raw_output = self.gdb_process.stderr.readline().replace('\r', '\n').encode('utf-8')
                 responses += self._get_responses_list(raw_output, 'stderr', verbose)
             except IOError:
                 pass
@@ -303,11 +310,12 @@ class GdbController():
         if not raw_output:
             return responses
 
-        response_list = list(filter(lambda x: x, raw_output.decode().split('\n')))  # remove blank lines
+        response_list = list(filter(lambda x: x, raw_output.decode().replace('\r', '\n').split('\n')))  # remove blank lines
 
         # parse each response from gdb into a dict, and store in a list
         for response in response_list:
             if gdbmiparser.response_is_finished(response):
+                print('done')
                 pass
             else:
                 parsed_response = gdbmiparser.parse_response(response)
@@ -316,7 +324,7 @@ class GdbController():
                 responses.append(parsed_response)
                 if verbose:
                     pprint(parsed_response)
-
+        print(self._incomplete_output[stream])
         return responses
 
     def send_signal_to_gdb(self, signal_input):
