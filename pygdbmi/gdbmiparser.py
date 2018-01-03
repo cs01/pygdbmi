@@ -42,7 +42,7 @@ def parse_response(gdb_mi_text):
                 'token': token}
 
     elif _GDB_MI_RESULT_RE.match(gdb_mi_text):
-        token, message, payload = _get_result_msg_and_paylod(gdb_mi_text, stream)
+        token, message, payload = _get_result_msg_and_payload(gdb_mi_text, stream)
         return {'type': 'result',
                 'message': message,
                 'payload': payload,
@@ -152,13 +152,18 @@ def _get_notify_msg_and_payload(result, stream):
     """Get notify message and payload dict"""
     token = stream.advance_past_chars(['=', '*'])
     token = int(token) if token != '' else None
+    if _DEBUG:
+        print_green('parsing message')
     message = stream.advance_past_chars([','])
+    if _DEBUG:
+        print('parsed message')
+        print_green(message)
 
     payload = _parse_dict(stream)
     return token, message.strip(), payload
 
 
-def _get_result_msg_and_paylod(result, stream):
+def _get_result_msg_and_payload(result, stream):
     """Get result message and payload dict"""
 
     groups = _GDB_MI_RESULT_RE.match(result).groups()
@@ -182,6 +187,8 @@ def _parse_dict(stream):
     """
     obj = {}
 
+    if _DEBUG:
+        print_green('parsing dict')
     while True:
         c = stream.read(1)
         if c in _WHITESPACE:
@@ -212,6 +219,7 @@ def _parse_dict(stream):
                 obj[key] = val
 
     if _DEBUG:
+        print_green('parsed dict')
         print_green(obj)
     return obj
 
@@ -223,10 +231,13 @@ def _parse_key_val(stream):
         Parsed value (either a string, array, or dict)
     """
 
+    if _DEBUG:
+        print_green('parsing key/val')
     key = _parse_key(stream)
     val = _parse_val(stream)
 
     if _DEBUG:
+        print_green('parsed key/val')
         print_green(key)
         print_green(val)
     return key, val
@@ -237,8 +248,11 @@ def _parse_key(stream):
     returns :
         Parsed key (string)
     """
+    if _DEBUG:
+        print_green('parsing key')
     key = stream.advance_past_chars(['='])
     if _DEBUG:
+        print_green('parsed key:')
         print_green(key)
     return key
 
@@ -248,6 +262,9 @@ def _parse_val(stream):
     returns:
         Parsed value (either a string, array, or dict)
     """
+
+    if _DEBUG:
+        print_green('parsing value')
 
     while True:
         c = stream.read(1)
@@ -268,6 +285,7 @@ def _parse_val(stream):
             raise ValueError('unexpected character: %s' % c)
 
     if _DEBUG:
+        print_green('parsed value:')
         print_green(val)
 
     return val
@@ -279,6 +297,8 @@ def _parse_array(stream):
         Parsed array
     """
 
+    if _DEBUG:
+        print_green('parsing array')
     arr = []
     while True:
         c = stream.read(1)
@@ -297,5 +317,6 @@ def _parse_array(stream):
             break
 
     if _DEBUG:
+        print('parsed array:')
         print_green(arr)
     return arr

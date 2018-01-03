@@ -1,7 +1,7 @@
 .. image:: https://travis-ci.org/cs01/pygdbmi.svg?branch=master
   :target: https://travis-ci.org/cs01/pygdbmi
 
-.. image:: https://img.shields.io/badge/pypi-v0.8.0.0-blue.svg
+.. image:: https://img.shields.io/badge/pypi-v0.8.1.0-blue.svg
   :target: https://pypi.python.org/pypi/pygdbmi/
 
 .. image:: https://img.shields.io/badge/python-2.7,3.3,3.4,3.5,3.6,pypy-blue.svg
@@ -33,6 +33,8 @@ Compatibility
 Operating Systems
 ^^^^^^^^^^^^^^^^^
 
+Cross platform support for Linux, macOS and Windows
+
 - Linux/Unix
 
   Ubuntu 14.04 and 16.04 have been tested to work. Other versions likely work as well.
@@ -43,12 +45,12 @@ Operating Systems
 
 - Windows
 
-  Windows 10 under cygwin has been tested to work.
+  Windows 10 has been tested to work with MinGW and cygwin.
 
 gdb versions
 ^^^^^^^^^^^^
 
-- gdb 7.7+ has been tested. Older versions may work as well.
+- gdb 7.6+ has been tested. Older versions may work as well.
 
 Examples
 --------

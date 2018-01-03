@@ -68,13 +68,9 @@ class StringStream:
                 # Get the next char that is being escaped
                 c2 = self.raw_text[self.index]
                 self.index += 1
-                if c2 in chars_to_remove_gdb_escape:
-                    # only store the escaped character in the buffer; don't store the backslash
-                    # (don't leave it escaped)
-                    buf += c2
-                else:
-                    # store the backslash and the following character in the buffer (leave it escaped)
-                    buf += c + c2
+                # only store the escaped character in the buffer; don't store the backslash
+                # (don't leave it escaped)
+                buf += c2
 
             elif c == '"':
                 # Quote is closed. Exit (and don't include the end quote).

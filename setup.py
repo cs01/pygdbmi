@@ -8,7 +8,6 @@ import io
 import os
 import sys
 import re
-from shutil import rmtree
 from setuptools import find_packages, setup, Command
 from codecs import open
 from pygdbmi.tests import test_app

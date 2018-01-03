@@ -228,14 +228,20 @@ class GdbController():
         while(True):
             try:
                 self.gdb_process.stdout.flush()
-                raw_output = self.gdb_process.stdout.read()
+                if PYTHON3:
+                    raw_output = self.gdb_process.stdout.readline().replace(b'\r', b'\n')
+                else:
+                    raw_output = self.gdb_process.stdout.read().replace(b'\r', b'\n')
                 responses += self._get_responses_list(raw_output, 'stdout', verbose)
             except IOError:
                 pass
 
             try:
                 self.gdb_process.stderr.flush()
-                raw_output = self.gdb_process.stderr.read()
+                if PYTHON3:
+                    raw_output = self.gdb_process.stderr.readline().replace(b'\r', b'\n')
+                else:
+                    raw_output = self.gdb_process.stderr.read().replace(b'\r', b'\n')
                 responses += self._get_responses_list(raw_output, 'stderr', verbose)
             except IOError:
                 pass
@@ -269,7 +275,6 @@ class GdbController():
 
                     else:
                         raise ValueError('Developer error. Got unexpected file number %d' % fileno)
-
                     responses_list = self._get_responses_list(raw_output, stream, verbose)
 
                     responses += responses_list
@@ -302,7 +307,6 @@ class GdbController():
 
         if not raw_output:
             return responses
-
         response_list = list(filter(lambda x: x, raw_output.decode().split('\n')))  # remove blank lines
 
         # parse each response from gdb into a dict, and store in a list
@@ -316,7 +320,6 @@ class GdbController():
                 responses.append(parsed_response)
                 if verbose:
                     pprint(parsed_response)
-
         return responses
 
     def send_signal_to_gdb(self, signal_input):
