@@ -87,7 +87,6 @@ class TestPyGdbMi(unittest.TestCase):
             print('Could not find executable "%s". Ensure it is installed and on your $PATH.' % MAKE_CMD)
             exit(1)
 
-
         SAMPLE_C_CODE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sample_c_app')
         binary_path = os.path.join(SAMPLE_C_CODE_DIR, binary_name)
         # Build C program
@@ -124,7 +123,7 @@ class TestPyGdbMi(unittest.TestCase):
         responses = gdbmi.write(['-exec-run', '-exec-continue'], timeout_sec=3)
         found_match = False
         for r in responses:
-            if '  leading spaces should be preserved. So should trailing spaces.  ' in r.get('payload', ''):
+            if r.get('payload', '') == '  leading spaces should be preserved. So should trailing spaces.  ':
                 found_match = True
         assert(found_match is True)
 

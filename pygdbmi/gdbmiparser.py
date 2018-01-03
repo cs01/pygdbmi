@@ -64,7 +64,6 @@ def parse_response(gdb_mi_text):
                 'payload': _GDB_MI_TARGET_OUTPUT_RE.match(gdb_mi_text).groups()[0]}
 
     elif response_is_finished(gdb_mi_text):
-        print('done!!')
         return {'type': 'done',
                 'message': None,
                 'payload': None}
