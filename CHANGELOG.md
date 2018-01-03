@@ -1,5 +1,8 @@
 # pygdbmi release history
 
+## 0.8.1.0
+* Add native Windows support
+
 ## 0.8.0.0
 * Make parsing more efficient when gdb outputs large strings
 * Add new methods to GdbController class: `spawn_new_gdb_subprocess`, `send_signal_to_gdb`, and `interrupt_gdb`
