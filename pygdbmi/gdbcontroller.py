@@ -229,9 +229,9 @@ class GdbController():
             try:
                 self.gdb_process.stdout.flush()
                 if PYTHON3:
-                    raw_output = self.gdb_process.stdout.readline().decode('utf-8').replace('\r', '\n').encode('utf-8')
+                    raw_output = self.gdb_process.stdout.readline().replace(b'\r', b'\n')
                 else:
-                    raw_output = self.gdb_process.stdout.readline().replace('\r', '\n').encode('utf-8')
+                    raw_output = self.gdb_process.stdout.read().replace(b'\r', b'\n')
                 responses += self._get_responses_list(raw_output, 'stdout', verbose)
             except IOError:
                 pass
@@ -239,9 +239,9 @@ class GdbController():
             try:
                 self.gdb_process.stderr.flush()
                 if PYTHON3:
-                    raw_output = self.gdb_process.stderr.readline().decode('utf-8').replace('\r', '\n').encode('utf-8')
+                    raw_output = self.gdb_process.stderr.readline().replace(b'\r', b'\n')
                 else:
-                    raw_output = self.gdb_process.stderr.readline().replace('\r', '\n').encode('utf-8')
+                    raw_output = self.gdb_process.stderr.read().replace(b'\r', b'\n')
                 responses += self._get_responses_list(raw_output, 'stderr', verbose)
             except IOError:
                 pass
