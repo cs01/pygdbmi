@@ -33,6 +33,8 @@ Compatibility
 Operating Systems
 ^^^^^^^^^^^^^^^^^
 
+Cross platform support for Linux, macOS and Windows
+
 - Linux/Unix
 
   Ubuntu 14.04 and 16.04 have been tested to work. Other versions likely work as well.
@@ -43,12 +45,12 @@ Operating Systems
 
 - Windows
 
-  Windows 10 under cygwin has been tested to work.
+  Windows 10 has been tested to work with MinGW and cygwin.
 
 gdb versions
 ^^^^^^^^^^^^
 
-- gdb 7.7+ has been tested. Older versions may work as well.
+- gdb 7.6+ has been tested. Older versions may work as well.
 
 Examples
 --------
