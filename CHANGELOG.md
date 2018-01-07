@@ -1,5 +1,8 @@
 # pygdbmi release history
 
+## 0.8.1.1
+* Discard unexpected text from gdb
+
 ## 0.8.1.0
 * Add native Windows support
 

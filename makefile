@@ -18,7 +18,7 @@ publish: test clean
 
 testpublish: test clean
 	python setup.py sdist bdist_wheel --universal
-	twine upload dist/* -r testpypi
+	twine upload dist/* -r pypitest
 
 clean:
 	find . -name '*.pyc' -exec rm -f {} +
