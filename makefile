@@ -12,9 +12,6 @@ readme_test:
 style_test:
 	flake8 pygdbmi --ignore E501,E127,E128
 
-clean:
-	rm -rf dist build
-
 publish: test clean
 	python setup.py sdist bdist_wheel --universal
 	twine upload dist/*
@@ -27,6 +24,7 @@ clean:
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
+	rm -rf dist build
 	make -C ./pygdbmi/docs clean
 
 docs:

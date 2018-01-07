@@ -80,6 +80,9 @@ class TestPyGdbMi(unittest.TestCase):
         # Test records with token
         assert_match(parse_response('1342^done'), {'type': 'result', 'payload': None, 'message': 'done', "token": 1342})
 
+        # Test extra characters at end of dictionary are discarded (issue #30)
+        assert_match(parse_response('=event,name="gdb"discardme'), {'type': 'notify', 'payload': {'name': 'gdb'}, 'message': 'event', "token": None})
+
     def _get_c_program(self, makefile_target_name, binary_name):
         """build c program and return path to binary"""
         find_executable(MAKE_CMD)
@@ -214,7 +217,7 @@ class TestPyGdbMi(unittest.TestCase):
                         break  # EOF
                     # let the controller try to parse this additional raw gdb output
                     responses += gdbmi._get_responses_list(gdb_mi_simulated_output, stream, False)
-            assert(len(responses) == 139)
+            assert(len(responses) == 141)
 
             # spot check a few
             assert_match(responses[0], {'message': None, 'type': 'console', 'payload': u'0x00007fe2c5c58920 in __nanosleep_nocancel () at ../sysdeps/unix/syscall-template.S:81\\n', 'stream': stream})
@@ -222,8 +225,10 @@ class TestPyGdbMi(unittest.TestCase):
                 # can't get this to pass in windows
                 assert_match(responses[71], {'stream': stream, 'message': u'done', 'type': 'result', 'payload': None, 'token': None})
                 assert_match(responses[82], {'message': None, 'type': 'output', 'payload': u'The inferior program printed this! Can you still parse it?', 'stream': stream})
-            assert_match(responses[-2], {'stream': stream, 'message': u'thread-group-exited', 'type': 'notify', 'payload': {u'exit-code': u'0', u'id': u'i1'}, 'token': None})
-            assert_match(responses[-1], {'stream': stream, 'message': u'thread-group-started', 'type': 'notify', 'payload': {u'pid': u'48337', u'id': u'i1'}, 'token': None})
+            assert_match(responses[137], {'stream': stream, 'message': u'thread-group-exited', 'type': 'notify', 'payload': {u'exit-code': u'0', u'id': u'i1'}, 'token': None})
+            assert_match(responses[138], {'stream': stream, 'message': u'thread-group-started', 'type': 'notify', 'payload': {u'pid': u'48337', u'id': u'i1'}, 'token': None})
+            assert_match(responses[139], {'stream': stream, 'message': u'tsv-created', 'type': 'notify', 'payload': {u'name': 'trace_timestamp', u'initial': '0'}, 'token': None})
+            assert_match(responses[140], {'stream': stream, 'message': u'tsv-created', 'type': 'notify', 'payload': {u'name': 'trace_timestamp', u'initial': '0'}, 'token': None})
 
             for stream in gdbmi._incomplete_output.keys():
                 assert(gdbmi._incomplete_output[stream] is None)

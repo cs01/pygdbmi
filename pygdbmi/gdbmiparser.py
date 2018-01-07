@@ -218,6 +218,20 @@ def _parse_dict(stream):
             else:
                 obj[key] = val
 
+            look_ahead_for_garbage = True
+            c = stream.read(1)
+            while look_ahead_for_garbage:
+                if c in ['}', ',', '']:
+                    look_ahead_for_garbage = False
+                else:
+                    # got some garbage text, skip it. for example:
+                    # name="gdb"gargage  # skip over 'garbage'
+                    # name="gdb"\n  # skip over '\n'
+                    if _DEBUG:
+                        print('skipping unexpected charcter' + c)
+                    c = stream.read(1)
+            stream.seek(-1)
+
     if _DEBUG:
         print_green('parsed dict')
         print_green(obj)
@@ -281,8 +295,11 @@ def _parse_val(stream):
             # Start of a string
             val = stream.advance_past_string_with_gdb_escapes()
             break
-        else:
+        elif _DEBUG:
             raise ValueError('unexpected character: %s' % c)
+        else:
+            print('pygdbmi warning: encountered unexpected character: "%s". Continuing.' % c)
+            val = ''  # this will be overwritten if there are more characters to be read
 
     if _DEBUG:
         print_green('parsed value:')
