@@ -1,7 +1,7 @@
 .. image:: https://travis-ci.org/cs01/pygdbmi.svg?branch=master
   :target: https://travis-ci.org/cs01/pygdbmi
 
-.. image:: https://img.shields.io/badge/pypi-v0.8.1.1-blue.svg
+.. image:: https://img.shields.io/badge/pypi-v0.8.2.0-blue.svg
   :target: https://pypi.python.org/pypi/pygdbmi/
 
 .. image:: https://img.shields.io/badge/python-2.7,3.3,3.4,3.5,3.6,pypy-blue.svg
@@ -128,7 +128,12 @@ a ``-``.
     response = gdbmi.write('run')
     response = gdbmi.write('-exec-next', timeout_sec=0.1)  # the wait time can be modified from the default of 1 second
     response = gdbmi.write('next')
+    response = gdbmi.write('next', raise_error_on_timeout=False)
+    response = gdbmi.write('next', raise_error_on_timeout=True, timeout_sec=0.01)
     response = gdbmi.write('-exec-continue')
+    response = gdbmi.send_signal_to_gdb('SIGKILL')  # name of signal is okay
+    response = gdbmi.send_signal_to_gdb(2)  # value of signal is okay too
+    response = gdbmi.interrupt_gdb()  # sends SIGINT to gdb
     response = gdbmi.write('continue')
     response = gdbmi.exit()
 
