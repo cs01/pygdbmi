@@ -58,6 +58,7 @@ class GdbController():
                     gdb_path='gdb',
                     gdb_args=['--nx', '--quiet', '--interpreter=mi2'],
                     time_to_check_for_additional_output_sec=DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
+                    rr=False,
                     verbose=False):
         self.verbose = verbose
         self.abs_gdb_path = None  # abs path to gdb executable
@@ -66,16 +67,20 @@ class GdbController():
         self.gdb_process = None
         self._allow_overwrite_timeout_times = self.time_to_check_for_additional_output_sec > 0
 
-        if not gdb_path:
-            raise ValueError('a valid path to gdb must be specified')
-        else:
-            abs_gdb_path = find_executable(gdb_path)
-            if abs_gdb_path is None:
-                raise ValueError('gdb executable could not be resolved from "%s"' % gdb_path)
-            else:
-                self.abs_gdb_path = abs_gdb_path
+        if rr:
+            self.cmd = ['rr', 'replay'] + gdb_args
 
-        self.cmd = [self.abs_gdb_path] + gdb_args
+        else:
+            if not gdb_path:
+                raise ValueError('a valid path to gdb must be specified')
+            else:
+                abs_gdb_path = find_executable(gdb_path)
+                if abs_gdb_path is None:
+                    raise ValueError('gdb executable could not be resolved from "%s"' % gdb_path)
+                else:
+                    self.abs_gdb_path = abs_gdb_path
+            self.cmd = [self.abs_gdb_path] + gdb_args
+
         self.spawn_new_gdb_subprocess()
 
     def spawn_new_gdb_subprocess(self):
