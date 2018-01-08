@@ -1,5 +1,8 @@
 # pygdbmi release history
 
+## 0.8.2.0
+* Add support for [record and replay (rr) gdb supplement](http://rr-project.org/)
+
 ## 0.8.1.1
 * Discard unexpected text from gdb
 
