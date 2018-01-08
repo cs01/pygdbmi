@@ -49,6 +49,7 @@ class GdbController():
         gdb_path (str): Command to run in shell to spawn new gdb subprocess
         gdb_args (list): Arguments to pass to shell when spawning new gdb subprocess
         time_to_check_for_additional_output_sec (float): When parsing responses, wait this amout of time before exiting (exits before timeout is reached to save time). If <= 0, full timeout time is used.
+        rr (bool): Use the `rr replay` command instead of `gdb`. See rr-project.org for more info.
         verbose (bool): Print verbose output if True
     Returns:
         New GdbController object
