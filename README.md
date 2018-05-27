@@ -59,12 +59,14 @@ Cross platform support for Linux, macOS and Windows
 
 gdb mi defines a syntax for its output that is suitable for machine readability and scripting: [example output](https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Simple-Examples.html#GDB_002fMI-Simple-Examples):
 
-    -> -break-insert main
-    <- ^done,bkpt={number="1",type="breakpoint",disp="keep",
-        enabled="y",addr="0x08048564",func="main",file="myprog.c",
-        fullname="/home/myprog.c",line="68",thread-groups=["i1"],
-        times="0"}
-    <- (gdb)
+```
+-> -break-insert main
+<- ^done,bkpt={number="1",type="breakpoint",disp="keep",
+enabled="y",addr="0x08048564",func="main",file="myprog.c",
+fullname="/home/myprog.c",line="68",thread-groups=["i1"],
+times="0"}
+<- (gdb)
+```
 
 Use `pygdbmi.gdbmiparser.parse_response` to turn that string output into a JSON serializable dictionary
 
@@ -74,7 +76,7 @@ from pprint import pprint
 response = gdbmiparser.parse_response('^done,bkpt={number="1",type="breakpoint",disp="keep", enabled="y",addr="0x08048564",func="main",file="myprog.c",fullname="/home/myprog.c",line="68",thread-groups=["i1"],times="0"')
 pprint(response)
 > {'message': 'done',
- 'payload': {'bkpt': {'addr': '0x08048564',
+'payload': {'bkpt': {'addr': '0x08048564',
                       'disp': 'keep',
                       'enabled': 'y',
                       'file': 'myprog.c',

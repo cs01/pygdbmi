@@ -10,7 +10,7 @@ readme_test:
 	python setup.py checkdocs
 
 style_test:
-	flake8 pygdbmi --ignore E501,E127,E128
+	black .
 
 publish: test clean
 	python setup.py sdist bdist_wheel --universal

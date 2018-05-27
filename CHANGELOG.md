@@ -1,5 +1,8 @@
 # pygdbmi release history
 
+## 0.8.3.0
+* Improve reading gdb responses on unix (performance, bugfix) (@mouuff)
+
 ## 0.8.2.0
 * Add support for [record and replay (rr) gdb supplement](http://rr-project.org/)
 

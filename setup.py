@@ -47,6 +47,7 @@ setup(
     author_email="grassfedcode@gmail.com",
     description="Parse gdb machine interface output with Python",
     long_description=README,
+    long_description_content_type="text/markdown",
     url="https://github.com/cs01/pygdbmi",
     license="MIT",
     packages=find_packages(exclude=EXCLUDE_FROM_PACKAGES),
