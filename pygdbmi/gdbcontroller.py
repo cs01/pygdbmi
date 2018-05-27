@@ -13,7 +13,7 @@ from distutils.spawn import find_executable
 PYTHON3 = sys.version_info.major == 3
 DEFAULT_GDB_TIMEOUT_SEC = 1
 DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC = 0.2
-USING_WINDOWS = os.name == 'nt'
+USING_WINDOWS = os.name == "nt"
 if USING_WINDOWS:
     import msvcrt
     from ctypes import windll, byref, wintypes, WinError, POINTER
@@ -23,7 +23,7 @@ else:
 
 SIGNAL_NAME_TO_NUM = {}
 for n in dir(signal):
-    if n.startswith('SIG') and '_' not in n:
+    if n.startswith("SIG") and "_" not in n:
         SIGNAL_NAME_TO_NUM[n.upper()] = getattr(signal, n)
 
 unicode = str if PYTHON3 else unicode  # noqa: F821
@@ -40,7 +40,7 @@ class GdbTimeoutError(ValueError):
     pass
 
 
-class GdbController():
+class GdbController:
     """
     Run gdb as a subprocess. Send commands and receive structured output.
     Create new object, along with a gdb subprocess
@@ -55,29 +55,37 @@ class GdbController():
         New GdbController object
     """
 
-    def __init__(self,
-                    gdb_path='gdb',
-                    gdb_args=['--nx', '--quiet', '--interpreter=mi2'],
-                    time_to_check_for_additional_output_sec=DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
-                    rr=False,
-                    verbose=False):
+    def __init__(
+        self,
+        gdb_path="gdb",
+        gdb_args=["--nx", "--quiet", "--interpreter=mi2"],
+        time_to_check_for_additional_output_sec=DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
+        rr=False,
+        verbose=False,
+    ):
         self.verbose = verbose
         self.abs_gdb_path = None  # abs path to gdb executable
         self.cmd = []  # the shell command to run gdb
-        self.time_to_check_for_additional_output_sec = time_to_check_for_additional_output_sec
+        self.time_to_check_for_additional_output_sec = (
+            time_to_check_for_additional_output_sec
+        )
         self.gdb_process = None
-        self._allow_overwrite_timeout_times = self.time_to_check_for_additional_output_sec > 0
+        self._allow_overwrite_timeout_times = (
+            self.time_to_check_for_additional_output_sec > 0
+        )
 
         if rr:
-            self.cmd = ['rr', 'replay'] + gdb_args
+            self.cmd = ["rr", "replay"] + gdb_args
 
         else:
             if not gdb_path:
-                raise ValueError('a valid path to gdb must be specified')
+                raise ValueError("a valid path to gdb must be specified")
             else:
                 abs_gdb_path = find_executable(gdb_path)
                 if abs_gdb_path is None:
-                    raise ValueError('gdb executable could not be resolved from "%s"' % gdb_path)
+                    raise ValueError(
+                        'gdb executable could not be resolved from "%s"' % gdb_path
+                    )
                 else:
                     self.abs_gdb_path = abs_gdb_path
             self.cmd = [self.abs_gdb_path] + gdb_args
@@ -92,16 +100,22 @@ class GdbController():
         """
         if self.gdb_process:
             if self.verbose:
-                print('Killing current gdb subprocess (pid %d)' % self.gdb_process.pid)
+                print("Killing current gdb subprocess (pid %d)" % self.gdb_process.pid)
             self.exit()
 
         if self.verbose:
-            print('Launching gdb: "%s"' % ' '.join(self.cmd))
+            print('Launching gdb: "%s"' % " ".join(self.cmd))
 
         # Use pipes to the standard streams
         # In UNIX a newline will typically only flush the buffer if stdout is a terminal.
         # If the output is being redirected to a file, a newline won't flush
-        self.gdb_process = subprocess.Popen(self.cmd, shell=False, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.gdb_process = subprocess.Popen(
+            self.cmd,
+            shell=False,
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
 
         _make_non_blocking(self.gdb_process.stdout)
         _make_non_blocking(self.gdb_process.stderr)
@@ -115,22 +129,28 @@ class GdbController():
         self.write_list = [self.stdin_fileno]
 
         # string buffers for unifinished gdb output
-        self._incomplete_output = {'stdout': None, 'stderr': None}
+        self._incomplete_output = {"stdout": None, "stderr": None}
         return self.gdb_process.pid
 
     def verify_valid_gdb_subprocess(self):
         """Verify there is a process object, and that it is still running.
         Raise NoGdbProcessError if either of the above are not true."""
         if not self.gdb_process:
-            raise NoGdbProcessError('gdb process is not attached')
+            raise NoGdbProcessError("gdb process is not attached")
         elif self.gdb_process.poll() is not None:
-            raise NoGdbProcessError('gdb process has already finished with return code: %s' % str(self.gdb_process.poll()))
+            raise NoGdbProcessError(
+                "gdb process has already finished with return code: %s"
+                % str(self.gdb_process.poll())
+            )
 
-    def write(self, mi_cmd_to_write,
-            timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
-            verbose=False,
-            raise_error_on_timeout=True,
-            read_response=True):
+    def write(
+        self,
+        mi_cmd_to_write,
+        timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
+        verbose=False,
+        raise_error_on_timeout=True,
+        read_response=True,
+    ):
         """Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
 
         Args:
@@ -148,7 +168,7 @@ class GdbController():
         """
         self.verify_valid_gdb_subprocess()
         if timeout_sec < 0:
-            print('warning: timeout_sec was negative, replacing with 0')
+            print("warning: timeout_sec was negative, replacing with 0")
             timeout_sec = 0
 
         verbose = self.verbose or verbose
@@ -157,15 +177,18 @@ class GdbController():
         if type(mi_cmd_to_write) in [str, unicode]:
             pass
         elif type(mi_cmd_to_write) == list:
-            mi_cmd_to_write = '\n'.join(mi_cmd_to_write)
+            mi_cmd_to_write = "\n".join(mi_cmd_to_write)
         else:
-            raise TypeError('The gdb mi command must a be str or list. Got ' + str(type(mi_cmd_to_write)))
+            raise TypeError(
+                "The gdb mi command must a be str or list. Got "
+                + str(type(mi_cmd_to_write))
+            )
 
         if verbose:
-            print('\nwriting: %s' % mi_cmd_to_write)
+            print("\nwriting: %s" % mi_cmd_to_write)
 
-        if not mi_cmd_to_write.endswith('\n'):
-            mi_cmd_to_write_nl = mi_cmd_to_write + '\n'
+        if not mi_cmd_to_write.endswith("\n"):
+            mi_cmd_to_write_nl = mi_cmd_to_write + "\n"
         else:
             mi_cmd_to_write_nl = mi_cmd_to_write
 
@@ -183,14 +206,23 @@ class GdbController():
                 # to evaluate, and we won't get a response
                 self.gdb_process.stdin.flush()
             else:
-                print('developer error: got unexpected fileno %d, event %d' % fileno)
+                print("developer error: got unexpected fileno %d, event %d" % fileno)
 
         if read_response is True:
-            return self.get_gdb_response(timeout_sec=timeout_sec, raise_error_on_timeout=raise_error_on_timeout, verbose=verbose)
+            return self.get_gdb_response(
+                timeout_sec=timeout_sec,
+                raise_error_on_timeout=raise_error_on_timeout,
+                verbose=verbose,
+            )
         else:
             return []
 
-    def get_gdb_response(self, timeout_sec=DEFAULT_GDB_TIMEOUT_SEC, raise_error_on_timeout=True, verbose=False):
+    def get_gdb_response(
+        self,
+        timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
+        raise_error_on_timeout=True,
+        verbose=False,
+    ):
         """Get response from GDB, and block while doing so. If GDB does not have any response ready to be read
         by timeout_sec, an exception is raised.
 
@@ -212,7 +244,7 @@ class GdbController():
 
         self.verify_valid_gdb_subprocess()
         if timeout_sec < 0:
-            print('warning: timeout_sec was negative, replacing with 0')
+            print("warning: timeout_sec was negative, replacing with 0")
             timeout_sec = 0
 
         verbose = self.verbose or verbose
@@ -223,7 +255,9 @@ class GdbController():
             retval = self._get_responses_unix(timeout_sec, verbose)
 
         if not retval and raise_error_on_timeout:
-            raise GdbTimeoutError('Did not get response from gdb after %s seconds' % timeout_sec)
+            raise GdbTimeoutError(
+                "Did not get response from gdb after %s seconds" % timeout_sec
+            )
         else:
             return retval
 
@@ -231,24 +265,28 @@ class GdbController():
         """Get responses on windows. Assume no support for select and use a while loop."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
-        while(True):
+        while True:
             try:
                 self.gdb_process.stdout.flush()
                 if PYTHON3:
-                    raw_output = self.gdb_process.stdout.readline().replace(b'\r', b'\n')
+                    raw_output = self.gdb_process.stdout.readline().replace(
+                        b"\r", b"\n"
+                    )
                 else:
-                    raw_output = self.gdb_process.stdout.read().replace(b'\r', b'\n')
-                responses += self._get_responses_list(raw_output, 'stdout', verbose)
+                    raw_output = self.gdb_process.stdout.read().replace(b"\r", b"\n")
+                responses += self._get_responses_list(raw_output, "stdout", verbose)
             except IOError:
                 pass
 
             try:
                 self.gdb_process.stderr.flush()
                 if PYTHON3:
-                    raw_output = self.gdb_process.stderr.readline().replace(b'\r', b'\n')
+                    raw_output = self.gdb_process.stderr.readline().replace(
+                        b"\r", b"\n"
+                    )
                 else:
-                    raw_output = self.gdb_process.stderr.read().replace(b'\r', b'\n')
-                responses += self._get_responses_list(raw_output, 'stderr', verbose)
+                    raw_output = self.gdb_process.stderr.read().replace(b"\r", b"\n")
+                responses += self._get_responses_list(raw_output, "stderr", verbose)
             except IOError:
                 pass
 
@@ -260,7 +298,7 @@ class GdbController():
         """Get responses on unix-like system. Use select to wait for output."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
-        while(True):
+        while True:
             select_timeout = timeout_time_sec - time.time()
             # I prefer to not pass a negative value to select
             if select_timeout <= 0:
@@ -273,16 +311,20 @@ class GdbController():
                     if fileno == self.stdout_fileno:
                         self.gdb_process.stdout.flush()
                         raw_output = self.gdb_process.stdout.read()
-                        stream = 'stdout'
+                        stream = "stdout"
 
                     elif fileno == self.stderr_fileno:
                         self.gdb_process.stderr.flush()
                         raw_output = self.gdb_process.stderr.read()
-                        stream = 'stderr'
+                        stream = "stderr"
 
                     else:
-                        raise ValueError('Developer error. Got unexpected file number %d' % fileno)
-                    responses_list = self._get_responses_list(raw_output, stream, verbose)
+                        raise ValueError(
+                            "Developer error. Got unexpected file number %d" % fileno
+                        )
+                    responses_list = self._get_responses_list(
+                        raw_output, stream, verbose
+                    )
                     responses += responses_list
 
             except IOError:  # only occurs in python 2.7
@@ -293,7 +335,10 @@ class GdbController():
 
             elif responses_list and self._allow_overwrite_timeout_times:
                 # update timeout time to potentially be closer to now to avoid lengthy wait times when nothing is being output by gdb
-                timeout_time_sec = min(time.time() + self.time_to_check_for_additional_output_sec, timeout_time_sec)
+                timeout_time_sec = min(
+                    time.time() + self.time_to_check_for_additional_output_sec,
+                    timeout_time_sec,
+                )
 
             elif time.time() > timeout_time_sec:
                 break
@@ -309,11 +354,15 @@ class GdbController():
         """
         responses = []
 
-        raw_output, self._incomplete_output[stream] = _buffer_incomplete_responses(raw_output, self._incomplete_output.get(stream))
+        raw_output, self._incomplete_output[stream] = _buffer_incomplete_responses(
+            raw_output, self._incomplete_output.get(stream)
+        )
 
         if not raw_output:
             return responses
-        response_list = list(filter(lambda x: x, raw_output.decode().split('\n')))  # remove blank lines
+        response_list = list(
+            filter(lambda x: x, raw_output.decode().split("\n"))
+        )  # remove blank lines
 
         # parse each response from gdb into a dict, and store in a list
         for response in response_list:
@@ -321,7 +370,7 @@ class GdbController():
                 pass
             else:
                 parsed_response = gdbmiparser.parse_response(response)
-                parsed_response['stream'] = stream
+                parsed_response["stream"] = stream
 
                 responses.append(parsed_response)
                 if verbose:
@@ -343,16 +392,20 @@ class GdbController():
             signal = SIGNAL_NAME_TO_NUM.get(signal_input.upper())
 
         if not signal:
-            raise ValueError('Could not find signal corresponding to "%s"' % str(signal))
+            raise ValueError(
+                'Could not find signal corresponding to "%s"' % str(signal)
+            )
 
         if self.gdb_process:
             os.kill(self.gdb_process.pid, signal)
         else:
-            raise NoGdbProcessError('Cannot send signal to gdb process because no process exists.')
+            raise NoGdbProcessError(
+                "Cannot send signal to gdb process because no process exists."
+            )
 
     def interrupt_gdb(self):
         """Send SIGINT (interrupt signal) to the gdb subprocess"""
-        self.send_signal_to_gdb('SIGINT')
+        self.send_signal_to_gdb("SIGINT")
 
     def exit(self):
         """Terminate gdb process
@@ -382,18 +435,18 @@ def _buffer_incomplete_responses(raw_output, buf):
     if raw_output:
         if buf:
             # concatenate buffer and new output
-            raw_output = b''.join([buf, raw_output])
+            raw_output = b"".join([buf, raw_output])
             buf = None
 
-        if b'\n' not in raw_output:
+        if b"\n" not in raw_output:
             # newline was not found, so assume output is incomplete and store in buffer
             buf = raw_output
             raw_output = None
 
-        elif not raw_output.endswith(b'\n'):
+        elif not raw_output.endswith(b"\n"):
             # raw output doesn't end in a newline, so store everything after the last newline (if anything)
             # in the buffer, and parse everything before it
-            remainder_offset = raw_output.rindex(b'\n') + 1
+            remainder_offset = raw_output.rindex(b"\n") + 1
             buf = raw_output[remainder_offset:]
             raw_output = raw_output[:remainder_offset]
 

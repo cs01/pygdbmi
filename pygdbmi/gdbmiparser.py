@@ -36,44 +36,50 @@ def parse_response(gdb_mi_text):
 
     if _GDB_MI_NOTIFY_RE.match(gdb_mi_text):
         token, message, payload = _get_notify_msg_and_payload(gdb_mi_text, stream)
-        return {'type': 'notify',
-                'message': message,
-                'payload': payload,
-                'token': token}
+        return {
+            "type": "notify",
+            "message": message,
+            "payload": payload,
+            "token": token,
+        }
 
     elif _GDB_MI_RESULT_RE.match(gdb_mi_text):
         token, message, payload = _get_result_msg_and_payload(gdb_mi_text, stream)
-        return {'type': 'result',
-                'message': message,
-                'payload': payload,
-                'token': token}
+        return {
+            "type": "result",
+            "message": message,
+            "payload": payload,
+            "token": token,
+        }
 
     elif _GDB_MI_CONSOLE_RE.match(gdb_mi_text):
-        return {'type': 'console',
-                'message': None,
-                'payload': _GDB_MI_CONSOLE_RE.match(gdb_mi_text).groups()[0]}
+        return {
+            "type": "console",
+            "message": None,
+            "payload": _GDB_MI_CONSOLE_RE.match(gdb_mi_text).groups()[0],
+        }
 
     elif _GDB_MI_LOG_RE.match(gdb_mi_text):
-        return {'type': 'log',
-                'message': None,
-                'payload': _GDB_MI_LOG_RE.match(gdb_mi_text).groups()[0]}
+        return {
+            "type": "log",
+            "message": None,
+            "payload": _GDB_MI_LOG_RE.match(gdb_mi_text).groups()[0],
+        }
 
     elif _GDB_MI_TARGET_OUTPUT_RE.match(gdb_mi_text):
-        return {'type': 'target',
-                'message': None,
-                'payload': _GDB_MI_TARGET_OUTPUT_RE.match(gdb_mi_text).groups()[0]}
+        return {
+            "type": "target",
+            "message": None,
+            "payload": _GDB_MI_TARGET_OUTPUT_RE.match(gdb_mi_text).groups()[0],
+        }
 
     elif response_is_finished(gdb_mi_text):
-        return {'type': 'done',
-                'message': None,
-                'payload': None}
+        return {"type": "done", "message": None, "payload": None}
 
     else:
         # This was not gdb mi output, so it must have just been printed by
         # the inferior program that's being debugged
-        return {'type': 'output',
-                'message': None,
-                'payload': gdb_mi_text}
+        return {"type": "output", "message": None, "payload": gdb_mi_text}
 
 
 def response_is_finished(gdb_mi_text):
@@ -90,10 +96,10 @@ def assert_match(actual_char_or_str, expected_char_or_str):
     continue
     Raises: ValueError if argumetns do not match"""
     if expected_char_or_str != actual_char_or_str:
-        print('Expected')
+        print("Expected")
         pprint(expected_char_or_str)
-        print('')
-        print('Got')
+        print("")
+        print("Got")
         pprint(actual_char_or_str)
         raise ValueError()
 
@@ -110,14 +116,14 @@ def assert_match(actual_char_or_str, expected_char_or_str):
 # In addition to a number of out-of-band notifications,
 # the response to a gdb/mi command includes one of the following result indications:
 # done, running, connected, error, exit
-_GDB_MI_RESULT_RE = re.compile('^(\d*)\^(\S+?)(,(.*))?$')
+_GDB_MI_RESULT_RE = re.compile("^(\d*)\^(\S+?)(,(.*))?$")
 
 # https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Async-Records.html#GDB_002fMI-Async-Records
 # Async records are used to notify the gdb/mi client of additional
 # changes that have occurred. Those changes can either be a consequence
 # of gdb/mi commands (e.g., a breakpoint modified) or a result of target activity
 # (e.g., target stopped).
-_GDB_MI_NOTIFY_RE = re.compile('^(\d*)[*=](\S+?),(.*)$')
+_GDB_MI_NOTIFY_RE = re.compile("^(\d*)[*=](\S+?),(.*)$")
 
 # https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
 # "~" string-output
@@ -138,25 +144,29 @@ _GDB_MI_LOG_RE = re.compile('&"(.*)"', re.DOTALL)
 _GDB_MI_TARGET_OUTPUT_RE = re.compile('@"(.*)"', re.DOTALL)
 
 # Response finished
-_GDB_MI_RESPONSE_FINISHED_RE = re.compile('^\(gdb\)\s*$')
+_GDB_MI_RESPONSE_FINISHED_RE = re.compile("^\(gdb\)\s*$")
 
-_WHITESPACE = [' ', '\t', '\r', '\n']
+_WHITESPACE = [" ", "\t", "\r", "\n"]
 
-_GDB_MI_CHAR_DICT_START = '{'
-_GDB_MI_CHAR_ARRAY_START = '['
+_GDB_MI_CHAR_DICT_START = "{"
+_GDB_MI_CHAR_ARRAY_START = "["
 _GDB_MI_CHAR_STRING_START = '"'
-_GDB_MI_VALUE_START_CHARS = [_GDB_MI_CHAR_DICT_START, _GDB_MI_CHAR_ARRAY_START, _GDB_MI_CHAR_STRING_START]
+_GDB_MI_VALUE_START_CHARS = [
+    _GDB_MI_CHAR_DICT_START,
+    _GDB_MI_CHAR_ARRAY_START,
+    _GDB_MI_CHAR_STRING_START,
+]
 
 
 def _get_notify_msg_and_payload(result, stream):
     """Get notify message and payload dict"""
-    token = stream.advance_past_chars(['=', '*'])
-    token = int(token) if token != '' else None
+    token = stream.advance_past_chars(["=", "*"])
+    token = int(token) if token != "" else None
     if _DEBUG:
-        print_green('parsing message')
-    message = stream.advance_past_chars([','])
+        print_green("parsing message")
+    message = stream.advance_past_chars([","])
     if _DEBUG:
-        print('parsed message')
+        print("parsed message")
         print_green(message)
 
     payload = _parse_dict(stream)
@@ -167,13 +177,13 @@ def _get_result_msg_and_payload(result, stream):
     """Get result message and payload dict"""
 
     groups = _GDB_MI_RESULT_RE.match(result).groups()
-    token = int(groups[0]) if groups[0] != '' else None
+    token = int(groups[0]) if groups[0] != "" else None
     message = groups[1]
 
     if groups[2] is None:
         payload = None
     else:
-        stream.advance_past_chars([','])
+        stream.advance_past_chars([","])
         payload = _parse_dict(stream)
 
     return token, message, payload
@@ -188,14 +198,14 @@ def _parse_dict(stream):
     obj = {}
 
     if _DEBUG:
-        print_green('parsing dict')
+        print_green("parsing dict")
     while True:
         c = stream.read(1)
         if c in _WHITESPACE:
             pass
-        elif c in ['{', ',']:
+        elif c in ["{", ","]:
             pass
-        elif c in ['}', '']:
+        elif c in ["}", ""]:
             # end of object, exit loop
             break
         else:
@@ -221,19 +231,19 @@ def _parse_dict(stream):
             look_ahead_for_garbage = True
             c = stream.read(1)
             while look_ahead_for_garbage:
-                if c in ['}', ',', '']:
+                if c in ["}", ",", ""]:
                     look_ahead_for_garbage = False
                 else:
                     # got some garbage text, skip it. for example:
                     # name="gdb"gargage  # skip over 'garbage'
                     # name="gdb"\n  # skip over '\n'
                     if _DEBUG:
-                        print('skipping unexpected charcter' + c)
+                        print("skipping unexpected charcter" + c)
                     c = stream.read(1)
             stream.seek(-1)
 
     if _DEBUG:
-        print_green('parsed dict')
+        print_green("parsed dict")
         print_green(obj)
     return obj
 
@@ -246,12 +256,12 @@ def _parse_key_val(stream):
     """
 
     if _DEBUG:
-        print_green('parsing key/val')
+        print_green("parsing key/val")
     key = _parse_key(stream)
     val = _parse_val(stream)
 
     if _DEBUG:
-        print_green('parsed key/val')
+        print_green("parsed key/val")
         print_green(key)
         print_green(val)
     return key, val
@@ -263,10 +273,10 @@ def _parse_key(stream):
         Parsed key (string)
     """
     if _DEBUG:
-        print_green('parsing key')
-    key = stream.advance_past_chars(['='])
+        print_green("parsing key")
+    key = stream.advance_past_chars(["="])
     if _DEBUG:
-        print_green('parsed key:')
+        print_green("parsed key:")
         print_green(key)
     return key
 
@@ -278,16 +288,16 @@ def _parse_val(stream):
     """
 
     if _DEBUG:
-        print_green('parsing value')
+        print_green("parsing value")
 
     while True:
         c = stream.read(1)
 
-        if c == '{':
+        if c == "{":
             # Start object
             val = _parse_dict(stream)
             break
-        elif c == '[':
+        elif c == "[":
             # Start of an array
             val = _parse_array(stream)
             break
@@ -296,13 +306,16 @@ def _parse_val(stream):
             val = stream.advance_past_string_with_gdb_escapes()
             break
         elif _DEBUG:
-            raise ValueError('unexpected character: %s' % c)
+            raise ValueError("unexpected character: %s" % c)
         else:
-            print('pygdbmi warning: encountered unexpected character: "%s". Continuing.' % c)
-            val = ''  # this will be overwritten if there are more characters to be read
+            print(
+                'pygdbmi warning: encountered unexpected character: "%s". Continuing.'
+                % c
+            )
+            val = ""  # this will be overwritten if there are more characters to be read
 
     if _DEBUG:
-        print_green('parsed value:')
+        print_green("parsed value:")
         print_green(val)
 
     return val
@@ -315,7 +328,7 @@ def _parse_array(stream):
     """
 
     if _DEBUG:
-        print_green('parsing array')
+        print_green("parsing array")
     arr = []
     while True:
         c = stream.read(1)
@@ -326,14 +339,14 @@ def _parse_array(stream):
             arr.append(val)
         elif c in _WHITESPACE:
             pass
-        elif c == ',':
+        elif c == ",":
             pass
-        elif c == ']':
+        elif c == "]":
             # Stop when this array has finished. Note
             # that elements of this array can be also be arrays.
             break
 
     if _DEBUG:
-        print('parsed array:')
+        print("parsed array:")
         print_green(arr)
     return arr

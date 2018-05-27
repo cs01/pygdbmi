@@ -22,9 +22,9 @@ class StringStream:
         """
         new_index = self.index + count
         if new_index > self.len:
-            buf = self.raw_text[self.index:]  # return to the end, don't fail
+            buf = self.raw_text[self.index :]  # return to the end, don't fail
         else:
-            buf = self.raw_text[self.index:new_index]
+            buf = self.raw_text[self.index : new_index]
         self.index = new_index
 
         return buf
@@ -47,21 +47,21 @@ class StringStream:
                 break
             elif self.index == self.len:
                 break
-        return self.raw_text[start_index:self.index - 1]
+        return self.raw_text[start_index : self.index - 1]
 
     def advance_past_string_with_gdb_escapes(self, chars_to_remove_gdb_escape=['"']):
         """characters that gdb escapes that should not be
         escaped by this parser
         """
 
-        buf = ''
+        buf = ""
         while True:
             c = self.raw_text[self.index]
             self.index += 1
             if self.debug:
                 print_cyan(c)
 
-            if c == '\\':
+            if c == "\\":
                 # We are on a backslash and there is another character after the backslash
                 # to parse. Handle this case specially since gdb escaped it for us
 
