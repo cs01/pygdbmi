@@ -14,7 +14,7 @@ from pygdbmi.tests import test_app
 
 EXCLUDE_FROM_PACKAGES = []
 CURDIR = os.path.abspath(os.path.dirname(__file__))
-README = io.open("README.rst", "r", encoding="utf-8").read()
+README = io.open("README.md", "r", encoding="utf-8").read()
 
 with open("pygdbmi/__init__.py", "r") as fd:
     version = re.search(
