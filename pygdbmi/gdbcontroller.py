@@ -258,13 +258,14 @@ class GdbController():
 
     def _get_responses_unix(self, timeout_sec, verbose):
         """Get responses on unix-like system. Use select to wait for output."""
-        events, _, _ = select.select(self.read_list, [], [], timeout_sec)
-
-        # timeout_sec can be zero, in which case we won't waste the CPU cycles retrieving and computing a timeout time
-        if timeout_sec != 0:
-            timeout_time_sec = time.time() + timeout_sec
+        timeout_time_sec = time.time() + timeout_sec
         responses = []
         while(True):
+            select_timeout = timeout_time_sec - time.time()
+            # I prefer to not pass a negative value to select
+            if select_timeout <= 0:
+                select_timeout = 0
+            events, _, _ = select.select(self.read_list, [], [], select_timeout)
             responses_list = None  # to avoid infinite loop if using Python 2
             try:
                 for fileno in events:
@@ -282,7 +283,6 @@ class GdbController():
                     else:
                         raise ValueError('Developer error. Got unexpected file number %d' % fileno)
                     responses_list = self._get_responses_list(raw_output, stream, verbose)
-
                     responses += responses_list
 
             except IOError:  # only occurs in python 2.7
