@@ -16,7 +16,7 @@ pygdbmi - Get Structured Output from GDB's Machine Interface
 <a href="https://github.com/ambv/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black" /></a>
 </p>
 
-## [API Documentation](http://grassfedcode.com/pygdbmi/)
+Python (**py**) [**gdb**](https://www.gnu.org/software/gdb/) machine interface [(**mi**)](https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html)
 
 ## What's in the box?
 
@@ -32,6 +32,10 @@ gdb --interpreter=mi2
 ## Installation
 
     pip install pygdbmi
+
+## Documentation
+
+[API Documentation](http://grassfedcode.com/pygdbmi/)
 
 ## Compatibility
 
