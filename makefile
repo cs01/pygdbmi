@@ -1,16 +1,10 @@
 # run pip install -r dev_requirements.txt before running make test
 .PHONY: test upload clean
 
-test: functional_test style_test readme_test
+test: functional_test
 
 functional_test:
 	python setup.py test
-
-readme_test:
-	python setup.py checkdocs
-
-style_test:
-	black .
 
 publish: test clean
 	python setup.py sdist bdist_wheel --universal
@@ -21,10 +15,10 @@ testpublish: test clean
 	twine upload dist/* -r pypitest
 
 clean:
+	rm -rf dist build *.egg-info
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
-	rm -rf dist build
 	make -C ./pygdbmi/docs clean
 
 docs:
