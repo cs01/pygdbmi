@@ -22,24 +22,6 @@ with open("pygdbmi/__init__.py", "r") as fd:
     ).group(1)
 
 
-class TestCommand(Command):
-    description = "test task"
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        num_failures = tests.test_pygdbmi.main()
-        if num_failures == 0:
-            sys.exit(0)
-        else:
-            sys.exit(1)
-
-
 setup(
     name="pygdbmi",
     version=version,
@@ -57,7 +39,6 @@ setup(
     entry_points={},
     extras_require={},
     zip_safe=False,
-    cmdclass={"test": TestCommand},
     classifiers=[
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",

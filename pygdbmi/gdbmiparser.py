@@ -87,6 +87,7 @@ def response_is_finished(gdb_mi_text):
     Returns: True if gdb response is finished"""
     if _GDB_MI_RESPONSE_FINISHED_RE.match(gdb_mi_text):
         return True
+
     else:
         return False
 
@@ -208,6 +209,7 @@ def _parse_dict(stream):
         elif c in ["}", ""]:
             # end of object, exit loop
             break
+
         else:
             stream.seek(-1)
             key, val = _parse_key_val(stream)
@@ -297,16 +299,20 @@ def _parse_val(stream):
             # Start object
             val = _parse_dict(stream)
             break
+
         elif c == "[":
             # Start of an array
             val = _parse_array(stream)
             break
+
         elif c == '"':
             # Start of a string
             val = stream.advance_past_string_with_gdb_escapes()
             break
+
         elif _DEBUG:
             raise ValueError("unexpected character: %s" % c)
+
         else:
             print(
                 'pygdbmi warning: encountered unexpected character: "%s". Continuing.'
