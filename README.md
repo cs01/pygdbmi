@@ -18,6 +18,10 @@ pygdbmi - Get Structured Output from GDB's Machine Interface
 
 Python (**py**) [**gdb**](https://www.gnu.org/software/gdb/) machine interface [(**mi**)](https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html)
 
+> GDB/MI is a line based machine oriented text interface to GDB and is activated by specifying using the --interpreter command line option (see Mode Options). It is specifically intended to support the development of systems which use the debugger as just one small component of a larger system.
+
+[>> read more](https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html)
+
 ## What's in the box?
 
 1.  A function to parse gdb machine interface string output and return structured data types (Python dicts) that are JSON serializable. Useful for writing the backend to a gdb frontend. For example, [gdbgui](https://github.com/cs01/gdbgui) uses pygdbmi on the backend.

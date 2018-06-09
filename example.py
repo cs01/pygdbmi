@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+
+"""
+Run with `python -m example`
+"""
 import subprocess
 import os
 import sys

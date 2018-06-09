@@ -10,7 +10,7 @@ import sys
 import re
 from setuptools import find_packages, setup, Command
 from codecs import open
-from pygdbmi.tests import test_app
+import tests
 
 EXCLUDE_FROM_PACKAGES = []
 CURDIR = os.path.abspath(os.path.dirname(__file__))
@@ -33,7 +33,7 @@ class TestCommand(Command):
         pass
 
     def run(self):
-        num_failures = test_app.main()
+        num_failures = tests.test_pygdbmi.main()
         if num_failures == 0:
             sys.exit(0)
         else:
