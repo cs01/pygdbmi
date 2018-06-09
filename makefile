@@ -4,7 +4,7 @@
 test: functional_test
 
 functional_test:
-	python setup.py test
+	python -m tests.test_pygdbmi
 
 publish: test clean
 	python setup.py sdist bdist_wheel --universal

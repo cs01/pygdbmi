@@ -3,3 +3,8 @@ a.out
 _build
 build
 dist
+.DS_Store
+__pycache__
+*egg*
+__pycache__
+*.dSYM

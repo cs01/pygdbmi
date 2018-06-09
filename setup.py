@@ -10,7 +10,7 @@ import sys
 import re
 from setuptools import find_packages, setup, Command
 from codecs import open
-from pygdbmi.tests import test_app
+import tests
 
 EXCLUDE_FROM_PACKAGES = []
 CURDIR = os.path.abspath(os.path.dirname(__file__))
@@ -20,24 +20,6 @@ with open("pygdbmi/__init__.py", "r") as fd:
     version = re.search(
         r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE
     ).group(1)
-
-
-class TestCommand(Command):
-    description = "test task"
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        num_failures = test_app.main()
-        if num_failures == 0:
-            sys.exit(0)
-        else:
-            sys.exit(1)
 
 
 setup(
@@ -57,7 +39,6 @@ setup(
     entry_points={},
     extras_require={},
     zip_safe=False,
-    cmdclass={"test": TestCommand},
     classifiers=[
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",

@@ -45,8 +45,10 @@ class StringStream:
             self.index += 1
             if current_char in chars:
                 break
+
             elif self.index == self.len:
                 break
+
         return self.raw_text[start_index : self.index - 1]
 
     def advance_past_string_with_gdb_escapes(self, chars_to_remove_gdb_escape=['"']):

@@ -32,11 +32,13 @@ unicode = str if PYTHON3 else unicode  # noqa: F821
 class NoGdbProcessError(ValueError):
     """Raise when trying to interact with gdb subprocess, but it does not exist.
     It may have been killed and removed, or failed to initialize for some reason."""
+
     pass
 
 
 class GdbTimeoutError(ValueError):
     """Raised when no response is recieved from gdb after the timeout has been triggered"""
+
     pass
 
 
@@ -80,12 +82,14 @@ class GdbController:
         else:
             if not gdb_path:
                 raise ValueError("a valid path to gdb must be specified")
+
             else:
                 abs_gdb_path = find_executable(gdb_path)
                 if abs_gdb_path is None:
                     raise ValueError(
                         'gdb executable could not be resolved from "%s"' % gdb_path
                     )
+
                 else:
                     self.abs_gdb_path = abs_gdb_path
             self.cmd = [self.abs_gdb_path] + gdb_args
@@ -137,6 +141,7 @@ class GdbController:
         Raise NoGdbProcessError if either of the above are not true."""
         if not self.gdb_process:
             raise NoGdbProcessError("gdb process is not attached")
+
         elif self.gdb_process.poll() is not None:
             raise NoGdbProcessError(
                 "gdb process has already finished with return code: %s"
@@ -214,6 +219,7 @@ class GdbController:
                 raise_error_on_timeout=raise_error_on_timeout,
                 verbose=verbose,
             )
+
         else:
             return []
 
@@ -258,6 +264,7 @@ class GdbController:
             raise GdbTimeoutError(
                 "Did not get response from gdb after %s seconds" % timeout_sec
             )
+
         else:
             return retval
 
@@ -292,6 +299,7 @@ class GdbController:
 
             if time.time() > timeout_time_sec:
                 break
+
         return responses
 
     def _get_responses_unix(self, timeout_sec, verbose):
@@ -322,6 +330,7 @@ class GdbController:
                         raise ValueError(
                             "Developer error. Got unexpected file number %d" % fileno
                         )
+
                     responses_list = self._get_responses_list(
                         raw_output, stream, verbose
                     )
@@ -360,6 +369,7 @@ class GdbController:
 
         if not raw_output:
             return responses
+
         response_list = list(
             filter(lambda x: x, raw_output.decode().split("\n"))
         )  # remove blank lines
