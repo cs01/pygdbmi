@@ -1,8 +1,9 @@
 """GdbController class to programatically run gdb and get structured output"""
 
 from distutils.spawn import find_executable
+import logging
 import os
-from pprint import pprint
+from pprint import pprint, pformat
 from pygdbmi import gdbmiparser
 import signal
 import select
@@ -103,6 +104,15 @@ class GdbController:
                     self.abs_gdb_path = abs_gdb_path
             self.cmd = [self.abs_gdb_path] + gdb_args
 
+        self.logger = logging.getLogger(str(self.__hash__()))
+        if verbose:
+            self.logger.setLevel(logging.DEBUG)
+        else:
+            self.logger.setLevel(logging.ERROR)
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
+        self.logger.addHandler(handler)
+
         self.spawn_new_gdb_subprocess()
 
     def get_subprocess_cmd(self):
@@ -118,12 +128,12 @@ class GdbController:
         Return int: gdb process id
         """
         if self.gdb_process:
-            if self.verbose:
-                print("Killing current gdb subprocess (pid %d)" % self.gdb_process.pid)
+            self.logger.debug(
+                "Killing current gdb subprocess (pid %d)" % self.gdb_process.pid
+            )
             self.exit()
 
-        if self.verbose:
-            print('Launching gdb: "%s"' % " ".join(self.cmd))
+        self.logger.debug('Launching gdb: "%s"' % " ".join(self.cmd))
 
         # Use pipes to the standard streams
         # In UNIX a newline will typically only flush the buffer if stdout is a terminal.
@@ -167,7 +177,6 @@ class GdbController:
         self,
         mi_cmd_to_write,
         timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
-        verbose=False,
         raise_error_on_timeout=True,
         read_response=True,
     ):
@@ -176,7 +185,6 @@ class GdbController:
         Args:
             mi_cmd_to_write (str or list): String to write to gdb. If list, it is joined by newlines.
             timeout_sec (float): Maximum number of seconds to wait for response before exiting. Must be >= 0.
-            verbose (bool): Be verbose in what is being written
             raise_error_on_timeout (bool): If read_response is True, raise error if no response is received
             read_response (bool): Block and read response. If there is a separate thread running,
             this can be false, and the reading thread read the output.
@@ -188,10 +196,8 @@ class GdbController:
         """
         self.verify_valid_gdb_subprocess()
         if timeout_sec < 0:
-            print("warning: timeout_sec was negative, replacing with 0")
+            self.logger.warning("timeout_sec was negative, replacing with 0")
             timeout_sec = 0
-
-        verbose = self.verbose or verbose
 
         # Ensure proper type of the mi command
         if type(mi_cmd_to_write) in [str, unicode]:
@@ -204,8 +210,7 @@ class GdbController:
                 + str(type(mi_cmd_to_write))
             )
 
-        if verbose:
-            print("\nwriting: %s" % mi_cmd_to_write)
+        self.logger.debug("writing: %s", mi_cmd_to_write)
 
         if not mi_cmd_to_write.endswith("\n"):
             mi_cmd_to_write_nl = mi_cmd_to_write + "\n"
@@ -226,23 +231,18 @@ class GdbController:
                 # to evaluate, and we won't get a response
                 self.gdb_process.stdin.flush()
             else:
-                print("developer error: got unexpected fileno %d, event %d" % fileno)
+                self.logger.error("got unexpected fileno %d" % fileno)
 
         if read_response is True:
             return self.get_gdb_response(
-                timeout_sec=timeout_sec,
-                raise_error_on_timeout=raise_error_on_timeout,
-                verbose=verbose,
+                timeout_sec=timeout_sec, raise_error_on_timeout=raise_error_on_timeout
             )
 
         else:
             return []
 
     def get_gdb_response(
-        self,
-        timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
-        raise_error_on_timeout=True,
-        verbose=False,
+        self, timeout_sec=DEFAULT_GDB_TIMEOUT_SEC, raise_error_on_timeout=True
     ):
         """Get response from GDB, and block while doing so. If GDB does not have any response ready to be read
         by timeout_sec, an exception is raised.
@@ -251,7 +251,6 @@ class GdbController:
             timeout_sec (float): Maximum time to wait for reponse. Must be >= 0. Will return after
             raise_error_on_timeout (bool): Whether an exception should be raised if no response was found
             after timeout_sec
-            verbose (bool): If true, more output it printed
 
         Returns:
             List of parsed GDB responses, returned from gdbmiparser.parse_response, with the
@@ -265,15 +264,13 @@ class GdbController:
 
         self.verify_valid_gdb_subprocess()
         if timeout_sec < 0:
-            print("warning: timeout_sec was negative, replacing with 0")
+            self.logger.warning("timeout_sec was negative, replacing with 0")
             timeout_sec = 0
 
-        verbose = self.verbose or verbose
-
         if USING_WINDOWS:
-            retval = self._get_responses_windows(timeout_sec, verbose)
+            retval = self._get_responses_windows(timeout_sec)
         else:
-            retval = self._get_responses_unix(timeout_sec, verbose)
+            retval = self._get_responses_unix(timeout_sec)
 
         if not retval and raise_error_on_timeout:
             raise GdbTimeoutError(
@@ -283,7 +280,7 @@ class GdbController:
         else:
             return retval
 
-    def _get_responses_windows(self, timeout_sec, verbose):
+    def _get_responses_windows(self, timeout_sec):
         """Get responses on windows. Assume no support for select and use a while loop."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
@@ -296,7 +293,7 @@ class GdbController:
                     )
                 else:
                     raw_output = self.gdb_process.stdout.read().replace(b"\r", b"\n")
-                responses += self._get_responses_list(raw_output, "stdout", verbose)
+                responses += self._get_responses_list(raw_output, "stdout")
             except IOError:
                 pass
 
@@ -308,7 +305,7 @@ class GdbController:
                     )
                 else:
                     raw_output = self.gdb_process.stderr.read().replace(b"\r", b"\n")
-                responses += self._get_responses_list(raw_output, "stderr", verbose)
+                responses += self._get_responses_list(raw_output, "stderr")
             except IOError:
                 pass
 
@@ -317,7 +314,7 @@ class GdbController:
 
         return responses
 
-    def _get_responses_unix(self, timeout_sec, verbose):
+    def _get_responses_unix(self, timeout_sec):
         """Get responses on unix-like system. Use select to wait for output."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
@@ -346,9 +343,7 @@ class GdbController:
                             "Developer error. Got unexpected file number %d" % fileno
                         )
 
-                    responses_list = self._get_responses_list(
-                        raw_output, stream, verbose
-                    )
+                    responses_list = self._get_responses_list(raw_output, stream)
                     responses += responses_list
 
             except IOError:  # only occurs in python 2.7
@@ -369,12 +364,11 @@ class GdbController:
 
         return responses
 
-    def _get_responses_list(self, raw_output, stream, verbose):
+    def _get_responses_list(self, raw_output, stream):
         """Get parsed response list from string output
         Args:
             raw_output (unicode): gdb output to parse
             stream (str): either stdout or stderr
-            verbose (bool): add verbose output when true
         """
         responses = []
 
@@ -397,9 +391,10 @@ class GdbController:
                 parsed_response = gdbmiparser.parse_response(response)
                 parsed_response["stream"] = stream
 
+                self.logger.debug("%s", pformat(parsed_response))
+
                 responses.append(parsed_response)
-                if verbose:
-                    pprint(parsed_response)
+
         return responses
 
     def send_signal_to_gdb(self, signal_input):
