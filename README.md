@@ -8,7 +8,7 @@ pygdbmi - Get Structured Output from GDB's Machine Interface
 </a>
 
 <a href="https://pypi.org/project/pygdbmi/">
-<img src="https://img.shields.io/badge/pypi-v0.8.3.0-blue.svg"/>
+<img src="https://img.shields.io/badge/pypi-v0.8.4.0-blue.svg"/>
 </a>
 
 
@@ -108,6 +108,7 @@ from pprint import pprint
 
 # Start gdb process
 gdbmi = GdbController()
+print(gdbmi.get_subprocess_cmd())  # print actual command run as subprocess
 
 # Load binary a.out and get structured response
 response = gdbmi.write('-file-exec-file a.out')

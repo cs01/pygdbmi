@@ -12,6 +12,7 @@ python:
 
 matrix:
   allow_failures:
+    - python: '3.7-dev'
     - python: '3.8-dev'
 
 before_install:
@@ -25,5 +26,5 @@ script:
 
 cache:
     directories:
-        # avoid using pyPI's bandwidth when pip packages are already cached
+        # avoid using PyPI's bandwidth when pip packages are already cached
         - $HOME/.cache/pip
