@@ -64,7 +64,5 @@ def main(verbose=True):
     gdbmi.exit()
 
 
-
-
 if __name__ == "__main__":
     main()

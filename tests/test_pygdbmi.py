@@ -156,7 +156,7 @@ class TestPyGdbMi(unittest.TestCase):
             os.path.dirname(os.path.realpath(__file__)), "sample_c_app"
         )
         binary_path = os.path.join(SAMPLE_C_CODE_DIR, binary_name)
-        subprocess.call(['rm', 'pygdbmi.a*'], cwd=SAMPLE_C_CODE_DIR)
+        subprocess.call(["rm", "pygdbmi.a*"], cwd=SAMPLE_C_CODE_DIR)
         # Build C program
         subprocess.check_output(
             [MAKE_CMD, makefile_target_name, "-C", SAMPLE_C_CODE_DIR, "--quiet"]

@@ -1,18 +1,19 @@
 """GdbController class to programatically run gdb and get structured output"""
 
-import sys
+from distutils.spawn import find_executable
+import os
+from pprint import pprint
+from pygdbmi import gdbmiparser
+import signal
 import select
 import subprocess
-import os
+import sys
 import time
+
 try:  # py3
     from shlex import quote
 except ImportError:  # py2
     from pipes import quote
-import signal
-from pprint import pprint
-from pygdbmi import gdbmiparser
-from distutils.spawn import find_executable
 
 PYTHON3 = sys.version_info.major == 3
 DEFAULT_GDB_TIMEOUT_SEC = 1
