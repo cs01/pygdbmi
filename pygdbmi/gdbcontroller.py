@@ -371,7 +371,7 @@ class GdbController:
             return responses
 
         response_list = list(
-            filter(lambda x: x, raw_output.decode().split("\n"))
+            filter(lambda x: x, raw_output.decode(errors="replace").split("\n"))
         )  # remove blank lines
 
         # parse each response from gdb into a dict, and store in a list
