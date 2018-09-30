@@ -1,4 +1,5 @@
-from pygdbmi.printcolor import print_cyan
+import logging
+from pygdbmi.printcolor import fmt_cyan
 
 
 class StringStream:
@@ -7,14 +8,19 @@ class StringStream:
     and memory does not need to be repeatedly allocated for the string.
 
     This class was written here to avoid adding a dependency
-    to the project rather than using.
+    to the project.
     """
 
     def __init__(self, raw_text, debug=False):
         self.raw_text = raw_text
         self.index = 0
         self.len = len(raw_text)
-        self.debug = debug
+
+        if debug:
+            level = logging.DEBUG
+        else:
+            level = logging.ERROR
+        logging.basicConfig(format="%(funcName)20s %(message)s", level=level)
 
     def read(self, count):
         """Read count characters starting at self.index,
@@ -51,17 +57,19 @@ class StringStream:
 
         return self.raw_text[start_index : self.index - 1]
 
-    def advance_past_string_with_gdb_escapes(self, chars_to_remove_gdb_escape=['"']):
+    def advance_past_string_with_gdb_escapes(self, chars_to_remove_gdb_escape=None):
         """characters that gdb escapes that should not be
         escaped by this parser
         """
+
+        if chars_to_remove_gdb_escape is None:
+            chars_to_remove_gdb_escape = ['"']
 
         buf = ""
         while True:
             c = self.raw_text[self.index]
             self.index += 1
-            if self.debug:
-                print_cyan(c)
+            logging.debug("%s", fmt_cyan(c))
 
             if c == "\\":
                 # We are on a backslash and there is another character after the backslash

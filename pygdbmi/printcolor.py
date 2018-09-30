@@ -22,3 +22,17 @@ def print_cyan(x):
         print(x)
     else:
         print("\033[96m {}\033[00m".format(x))
+
+
+def fmt_green(x):
+    if USING_WINDOWS:
+        return x
+    else:
+        return "\033[92m {}\033[00m".format(x)
+
+
+def fmt_cyan(x):
+    if USING_WINDOWS:
+        return x
+    else:
+        return "\033[96m {}\033[00m".format(x)

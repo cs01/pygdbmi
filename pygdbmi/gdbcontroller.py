@@ -3,7 +3,7 @@
 from distutils.spawn import find_executable
 import logging
 import os
-from pprint import pprint, pformat
+from pprint import pformat
 from pygdbmi import gdbmiparser
 import signal
 import select
@@ -104,16 +104,20 @@ class GdbController:
                     self.abs_gdb_path = abs_gdb_path
             self.cmd = [self.abs_gdb_path] + gdb_args
 
-        self.logger = logging.getLogger(str(self.__hash__()))
-        if verbose:
-            self.logger.setLevel(logging.DEBUG)
-        else:
-            self.logger.setLevel(logging.ERROR)
-        handler = logging.StreamHandler()
-        handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
-        self.logger.addHandler(handler)
-
+        self._attach_logger(verbose)
         self.spawn_new_gdb_subprocess()
+
+    def _attach_logger(self, verbose):
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter("%(message)s"))
+        self.logger = logging.getLogger(__name__ + "." + str(self.__hash__()))
+        self.logger.propagate = False
+        if verbose:
+            level = logging.DEBUG
+        else:
+            level = logging.ERROR
+        self.logger.setLevel(level)
+        self.logger.addHandler(handler)
 
     def get_subprocess_cmd(self):
         """Returns the shell-escaped string used to invoke the gdb subprocess.

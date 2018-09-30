@@ -8,13 +8,33 @@ See more at https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html#GDB_002fMI
 
 """
 
-import re
-from pygdbmi.printcolor import print_green
+import logging
+from pygdbmi.printcolor import fmt_green
 from pygdbmi.StringStream import StringStream
 from pprint import pprint
+import re
 
-# Print text to console as it's being parsed to help debug
 _DEBUG = False
+logger = logging.getLogger(__name__)
+
+
+def _setup_logger(logger, debug):
+    logger.propagate = False
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        logging.Formatter("[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s")
+    )
+    if debug:
+        level = logging.DEBUG
+    else:
+        level = logging.ERROR
+
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+
+_setup_logger(logger, _DEBUG)
 
 
 def parse_response(gdb_mi_text):
@@ -163,12 +183,11 @@ def _get_notify_msg_and_payload(result, stream):
     """Get notify message and payload dict"""
     token = stream.advance_past_chars(["=", "*"])
     token = int(token) if token != "" else None
-    if _DEBUG:
-        print_green("parsing message")
+    logger.debug("%s", fmt_green("parsing message"))
     message = stream.advance_past_chars([","])
-    if _DEBUG:
-        print("parsed message")
-        print_green(message)
+
+    logger.debug("parsed message")
+    logger.debug("%s", fmt_green(message))
 
     payload = _parse_dict(stream)
     return token, message.strip(), payload
@@ -198,8 +217,8 @@ def _parse_dict(stream):
     """
     obj = {}
 
-    if _DEBUG:
-        print_green("parsing dict")
+    logger.debug("%s", fmt_green("parsing dict"))
+
     while True:
         c = stream.read(1)
         if c in _WHITESPACE:
@@ -239,14 +258,12 @@ def _parse_dict(stream):
                     # got some garbage text, skip it. for example:
                     # name="gdb"gargage  # skip over 'garbage'
                     # name="gdb"\n  # skip over '\n'
-                    if _DEBUG:
-                        print("skipping unexpected charcter" + c)
+                    logger.debug("skipping unexpected charcter: " + c)
                     c = stream.read(1)
             stream.seek(-1)
 
-    if _DEBUG:
-        print_green("parsed dict")
-        print_green(obj)
+    logger.debug("parsed dict")
+    logger.debug("%s", fmt_green(obj))
     return obj
 
 
@@ -257,15 +274,14 @@ def _parse_key_val(stream):
         Parsed value (either a string, array, or dict)
     """
 
-    if _DEBUG:
-        print_green("parsing key/val")
+    logger.debug("parsing key/val")
     key = _parse_key(stream)
     val = _parse_val(stream)
 
-    if _DEBUG:
-        print_green("parsed key/val")
-        print_green(key)
-        print_green(val)
+    logger.debug("parsed key/val")
+    logger.debug("%s", fmt_green(key))
+    logger.debug("%s", fmt_green(val))
+
     return key, val
 
 
@@ -274,12 +290,12 @@ def _parse_key(stream):
     returns :
         Parsed key (string)
     """
-    if _DEBUG:
-        print_green("parsing key")
+    logger.debug("parsing key")
+
     key = stream.advance_past_chars(["="])
-    if _DEBUG:
-        print_green("parsed key:")
-        print_green(key)
+
+    logger.debug("parsed key:")
+    logger.debug("%s", fmt_green(key))
     return key
 
 
@@ -289,8 +305,7 @@ def _parse_val(stream):
         Parsed value (either a string, array, or dict)
     """
 
-    if _DEBUG:
-        print_green("parsing value")
+    logger.debug("parsing value")
 
     while True:
         c = stream.read(1)
@@ -320,9 +335,8 @@ def _parse_val(stream):
             )
             val = ""  # this will be overwritten if there are more characters to be read
 
-    if _DEBUG:
-        print_green("parsed value:")
-        print_green(val)
+    logger.debug("parsed value:")
+    logger.debug("%s", fmt_green(val))
 
     return val
 
@@ -333,8 +347,7 @@ def _parse_array(stream):
         Parsed array
     """
 
-    if _DEBUG:
-        print_green("parsing array")
+    logger.debug("parsing array")
     arr = []
     while True:
         c = stream.read(1)
@@ -352,7 +365,6 @@ def _parse_array(stream):
             # that elements of this array can be also be arrays.
             break
 
-    if _DEBUG:
-        print("parsed array:")
-        print_green(arr)
+    logger.debug("parsed array:")
+    logger.debug("%s", fmt_green(arr))
     return arr
