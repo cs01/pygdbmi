@@ -5,6 +5,10 @@ import select
 import subprocess
 import os
 import time
+try:  # py3
+    from shlex import quote
+except ImportError:  # py2
+    from pipes import quote
 import signal
 from pprint import pprint
 from pygdbmi import gdbmiparser
@@ -60,11 +64,15 @@ class GdbController:
     def __init__(
         self,
         gdb_path="gdb",
-        gdb_args=["--nx", "--quiet", "--interpreter=mi2"],
+        gdb_args=None,
         time_to_check_for_additional_output_sec=DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
         rr=False,
         verbose=False,
     ):
+        if gdb_args is None:
+            default_gdb_args = ["--nx", "--quiet", "--interpreter=mi2"]
+            gdb_args = default_gdb_args
+
         self.verbose = verbose
         self.abs_gdb_path = None  # abs path to gdb executable
         self.cmd = []  # the shell command to run gdb
@@ -95,6 +103,12 @@ class GdbController:
             self.cmd = [self.abs_gdb_path] + gdb_args
 
         self.spawn_new_gdb_subprocess()
+
+    def get_subprocess_cmd(self):
+        """Returns the shell-escaped string used to invoke the gdb subprocess.
+        This is a string that can be executed directly in a shell.
+        """
+        return " ".join(quote(c) for c in self.cmd)
 
     def spawn_new_gdb_subprocess(self):
         """Spawn a new gdb subprocess with the arguments supplied to the object

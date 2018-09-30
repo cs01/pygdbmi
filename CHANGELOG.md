@@ -1,5 +1,8 @@
 # pygdbmi release history
 
+## 0.8.3.1
+* Add method `get_subprocess_cmd` to view the gdb command run in the shell
+
 ## 0.8.3.0
 * Improve reading gdb responses on unix (performance, bugfix) (@mouuff)
 
