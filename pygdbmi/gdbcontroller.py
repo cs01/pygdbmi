@@ -140,14 +140,13 @@ class GdbController:
         self.logger.debug('Launching gdb: "%s"' % " ".join(self.cmd))
 
         # Use pipes to the standard streams
-        # In UNIX a newline will typically only flush the buffer if stdout is a terminal.
-        # If the output is being redirected to a file, a newline won't flush
         self.gdb_process = subprocess.Popen(
             self.cmd,
             shell=False,
             stdout=subprocess.PIPE,
             stdin=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            bufsize=0,
         )
 
         _make_non_blocking(self.gdb_process.stdout)
