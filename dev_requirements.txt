@@ -1,2 +1,4 @@
 twine==1.11.0
 Sphinx==1.6.6
+# black  # 3.6+
+flake8

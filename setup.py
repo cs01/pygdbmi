@@ -6,11 +6,9 @@
 
 import io
 import os
-import sys
 import re
-from setuptools import find_packages, setup, Command
+from setuptools import find_packages, setup
 from codecs import open
-import tests
 
 EXCLUDE_FROM_PACKAGES = []
 CURDIR = os.path.abspath(os.path.dirname(__file__))

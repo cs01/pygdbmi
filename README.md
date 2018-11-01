@@ -8,11 +8,11 @@ pygdbmi - Get Structured Output from GDB's Machine Interface
 </a>
 
 <a href="https://pypi.org/project/pygdbmi/">
-<img src="https://img.shields.io/badge/pypi-v0.8.4.0-blue.svg"/>
+<img src="https://img.shields.io/badge/pypi-v0.9.0.0-blue.svg"/>
 </a>
 
 
-<img src="https://img.shields.io/badge/python-2.7,3.3,3.4,3.5,3.6,pypy-blue.svg"/>
+<img src="https://img.shields.io/badge/python-2.7,3.4,3.5,3.6,pypy-blue.svg"/>
 <a href="https://github.com/ambv/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black" /></a>
 </p>
 

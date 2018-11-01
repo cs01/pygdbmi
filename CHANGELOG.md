@@ -1,7 +1,9 @@
 # pygdbmi release history
 
 ## 0.9.0.0
-* Use logger in GdbController; remove `verbose` arguments.
+* Stop buffering output
+* Use logger in GdbController; modify `verbose` arguments.
+* Remove support for Python 3.3
 
 ## 0.8.4.0
 * Add method `get_subprocess_cmd` to view the gdb command run in the shell

@@ -1,10 +1,8 @@
 # run pip install -r dev_requirements.txt before running make test
 .PHONY: test upload clean
 
-test: functional_test
-
-functional_test:
-	python -m tests.test_pygdbmi
+test:
+	python -m tests
 
 publish: test clean
 	python setup.py sdist bdist_wheel --universal

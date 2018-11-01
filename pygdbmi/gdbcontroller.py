@@ -110,7 +110,8 @@ class GdbController:
     def _attach_logger(self, verbose):
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter("%(message)s"))
-        self.logger = logging.getLogger(__name__ + "." + str(self.__hash__()))
+        unique_number = time.time()
+        self.logger = logging.getLogger(__name__ + "." + str(unique_number))
         self.logger.propagate = False
         if verbose:
             level = logging.DEBUG

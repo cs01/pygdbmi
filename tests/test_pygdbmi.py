@@ -182,9 +182,8 @@ class TestPyGdbMi(unittest.TestCase):
         # Verify output was parsed into a list of responses
         assert len(responses) != 0
         response = responses[0]
-        assert set(response.keys()) == set(
-            ["message", "type", "payload", "stream", "token"]
-        )
+        assert set(response.keys()) == {"message", "type", "payload", "stream", "token"}
+
         assert response["message"] == "thread-group-added"
         assert response["type"] == "notify"
         assert response["payload"] == {"id": "i1"}
@@ -257,14 +256,13 @@ class TestPyGdbMi(unittest.TestCase):
         to_be_buffered = b'^done,BreakpointTable={nr_rows="1",nr_'
 
         stream = "teststream"
-        verbose = False
-        response = gdbmi._get_responses_list(to_be_buffered, stream, verbose)
+        response = gdbmi._get_responses_list(to_be_buffered, stream)
         # Nothing should have been parsed yet
         assert len(response) == 0
         assert gdbmi._incomplete_output[stream] == to_be_buffered
 
         remaining_gdb_output = b'cols="6"}\n(gdb) \n'
-        response = gdbmi._get_responses_list(remaining_gdb_output, stream, verbose)
+        response = gdbmi._get_responses_list(remaining_gdb_output, stream)
 
         # Should have parsed response at this point
         assert len(response) == 1
@@ -294,7 +292,7 @@ class TestPyGdbMi(unittest.TestCase):
 
                     # let the controller try to parse this additional raw gdb output
                     responses += gdbmi._get_responses_list(
-                        gdb_mi_simulated_output, stream, False
+                        gdb_mi_simulated_output, stream
                     )
             assert len(responses) == 141
 
@@ -450,4 +448,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    exit(main())
