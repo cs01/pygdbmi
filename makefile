@@ -1,5 +1,5 @@
 # run pip install -r dev_requirements.txt before running make test
-.PHONY: test upload clean
+.PHONY: test upload clean docs
 
 test:
 	python -m tests
@@ -20,4 +20,4 @@ clean:
 	make -C ./pygdbmi/docs clean
 
 docs:
-	make -C ./pygdbmi/docs
+	make -C ./docs
