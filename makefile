@@ -20,4 +20,4 @@ clean:
 	make -C ./pygdbmi/docs clean
 
 docs:
-	make -C ./docs
+	make -C ./doc_generation

@@ -15,9 +15,9 @@ EXCLUDE_FROM_APIDOCS = tests *printcolor*
 .PHONY: help Makefile gen_apidoc html clean
 
 html: clean gen_apidoc
-	$(SPHINXBUILD) -b html . $(BUILDDIR)/html
+	$(SPHINXBUILD) -b html . ../docs
 	@echo
-	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+	@echo "Build finished. The HTML pages are in ../docs."
 
 gen_apidoc:
 	rm -rf api
