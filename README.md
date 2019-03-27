@@ -8,7 +8,7 @@ pygdbmi - Get Structured Output from GDB's Machine Interface
 </a>
 
 <a href="https://pypi.org/project/pygdbmi/">
-<img src="https://img.shields.io/badge/pypi-v0.9.0.0-blue.svg"/>
+<img src="https://img.shields.io/badge/pypi-v0.9.0.1-blue.svg"/>
 </a>
 
 
