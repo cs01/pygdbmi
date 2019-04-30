@@ -15,7 +15,9 @@ pygdbmi - Get Structured Output from GDB's Machine Interface
 <a href="https://github.com/ambv/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black" /></a>
 </p>
 
-**API Documentation**: https://cs01.github.io/pygdbmi/
+**Documentation** https://cs01.github.io/pygdbmi
+
+**Source Code** https://github.com/cs01/pygdbmi
 
 ---
 

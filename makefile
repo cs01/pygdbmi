@@ -23,6 +23,6 @@ testpublish: test clean
 	twine upload dist/* -r pypitest
 
 docs:
-	pdoc --html  --overwrite --html-dir docs pygdbmi
+	pdoc --html  --force --output-dir docs pygdbmi
 	mv docs/pygdbmi/* docs
 	rmdir docs/pygdbmi
