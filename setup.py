@@ -35,7 +35,14 @@ setup(
     keywords=["gdb", "python", "machine-interface", "parse", "frontend"],
     scripts=[],
     entry_points={},
-    extras_require={},
+    extras_require={
+        "dev": [
+            'black;python_version>="3.6"',
+            'pdoc;python_version>="3.6"',
+            "flake8==3.5.0",
+            "collective.checkdocs==0.2",
+        ]
+    },
     zip_safe=False,
     classifiers=[
         "Intended Audience :: Developers",

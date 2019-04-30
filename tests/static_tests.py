@@ -1,5 +1,5 @@
 import subprocess
-
+import sys
 
 def run(cmd):
     print("Running %r" % ' '.join(cmd))
@@ -8,8 +8,8 @@ def run(cmd):
 
 def main():
     files = ["pygdbmi"]
-    # TODO turn back on for Python 3.6+
-    # run(["black", "--check"] + files)
+    if sys.version_info.major == 3 and sys.version_info.minor >= 6:
+        run(["black", "--check"] + files)
     run(["flake8"] + files)
     return 0
 

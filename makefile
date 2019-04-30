@@ -23,4 +23,4 @@ testpublish: test clean
 	twine upload dist/* -r pypitest
 
 docs:
-	make -C ./doc_generation
+	pdoc --html pygdbmi --overwrite
