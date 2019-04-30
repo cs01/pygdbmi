@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.5.4" />
+<title>pygdbmi.gdbmiparser API documentation</title>
+<meta name="description" content="Python parser for gdb&#39;s machine interface interpreter …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.name small{font-weight:normal}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title"><code>pygdbmi.gdbmiparser</code> module</h1>
+</header>
+<section id="section-intro">
+<p>Python parser for gdb's machine interface interpreter.</p>
+<p>Parses string output from gdb with the "&ndash;interpreter=mi2" flag into
+structured objects.</p>
+<p>See more at <a href="https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html#GDB_002fMI">https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html#GDB_002fMI</a></p>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">&#34;&#34;&#34;
+Python parser for gdb&#39;s machine interface interpreter.
+
+Parses string output from gdb with the &#34;--interpreter=mi2&#34; flag into
+structured objects.
+
+See more at https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html#GDB_002fMI
+
+&#34;&#34;&#34;
+
+import logging
+from pygdbmi.printcolor import fmt_green
+from pygdbmi.StringStream import StringStream
+from pprint import pprint
+import re
+
+_DEBUG = False
+logger = logging.getLogger(__name__)
+
+
+def _setup_logger(logger, debug):
+    logger.propagate = False
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        logging.Formatter(&#34;[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s&#34;)
+    )
+    if debug:
+        level = logging.DEBUG
+    else:
+        level = logging.ERROR
+
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+
+_setup_logger(logger, _DEBUG)
+
+
+def parse_response(gdb_mi_text):
+    &#34;&#34;&#34;Parse gdb mi text and turn it into a dictionary.
+
+    See https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
+    for details on types of gdb mi output.
+
+    Args:
+        gdb_mi_text (str): String output from gdb
+
+    Returns:
+        dict with the following keys:
+        type (either &#39;notify&#39;, &#39;result&#39;, &#39;console&#39;, &#39;log&#39;, &#39;target&#39;, &#39;done&#39;),
+        message (str or None),
+        payload (str, list, dict, or None)
+    &#34;&#34;&#34;
+    stream = StringStream(gdb_mi_text, debug=_DEBUG)
+
+    if _GDB_MI_NOTIFY_RE.match(gdb_mi_text):
+        token, message, payload = _get_notify_msg_and_payload(gdb_mi_text, stream)
+        return {
+            &#34;type&#34;: &#34;notify&#34;,
+            &#34;message&#34;: message,
+            &#34;payload&#34;: payload,
+            &#34;token&#34;: token,
+        }
+
+    elif _GDB_MI_RESULT_RE.match(gdb_mi_text):
+        token, message, payload = _get_result_msg_and_payload(gdb_mi_text, stream)
+        return {
+            &#34;type&#34;: &#34;result&#34;,
+            &#34;message&#34;: message,
+            &#34;payload&#34;: payload,
+            &#34;token&#34;: token,
+        }
+
+    elif _GDB_MI_CONSOLE_RE.match(gdb_mi_text):
+        return {
+            &#34;type&#34;: &#34;console&#34;,
+            &#34;message&#34;: None,
+            &#34;payload&#34;: _GDB_MI_CONSOLE_RE.match(gdb_mi_text).groups()[0],
+        }
+
+    elif _GDB_MI_LOG_RE.match(gdb_mi_text):
+        return {
+            &#34;type&#34;: &#34;log&#34;,
+            &#34;message&#34;: None,
+            &#34;payload&#34;: _GDB_MI_LOG_RE.match(gdb_mi_text).groups()[0],
+        }
+
+    elif _GDB_MI_TARGET_OUTPUT_RE.match(gdb_mi_text):
+        return {
+            &#34;type&#34;: &#34;target&#34;,
+            &#34;message&#34;: None,
+            &#34;payload&#34;: _GDB_MI_TARGET_OUTPUT_RE.match(gdb_mi_text).groups()[0],
+        }
+
+    elif response_is_finished(gdb_mi_text):
+        return {&#34;type&#34;: &#34;done&#34;, &#34;message&#34;: None, &#34;payload&#34;: None}
+
+    else:
+        # This was not gdb mi output, so it must have just been printed by
+        # the inferior program that&#39;s being debugged
+        return {&#34;type&#34;: &#34;output&#34;, &#34;message&#34;: None, &#34;payload&#34;: gdb_mi_text}
+
+
+def response_is_finished(gdb_mi_text):
+    &#34;&#34;&#34;Return true if the gdb mi response is ending
+    Returns: True if gdb response is finished&#34;&#34;&#34;
+    if _GDB_MI_RESPONSE_FINISHED_RE.match(gdb_mi_text):
+        return True
+
+    else:
+        return False
+
+
+def assert_match(actual_char_or_str, expected_char_or_str):
+    &#34;&#34;&#34;If values don&#39;t match, print them and raise a ValueError, otherwise,
+    continue
+    Raises: ValueError if argumetns do not match&#34;&#34;&#34;
+    if expected_char_or_str != actual_char_or_str:
+        print(&#34;Expected&#34;)
+        pprint(expected_char_or_str)
+        print(&#34;&#34;)
+        print(&#34;Got&#34;)
+        pprint(actual_char_or_str)
+        raise ValueError()
+
+
+# ========================================================================
+# All functions and variables below are used internally to parse mi output
+# ========================================================================
+
+
+# GDB machine interface output patterns to match
+# https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
+
+# https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Result-Records.html#GDB_002fMI-Result-Records
+# In addition to a number of out-of-band notifications,
+# the response to a gdb/mi command includes one of the following result indications:
+# done, running, connected, error, exit
+_GDB_MI_RESULT_RE = re.compile(r&#34;^(\d*)\^(\S+?)(,(.*))?$&#34;)
+
+# https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Async-Records.html#GDB_002fMI-Async-Records
+# Async records are used to notify the gdb/mi client of additional
+# changes that have occurred. Those changes can either be a consequence
+# of gdb/mi commands (e.g., a breakpoint modified) or a result of target activity
+# (e.g., target stopped).
+_GDB_MI_NOTIFY_RE = re.compile(r&#34;^(\d*)[*=](\S+?),(.*)$&#34;)
+
+# https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
+# &#34;~&#34; string-output
+# The console output stream contains text that should be displayed
+# in the CLI console window. It contains the textual responses to CLI commands.
+_GDB_MI_CONSOLE_RE = re.compile(r&#39;~&#34;(.*)&#34;&#39;, re.DOTALL)
+
+# https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
+# &#34;&amp;&#34; string-output
+# The log stream contains debugging messages being produced by gdb&#39;s internals.
+_GDB_MI_LOG_RE = re.compile(r&#39;&amp;&#34;(.*)&#34;&#39;, re.DOTALL)
+
+# https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
+# &#34;@&#34; string-output
+# The target output stream contains any textual output from the
+# running target. This is only present when GDB&#39;s event loop is truly asynchronous,
+# which is currently only the case for remote targets.
+_GDB_MI_TARGET_OUTPUT_RE = re.compile(r&#39;@&#34;(.*)&#34;&#39;, re.DOTALL)
+
+# Response finished
+_GDB_MI_RESPONSE_FINISHED_RE = re.compile(r&#34;^\(gdb\)\s*$&#34;)
+
+_WHITESPACE = [&#34; &#34;, &#34;\t&#34;, &#34;\r&#34;, &#34;\n&#34;]
+
+_GDB_MI_CHAR_DICT_START = &#34;{&#34;
+_GDB_MI_CHAR_ARRAY_START = &#34;[&#34;
+_GDB_MI_CHAR_STRING_START = &#39;&#34;&#39;
+_GDB_MI_VALUE_START_CHARS = [
+    _GDB_MI_CHAR_DICT_START,
+    _GDB_MI_CHAR_ARRAY_START,
+    _GDB_MI_CHAR_STRING_START,
+]
+
+
+def _get_notify_msg_and_payload(result, stream):
+    &#34;&#34;&#34;Get notify message and payload dict&#34;&#34;&#34;
+    token = stream.advance_past_chars([&#34;=&#34;, &#34;*&#34;])
+    token = int(token) if token != &#34;&#34; else None
+    logger.debug(&#34;%s&#34;, fmt_green(&#34;parsing message&#34;))
+    message = stream.advance_past_chars([&#34;,&#34;])
+
+    logger.debug(&#34;parsed message&#34;)
+    logger.debug(&#34;%s&#34;, fmt_green(message))
+
+    payload = _parse_dict(stream)
+    return token, message.strip(), payload
+
+
+def _get_result_msg_and_payload(result, stream):
+    &#34;&#34;&#34;Get result message and payload dict&#34;&#34;&#34;
+
+    groups = _GDB_MI_RESULT_RE.match(result).groups()
+    token = int(groups[0]) if groups[0] != &#34;&#34; else None
+    message = groups[1]
+
+    if groups[2] is None:
+        payload = None
+    else:
+        stream.advance_past_chars([&#34;,&#34;])
+        payload = _parse_dict(stream)
+
+    return token, message, payload
+
+
+def _parse_dict(stream):
+    &#34;&#34;&#34;Parse dictionary, with optional starting character &#39;{&#39;
+    return (tuple):
+        Number of characters parsed from to_parse
+        Parsed dictionary
+    &#34;&#34;&#34;
+    obj = {}
+
+    logger.debug(&#34;%s&#34;, fmt_green(&#34;parsing dict&#34;))
+
+    while True:
+        c = stream.read(1)
+        if c in _WHITESPACE:
+            pass
+        elif c in [&#34;{&#34;, &#34;,&#34;]:
+            pass
+        elif c in [&#34;}&#34;, &#34;&#34;]:
+            # end of object, exit loop
+            break
+
+        else:
+            stream.seek(-1)
+            key, val = _parse_key_val(stream)
+            if key in obj:
+                # This is a gdb bug. We should never get repeated keys in a dict!
+                # See https://sourceware.org/bugzilla/show_bug.cgi?id=22217
+                # and https://github.com/cs01/pygdbmi/issues/19
+                # Example:
+                #   thread-ids={thread-id=&#34;1&#34;,thread-id=&#34;2&#34;}
+                # Results in:
+                #   thread-ids: {{&#39;thread-id&#39;: [&#39;1&#39;, &#39;2&#39;]}}
+                # Rather than the lossy
+                #   thread-ids: {&#39;thread-id&#39;: 2}  # &#39;1&#39; got overwritten!
+                if isinstance(obj[key], list):
+                    obj[key].append(val)
+                else:
+                    obj[key] = [obj[key], val]
+            else:
+                obj[key] = val
+
+            look_ahead_for_garbage = True
+            c = stream.read(1)
+            while look_ahead_for_garbage:
+                if c in [&#34;}&#34;, &#34;,&#34;, &#34;&#34;]:
+                    look_ahead_for_garbage = False
+                else:
+                    # got some garbage text, skip it. for example:
+                    # name=&#34;gdb&#34;gargage  # skip over &#39;garbage&#39;
+                    # name=&#34;gdb&#34;\n  # skip over &#39;\n&#39;
+                    logger.debug(&#34;skipping unexpected charcter: &#34; + c)
+                    c = stream.read(1)
+            stream.seek(-1)
+
+    logger.debug(&#34;parsed dict&#34;)
+    logger.debug(&#34;%s&#34;, fmt_green(obj))
+    return obj
+
+
+def _parse_key_val(stream):
+    &#34;&#34;&#34;Parse key, value combination
+    return (tuple):
+        Parsed key (string)
+        Parsed value (either a string, array, or dict)
+    &#34;&#34;&#34;
+
+    logger.debug(&#34;parsing key/val&#34;)
+    key = _parse_key(stream)
+    val = _parse_val(stream)
+
+    logger.debug(&#34;parsed key/val&#34;)
+    logger.debug(&#34;%s&#34;, fmt_green(key))
+    logger.debug(&#34;%s&#34;, fmt_green(val))
+
+    return key, val
+
+
+def _parse_key(stream):
+    &#34;&#34;&#34;Parse key, value combination
+    returns :
+        Parsed key (string)
+    &#34;&#34;&#34;
+    logger.debug(&#34;parsing key&#34;)
+
+    key = stream.advance_past_chars([&#34;=&#34;])
+
+    logger.debug(&#34;parsed key:&#34;)
+    logger.debug(&#34;%s&#34;, fmt_green(key))
+    return key
+
+
+def _parse_val(stream):
+    &#34;&#34;&#34;Parse value from string
+    returns:
+        Parsed value (either a string, array, or dict)
+    &#34;&#34;&#34;
+
+    logger.debug(&#34;parsing value&#34;)
+
+    while True:
+        c = stream.read(1)
+
+        if c == &#34;{&#34;:
+            # Start object
+            val = _parse_dict(stream)
+            break
+
+        elif c == &#34;[&#34;:
+            # Start of an array
+            val = _parse_array(stream)
+            break
+
+        elif c == &#39;&#34;&#39;:
+            # Start of a string
+            val = stream.advance_past_string_with_gdb_escapes()
+            break
+
+        elif _DEBUG:
+            raise ValueError(&#34;unexpected character: %s&#34; % c)
+
+        else:
+            print(
+                &#39;pygdbmi warning: encountered unexpected character: &#34;%s&#34;. Continuing.&#39;
+                % c
+            )
+            val = &#34;&#34;  # this will be overwritten if there are more characters to be read
+
+    logger.debug(&#34;parsed value:&#34;)
+    logger.debug(&#34;%s&#34;, fmt_green(val))
+
+    return val
+
+
+def _parse_array(stream):
+    &#34;&#34;&#34;Parse an array, stream should be passed the initial [
+    returns:
+        Parsed array
+    &#34;&#34;&#34;
+
+    logger.debug(&#34;parsing array&#34;)
+    arr = []
+    while True:
+        c = stream.read(1)
+
+        if c in _GDB_MI_VALUE_START_CHARS:
+            stream.seek(-1)
+            val = _parse_val(stream)
+            arr.append(val)
+        elif c in _WHITESPACE:
+            pass
+        elif c == &#34;,&#34;:
+            pass
+        elif c == &#34;]&#34;:
+            # Stop when this array has finished. Note
+            # that elements of this array can be also be arrays.
+            break
+
+    logger.debug(&#34;parsed array:&#34;)
+    logger.debug(&#34;%s&#34;, fmt_green(arr))
+    return arr</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="pygdbmi.gdbmiparser.assert_match"><code class="name flex">
+<span>def <span class="ident">assert_match</span></span>(<span>actual_char_or_str, expected_char_or_str)</span>
+</code></dt>
+<dd>
+<section class="desc"><dl>
+<dt>If values don't match, print them and raise a ValueError, otherwise,</dt>
+<dt>continue</dt>
+<dt><strong><code>Raises</code></strong> :&ensp;<code>ValueError</code> <code>if</code> <code>argumetns</code> <code>do</code> <code>not</code> <code>match</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def assert_match(actual_char_or_str, expected_char_or_str):
+    &#34;&#34;&#34;If values don&#39;t match, print them and raise a ValueError, otherwise,
+    continue
+    Raises: ValueError if argumetns do not match&#34;&#34;&#34;
+    if expected_char_or_str != actual_char_or_str:
+        print(&#34;Expected&#34;)
+        pprint(expected_char_or_str)
+        print(&#34;&#34;)
+        print(&#34;Got&#34;)
+        pprint(actual_char_or_str)
+        raise ValueError()</code></pre>
+</details>
+</dd>
+<dt id="pygdbmi.gdbmiparser.parse_response"><code class="name flex">
+<span>def <span class="ident">parse_response</span></span>(<span>gdb_mi_text)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Parse gdb mi text and turn it into a dictionary.</p>
+<p>See <a href="https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records">https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records</a>
+for details on types of gdb mi output.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>gdb_mi_text</code></strong> :&ensp;<code>str</code></dt>
+<dd>String output from gdb</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>dict with the following keys:
+type (either 'notify', 'result', 'console', 'log', 'target', 'done'),
+message (str or None),
+payload (str, list, dict, or None)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def parse_response(gdb_mi_text):
+    &#34;&#34;&#34;Parse gdb mi text and turn it into a dictionary.
+
+    See https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
+    for details on types of gdb mi output.
+
+    Args:
+        gdb_mi_text (str): String output from gdb
+
+    Returns:
+        dict with the following keys:
+        type (either &#39;notify&#39;, &#39;result&#39;, &#39;console&#39;, &#39;log&#39;, &#39;target&#39;, &#39;done&#39;),
+        message (str or None),
+        payload (str, list, dict, or None)
+    &#34;&#34;&#34;
+    stream = StringStream(gdb_mi_text, debug=_DEBUG)
+
+    if _GDB_MI_NOTIFY_RE.match(gdb_mi_text):
+        token, message, payload = _get_notify_msg_and_payload(gdb_mi_text, stream)
+        return {
+            &#34;type&#34;: &#34;notify&#34;,
+            &#34;message&#34;: message,
+            &#34;payload&#34;: payload,
+            &#34;token&#34;: token,
+        }
+
+    elif _GDB_MI_RESULT_RE.match(gdb_mi_text):
+        token, message, payload = _get_result_msg_and_payload(gdb_mi_text, stream)
+        return {
+            &#34;type&#34;: &#34;result&#34;,
+            &#34;message&#34;: message,
+            &#34;payload&#34;: payload,
+            &#34;token&#34;: token,
+        }
+
+    elif _GDB_MI_CONSOLE_RE.match(gdb_mi_text):
+        return {
+            &#34;type&#34;: &#34;console&#34;,
+            &#34;message&#34;: None,
+            &#34;payload&#34;: _GDB_MI_CONSOLE_RE.match(gdb_mi_text).groups()[0],
+        }
+
+    elif _GDB_MI_LOG_RE.match(gdb_mi_text):
+        return {
+            &#34;type&#34;: &#34;log&#34;,
+            &#34;message&#34;: None,
+            &#34;payload&#34;: _GDB_MI_LOG_RE.match(gdb_mi_text).groups()[0],
+        }
+
+    elif _GDB_MI_TARGET_OUTPUT_RE.match(gdb_mi_text):
+        return {
+            &#34;type&#34;: &#34;target&#34;,
+            &#34;message&#34;: None,
+            &#34;payload&#34;: _GDB_MI_TARGET_OUTPUT_RE.match(gdb_mi_text).groups()[0],
+        }
+
+    elif response_is_finished(gdb_mi_text):
+        return {&#34;type&#34;: &#34;done&#34;, &#34;message&#34;: None, &#34;payload&#34;: None}
+
+    else:
+        # This was not gdb mi output, so it must have just been printed by
+        # the inferior program that&#39;s being debugged
+        return {&#34;type&#34;: &#34;output&#34;, &#34;message&#34;: None, &#34;payload&#34;: gdb_mi_text}</code></pre>
+</details>
+</dd>
+<dt id="pygdbmi.gdbmiparser.response_is_finished"><code class="name flex">
+<span>def <span class="ident">response_is_finished</span></span>(<span>gdb_mi_text)</span>
+</code></dt>
+<dd>
+<section class="desc"><dl>
+<dt>Return true if the gdb mi response is ending</dt>
+<dt><strong><code>Returns</code></strong> :&ensp;<code>True</code> <code>if</code> <code>gdb</code> <code>response</code> <code>is</code> <code>finished</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def response_is_finished(gdb_mi_text):
+    &#34;&#34;&#34;Return true if the gdb mi response is ending
+    Returns: True if gdb response is finished&#34;&#34;&#34;
+    if _GDB_MI_RESPONSE_FINISHED_RE.match(gdb_mi_text):
+        return True
+
+    else:
+        return False</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="pygdbmi" href="index.html">pygdbmi</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="pygdbmi.gdbmiparser.assert_match" href="#pygdbmi.gdbmiparser.assert_match">assert_match</a></code></li>
+<li><code><a title="pygdbmi.gdbmiparser.parse_response" href="#pygdbmi.gdbmiparser.parse_response">parse_response</a></code></li>
+<li><code><a title="pygdbmi.gdbmiparser.response_is_finished" href="#pygdbmi.gdbmiparser.response_is_finished">response_is_finished</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.5.4</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

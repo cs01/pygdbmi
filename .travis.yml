@@ -18,7 +18,7 @@ before_install:
   - sudo apt-get install gdb
 
 install:
-  - 'pip install -r dev_requirements.txt'
+  - 'pip install -e .[dev]'
 
 script:
   - make test

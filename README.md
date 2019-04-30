@@ -11,16 +11,17 @@ pygdbmi - Get Structured Output from GDB's Machine Interface
 <img src="https://img.shields.io/badge/pypi-v0.9.0.1-blue.svg"/>
 </a>
 
-
 <img src="https://img.shields.io/badge/python-2.7,3.4,3.5,3.6,pypy-blue.svg"/>
 <a href="https://github.com/ambv/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black" /></a>
 </p>
 
+**API Documentation**: https://cs01.github.io/pygdbmi/
+
+---
+
 Python (**py**) [**gdb**](https://www.gnu.org/software/gdb/) machine interface [(**mi**)](https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html)
 
 > GDB/MI is a line based machine oriented text interface to GDB and is activated by specifying using the --interpreter command line option (see Mode Options). It is specifically intended to support the development of systems which use the debugger as just one small component of a larger system.
-
-[>> read more](https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html)
 
 ## What's in the box?
 
@@ -37,31 +38,27 @@ gdb --interpreter=mi2
 
     pip install pygdbmi
 
-## Documentation
-
-[API Documentation](http://grassfedcode.com/pygdbmi/)
-
 ## Compatibility
 
 ### Operating Systems
 
 Cross platform support for Linux, macOS and Windows
 
--   Linux/Unix
+- Linux/Unix
 
-    Ubuntu 14.04 and 16.04 have been tested to work. Other versions likely work as well.
+  Ubuntu 14.04 and 16.04 have been tested to work. Other versions likely work as well.
 
--   macOS
+- macOS
 
-    Note: the error `please check gdb is codesigned - see taskgated(8)` can be fixed by codesigning gdb with [these instructions](http://andresabino.com/2015/04/14/codesign-gdb-on-mac-os-x-yosemite-10-10-2/). If the error is not fixed, please [create an issue in github](https://github.com/cs01/pygdbmi/issues).
+  Note: the error `please check gdb is codesigned - see taskgated(8)` can be fixed by codesigning gdb with [these instructions](http://andresabino.com/2015/04/14/codesign-gdb-on-mac-os-x-yosemite-10-10-2/). If the error is not fixed, please [create an issue in github](https://github.com/cs01/pygdbmi/issues).
 
--   Windows
+- Windows
 
-    Windows 10 has been tested to work with MinGW and cygwin.
+  Windows 10 has been tested to work with MinGW and cygwin.
 
 ### gdb versions
 
--   gdb 7.6+ has been tested. Older versions may work as well.
+- gdb 7.6+ has been tested. Older versions may work as well.
 
 ## Examples
 
@@ -119,7 +116,7 @@ pprint(response)
  {'message': u'done', 'payload': None, 'type': 'result'}]
 ```
 
-Now do whatever you want with gdb. All gdb commands, as well as gdb [machine interface commands]((https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Input-Syntax.html#GDB_002fMI-Input-Syntax)) are acceptable. gdb mi commands give better structured output that is machine readable, rather than gdb console output. mi commands begin with a `-`.
+Now do whatever you want with gdb. All gdb commands, as well as gdb [machine interface commands](<(https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Input-Syntax.html#GDB_002fMI-Input-Syntax)>) are acceptable. gdb mi commands give better structured output that is machine readable, rather than gdb console output. mi commands begin with a `-`.
 
 ```python
 response = gdbmi.write('-break-insert main')  # machine interface (MI) commands start with a '-'
@@ -142,37 +139,37 @@ response = gdbmi.exit()
 
 Each parsed gdb response consists of a list of dictionaries. Each dictionary has keys `message`, `payload`, `token`, and `type`.
 
--   `message` contains a textual message from gdb, which is not always present. When missing, this is `None`.
--   `payload` contains the content of gdb's output, which can contain any of the following: `dictionary`, `list`, `string`. This too is not always present, and can be `None` depending on the response.
--   `token` If an input command was prefixed with a (optional) token then the corresponding output for that command will also be prefixed by that same token. This field is only present for pygdbmi output types `nofity` and `result`. When missing, this is `None`.
+- `message` contains a textual message from gdb, which is not always present. When missing, this is `None`.
+- `payload` contains the content of gdb's output, which can contain any of the following: `dictionary`, `list`, `string`. This too is not always present, and can be `None` depending on the response.
+- `token` If an input command was prefixed with a (optional) token then the corresponding output for that command will also be prefixed by that same token. This field is only present for pygdbmi output types `nofity` and `result`. When missing, this is `None`.
 
-The `type` is defined based on gdb's various [mi output record types]((https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Output-Records.html#GDB_002fMI-Output-Records)), and can be
+The `type` is defined based on gdb's various [mi output record types](<(https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Output-Records.html#GDB_002fMI-Output-Records)>), and can be
 
--   `result` - the result of a gdb command, such as `done`, `running`, `error`, etc.
--   `notify` - additional async changes that have occurred, such as breakpoint modified
--   `console` - textual responses to cli commands
--   `log` - debugging messages from gdb's internals
--   `output` - output from target
--   `target` - output from remote target
--   `done` - when gdb has finished its output
+- `result` - the result of a gdb command, such as `done`, `running`, `error`, etc.
+- `notify` - additional async changes that have occurred, such as breakpoint modified
+- `console` - textual responses to cli commands
+- `log` - debugging messages from gdb's internals
+- `output` - output from target
+- `target` - output from remote target
+- `done` - when gdb has finished its output
 
 ## Contributing
 
 Documentation fixes, bug fixes, performance improvements, and functional improvements are welcome. You may want to create an issue before beginning work to make sure I am interested in merging it to the master branch.
 
-To develop, set up a new virtual environment, then clone this repo and run `pip install -r requirements.txt` and `pip install -r dev_requirements.txt`.
+To develop, set up a new virtual environment, then clone this repo and run `pip install -e .[dev]`.
 
 Confirm unit tests are working with `make test`, then begin development.
 
 Update unit tests as necessary at `pygdbmi/tests/test_app.py`.
 
-Projects Using pygdbmi
-----------------------
+## Projects Using pygdbmi
 
--   [gdbgui](https://github.com/cs01/gdbgui) implements a browser-based frontend to gdb, using pygdbmi on the backend
--   [PINCE](https://github.com/korcankaraokcu/PINCE) is a gdb frontend that aims to provide a reverse engineering tool and a reusable library focused on games. It uses pygdbmi to parse gdb/mi based output for some functions
--   [avatar²](https://github.com/avatartwo/avatar2) is an orchestration framework for reversing and analysing firmware of embedded devices. It utilizes pygdbmi for internal communication to different analysis targets.
--   Know of another project? Create a PR and add it here.
+- [gdbgui](https://github.com/cs01/gdbgui) implements a browser-based frontend to gdb, using pygdbmi on the backend
+- [PINCE](https://github.com/korcankaraokcu/PINCE) is a gdb frontend that aims to provide a reverse engineering tool and a reusable library focused on games. It uses pygdbmi to parse gdb/mi based output for some functions
+- [avatar²](https://github.com/avatartwo/avatar2) is an orchestration framework for reversing and analysing firmware of embedded devices. It utilizes pygdbmi for internal communication to different analysis targets.
+- Know of another project? Create a PR and add it here.
 
 ## Authors
+
 `pygdbmi` was written by [Chad Smith](https://grassfedcode.com) with [contributions from the community](https://github.com/cs01/pygdbmi/graphs/contributors) for which the author is very grateful. Thanks especially to @mariusmue, @bobthekingofegypt, @mouuff, and @felipesere.
