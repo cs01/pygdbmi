@@ -41,6 +41,7 @@ setup(
             'pdoc;python_version>="3.6"',
             "flake8==3.5.0",
             "collective.checkdocs==0.2",
+            'pdoc3;python_version>="3.6"',
         ]
     },
     zip_safe=False,
