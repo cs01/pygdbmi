@@ -15,7 +15,7 @@ build: clean
 	python setup.py --quiet sdist bdist_wheel
 	twine check dist/*
 
-publish: test build
+publish:  build
 	twine upload dist/*
 
 testpublish: test clean

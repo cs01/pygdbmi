@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.5.5.dev14+gca359aa" />
+<meta name="generator" content="pdoc 0.6.2" />
 <title>pygdbmi.gdbcontroller API documentation</title>
 <meta name="description" content="GdbController class to programatically run gdb and get structured output" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title"><code>pygdbmi.gdbcontroller</code> module</h1>
+<h1 class="title">Module <code>pygdbmi.gdbcontroller</code></h1>
 </header>
 <section id="section-intro">
 <p>GdbController class to programatically run gdb and get structured output</p>
@@ -559,7 +559,10 @@ Create new object, along with a gdb subprocess</p>
 <dd>Print verbose output if True</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>New GdbController object</p></section>
+<dl>
+<dt><code>New</code> <a title="pygdbmi.gdbcontroller.GdbController" href="#pygdbmi.gdbcontroller.GdbController"><code>GdbController</code></a> <code>object</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">class GdbController:
@@ -960,11 +963,8 @@ Create new object, along with a gdb subprocess</p>
 <span>def <span class="ident">exit</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><dl>
-<dt>Terminate gdb process</dt>
-<dt><strong><code>Returns</code></strong> :&ensp;<code>None</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
+<section class="desc"><p>Terminate gdb process
+Returns: None</p></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def exit(self):
@@ -992,12 +992,21 @@ by timeout_sec, an exception is raised.</p>
 </dl>
 <p>after timeout_sec</p>
 <h2 id="returns">Returns</h2>
-<p>List of parsed GDB responses, returned from gdbmiparser.parse_response, with the
-additional key 'stream' which is either 'stdout' or 'stderr'</p>
+<dl>
+<dt><code>List</code> of <code>parsed</code> <code>GDB</code> <code>responses</code>, <code>returned</code> <code>from</code> <code>gdbmiparser.parse_response</code>, <code>with</code> <code>the</code></dt>
+<dd>&nbsp;</dd>
+<dt><code>additional</code> <code>key</code> <code>'stream'</code> <code>which</code> <code>is</code> <code>either</code> <code>'stdout'</code> or <code>'stderr'</code></dt>
+<dd>&nbsp;</dd>
+</dl>
 <h2 id="raises">Raises</h2>
-<p>GdbTimeoutError if response is not received within timeout_sec
-ValueError if select returned unexpected file number
-NoGdbProcessError if there is no gdb subprocess running</p></section>
+<dl>
+<dt><a title="pygdbmi.gdbcontroller.GdbTimeoutError" href="#pygdbmi.gdbcontroller.GdbTimeoutError"><code>GdbTimeoutError</code></a> <code>if</code> <code>response</code> <code>is</code> <code>not</code> <code>received</code> <code>within</code> <code>timeout_sec</code></dt>
+<dd>&nbsp;</dd>
+<dt><code>ValueError</code> <code>if</code> <code>select</code> <code>returned</code> <code>unexpected</code> <code>file</code> <code>number</code></dt>
+<dd>&nbsp;</dd>
+<dt><a title="pygdbmi.gdbcontroller.NoGdbProcessError" href="#pygdbmi.gdbcontroller.NoGdbProcessError"><code>NoGdbProcessError</code></a> <code>if</code> <code>there</code> <code>is</code> <code>no</code> <code>gdb</code> <code>subprocess</code> <code>running</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def get_gdb_response(
@@ -1198,10 +1207,17 @@ Raise NoGdbProcessError if either of the above are not true.</p></section>
 </dl>
 <p>this can be false, and the reading thread read the output.</p>
 <h2 id="returns">Returns</h2>
-<p>List of parsed gdb responses if read_response is True, otherwise []</p>
+<dl>
+<dt><code>List</code> of <code>parsed</code> <code>gdb</code> <code>responses</code> <code>if</code> <code>read_response</code> <code>is</code> <code>True</code>, <code>otherwise</code> []</dt>
+<dd>&nbsp;</dd>
+</dl>
 <h2 id="raises">Raises</h2>
-<p>NoGdbProcessError if there is no gdb subprocess running
-TypeError if mi_cmd_to_write is not valid</p></section>
+<dl>
+<dt><a title="pygdbmi.gdbcontroller.NoGdbProcessError" href="#pygdbmi.gdbcontroller.NoGdbProcessError"><code>NoGdbProcessError</code></a> <code>if</code> <code>there</code> <code>is</code> <code>no</code> <code>gdb</code> <code>subprocess</code> <code>running</code></dt>
+<dd>&nbsp;</dd>
+<dt><code>TypeError</code> <code>if</code> <code>mi_cmd_to_write</code> <code>is</code> <code>not</code> <code>valid</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>Source code</summary>
 <pre><code class="python">def write(
@@ -1358,7 +1374,7 @@ It may have been killed and removed, or failed to initialize for some reason.</p
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.5.5.dev14+gca359aa</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.2</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>
