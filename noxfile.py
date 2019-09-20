@@ -3,13 +3,9 @@ from pathlib import Path
 import shutil
 
 nox.options.sessions = ["tests", "lint", "docs"]
-python = ["3.5", "3.6", "3.7", "3.8"]
 
 
-lint_dependencies = ["black", "flake8", "mypy", "check-manifest"]
-
-
-@nox.session(python=python)
+@nox.session(python=["3.5", "3.6", "3.7", "3.8"])
 def tests(session):
     session.install(".")
     session.run("python", "-m", "unittest", "discover")
@@ -17,7 +13,7 @@ def tests(session):
 
 @nox.session(python="3.7")
 def lint(session):
-    session.install(*lint_dependencies)
+    session.install(*["black", "flake8", "mypy", "check-manifest"])
     files = ["pygdbmi", "tests"] + [str(p) for p in Path(".").glob("*.py")]
     session.run("black", "--check", *files)
     session.run("flake8", *files)
@@ -40,7 +36,7 @@ def docs(session):
 @nox.session(python="3.7")
 def build(session):
     session.install("setuptools", "wheel", "twine")
-    session.run("rm", "-rf", "dist", external=True)
+    shutil.rmtree("dist", ignore_errors=True)
     session.run("python", "setup.py", "--quiet", "sdist", "bdist_wheel")
     session.run("twine", "check", "dist/*")
 
