@@ -77,7 +77,7 @@ class GdbController:
 
         self.verbose = verbose
         self.abs_gdb_path = None  # abs path to gdb executable
-        self.cmd = []  # type: : List[str] the shell command to run gdb
+        self.cmd = []  # type: List[str]
         self.time_to_check_for_additional_output_sec = (
             time_to_check_for_additional_output_sec
         )
