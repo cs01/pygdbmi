@@ -1,29 +1,33 @@
+os:
+  - linux
+cache:
+  pip: true
 language: python
-sudo: required  # for gdb installation
-python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
-  - "3.7-dev"
-  - "3.8-dev"
-  - "pypy"
-
+sudo: required
 matrix:
   allow_failures:
-    - python: '3.7-dev'
-    - python: '3.8-dev'
-
-before_install:
-  - sudo apt-get install gdb
+    - os: osx
+  include:
+  - python: '3.5'
+    env: NOXSESSION="tests-3.6"
+  - python: '3.6'
+    env: NOXSESSION="tests-3.6"
+  - python: '3.7'
+    env: NOXSESSION="tests-3.7"
+    dist: xenial
+  - python: '3.7'
+    env: NOXSESSION="lint"
+    dist: xenial
+  - python: '3.7'
+    env: NOXSESSION="docs"
+    dist: xenial
 
 install:
-  - 'pip install -e .[dev]'
-
+  # commands for linux
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install gdb          ; fi
+  # commands for osx
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install homebrew/dupes/gdb; fi
+  - pip install nox
 script:
-  - make test
-
-cache:
-    directories:
-        # avoid using PyPI's bandwidth when pip packages are already cached
-        - $HOME/.cache/pip
+  - nox --non-interactive --session "$NOXSESSION"

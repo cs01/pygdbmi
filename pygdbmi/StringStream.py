@@ -16,12 +16,6 @@ class StringStream:
         self.index = 0
         self.len = len(raw_text)
 
-        if debug:
-            level = logging.DEBUG
-        else:
-            level = logging.ERROR
-        logging.basicConfig(format="%(funcName)20s %(message)s", level=level)
-
     def read(self, count):
         """Read count characters starting at self.index,
         and return those characters as a string
@@ -69,7 +63,6 @@ class StringStream:
         while True:
             c = self.raw_text[self.index]
             self.index += 1
-            logging.debug("%s", fmt_cyan(c))
 
             if c == "\\":
                 # We are on a backslash and there is another character after the backslash

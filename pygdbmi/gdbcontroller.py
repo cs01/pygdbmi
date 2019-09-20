@@ -246,7 +246,10 @@ class GdbController:
             return []
 
     def get_gdb_response(
-        self, timeout_sec=DEFAULT_GDB_TIMEOUT_SEC, raise_error_on_timeout=True
+        self,
+        timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
+        raise_error_on_timeout=True,
+        return_on_first_response=False,
     ):
         """Get response from GDB, and block while doing so. If GDB does not have any response ready to be read
         by timeout_sec, an exception is raised.
@@ -255,6 +258,8 @@ class GdbController:
             timeout_sec (float): Maximum time to wait for reponse. Must be >= 0. Will return after
             raise_error_on_timeout (bool): Whether an exception should be raised if no response was found
             after timeout_sec
+            return_on_first_response (bool): Return as soon as at least one response from gdb has been parsed.
+            This may result in faster return times, but also may leave some arguments remaining to be parsed.
 
         Returns:
             List of parsed GDB responses, returned from gdbmiparser.parse_response, with the
@@ -272,9 +277,9 @@ class GdbController:
             timeout_sec = 0
 
         if USING_WINDOWS:
-            retval = self._get_responses_windows(timeout_sec)
+            retval = self._get_responses_windows(timeout_sec, return_on_first_response)
         else:
-            retval = self._get_responses_unix(timeout_sec)
+            retval = self._get_responses_unix(timeout_sec, return_on_first_response)
 
         if not retval and raise_error_on_timeout:
             raise GdbTimeoutError(
@@ -284,7 +289,7 @@ class GdbController:
         else:
             return retval
 
-    def _get_responses_windows(self, timeout_sec):
+    def _get_responses_windows(self, timeout_sec, return_on_first_response):
         """Get responses on windows. Assume no support for select and use a while loop."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
@@ -315,10 +320,12 @@ class GdbController:
 
             if time.time() > timeout_time_sec:
                 break
+            elif responses and return_on_first_response:
+                break
 
         return responses
 
-    def _get_responses_unix(self, timeout_sec):
+    def _get_responses_unix(self, timeout_sec, return_on_first_response):
         """Get responses on unix-like system. Use select to wait for output."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
@@ -364,6 +371,8 @@ class GdbController:
                 )
 
             elif time.time() > timeout_time_sec:
+                break
+            elif responses and return_on_first_response:
                 break
 
         return responses
