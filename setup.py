@@ -1,23 +1,23 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# Note: To use the 'upload' functionality of this file, you must:
-#  pip install twine
 
 import io
 import os
 import re
-from setuptools import find_packages, setup
 from codecs import open
+
+from setuptools import find_packages, setup  # type: ignore
 
 EXCLUDE_FROM_PACKAGES = ["tests"]
 CURDIR = os.path.abspath(os.path.dirname(__file__))
 README = io.open("README.md", "r", encoding="utf-8").read()
 
 with open("pygdbmi/__init__.py", "r") as fd:
-    version = re.search(
+    matches = re.search(
         r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE
-    ).group(1)
+    )
+    version = "0.0.0.0"
+    if matches:
+        version = matches.group(1)
 
 
 setup(
@@ -45,6 +45,7 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
 )

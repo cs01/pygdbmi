@@ -1,7 +1,3 @@
-import logging
-from pygdbmi.printcolor import fmt_cyan
-
-
 class StringStream:
     """A simple class to hold text so that when passed
     between functions, the object is passed by reference

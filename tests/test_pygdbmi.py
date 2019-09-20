@@ -195,6 +195,7 @@ class TestPyGdbMi(unittest.TestCase):
 
         responses = gdbmi.write(["-exec-run", "-exec-continue"], timeout_sec=3)
         found_match = False
+        print(responses)
         for r in responses:
             if (
                 r.get("payload", "")

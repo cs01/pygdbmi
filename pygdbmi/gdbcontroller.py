@@ -1,15 +1,17 @@
 """GdbController class to programatically run gdb and get structured output"""
 
-from distutils.spawn import find_executable
 import logging
 import os
-from pprint import pformat
-from pygdbmi import gdbmiparser
-import signal
 import select
+import signal
 import subprocess
 import sys
 import time
+from distutils.spawn import find_executable
+from pprint import pformat
+from typing import Union, List
+
+from pygdbmi import gdbmiparser
 
 try:  # py3
     from shlex import quote
@@ -22,7 +24,7 @@ DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC = 0.2
 USING_WINDOWS = os.name == "nt"
 if USING_WINDOWS:
     import msvcrt
-    from ctypes import windll, byref, wintypes, WinError, POINTER
+    from ctypes import windll, byref, wintypes, WinError, POINTER  # type: ignore
     from ctypes.wintypes import HANDLE, DWORD, BOOL
 else:
     import fcntl
@@ -31,8 +33,6 @@ SIGNAL_NAME_TO_NUM = {}
 for n in dir(signal):
     if n.startswith("SIG") and "_" not in n:
         SIGNAL_NAME_TO_NUM[n.upper()] = getattr(signal, n)
-
-unicode = str if PYTHON3 else unicode  # noqa: F821
 
 
 class NoGdbProcessError(ValueError):
@@ -179,7 +179,7 @@ class GdbController:
 
     def write(
         self,
-        mi_cmd_to_write,
+        mi_cmd_to_write: Union[str, List[str]],
         timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
         raise_error_on_timeout=True,
         read_response=True,
@@ -204,10 +204,10 @@ class GdbController:
             timeout_sec = 0
 
         # Ensure proper type of the mi command
-        if type(mi_cmd_to_write) in [str, unicode]:
-            pass
+        if isinstance(mi_cmd_to_write, str):
+            mi_cmd_to_write_str = mi_cmd_to_write
         elif type(mi_cmd_to_write) == list:
-            mi_cmd_to_write = "\n".join(mi_cmd_to_write)
+            mi_cmd_to_write_str = "\n".join(mi_cmd_to_write)
         else:
             raise TypeError(
                 "The gdb mi command must a be str or list. Got "
@@ -216,10 +216,10 @@ class GdbController:
 
         self.logger.debug("writing: %s", mi_cmd_to_write)
 
-        if not mi_cmd_to_write.endswith("\n"):
-            mi_cmd_to_write_nl = mi_cmd_to_write + "\n"
+        if not mi_cmd_to_write_str.endswith("\n"):
+            mi_cmd_to_write_nl = mi_cmd_to_write_str + "\n"
         else:
-            mi_cmd_to_write_nl = mi_cmd_to_write
+            mi_cmd_to_write_nl = mi_cmd_to_write_str
 
         if USING_WINDOWS:
             # select not implemented in windows for pipes
