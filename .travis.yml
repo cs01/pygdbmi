@@ -5,16 +5,18 @@ cache:
 language: python
 sudo: required
 matrix:
-  allow_failures:
-    - os: osx
   include:
   - python: '3.5'
-    env: NOXSESSION="tests-3.6"
+    env: NOXSESSION="tests-3.5"
   - python: '3.6'
     env: NOXSESSION="tests-3.6"
   - python: '3.7'
     env: NOXSESSION="tests-3.7"
     dist: xenial
+  - python: '3.8-dev'
+    env: NOXSESSION="tests-3.8"
+    dist: xenial
+
   - python: '3.7'
     env: NOXSESSION="lint"
     dist: xenial
@@ -23,11 +25,10 @@ matrix:
     dist: xenial
 
 install:
-  # commands for linux
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install gdb          ; fi
-  # commands for osx
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install gdb; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install homebrew/dupes/gdb; fi
   - pip install nox
+
 script:
   - nox --non-interactive --session "$NOXSESSION"
