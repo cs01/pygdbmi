@@ -206,7 +206,7 @@ class GdbController:
         # Ensure proper type of the mi command
         if isinstance(mi_cmd_to_write, str):
             mi_cmd_to_write_str = mi_cmd_to_write
-        elif type(mi_cmd_to_write) == list:
+        elif isinstance(mi_cmd_to_write, list):
             mi_cmd_to_write_str = "\n".join(mi_cmd_to_write)
         else:
             raise TypeError(

@@ -1,3 +1,9 @@
-include
-*.md
-LICENSE
+include *.md
+include LICENSE
+
+exclude example.py
+exclude .flake8
+exclude noxfile.py
+
+prune tests
+prune docs
