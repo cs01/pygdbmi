@@ -25,16 +25,18 @@
 <summary>Source code</summary>
 <pre><code class="python">&#34;&#34;&#34;GdbController class to programatically run gdb and get structured output&#34;&#34;&#34;
 
-from distutils.spawn import find_executable
 import logging
 import os
-from pprint import pformat
-from pygdbmi import gdbmiparser
-import signal
 import select
+import signal
 import subprocess
 import sys
 import time
+from distutils.spawn import find_executable
+from pprint import pformat
+from typing import Union, List, Optional
+
+from pygdbmi import gdbmiparser
 
 try:  # py3
     from shlex import quote
@@ -47,7 +49,7 @@ DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC = 0.2
 USING_WINDOWS = os.name == &#34;nt&#34;
 if USING_WINDOWS:
     import msvcrt
-    from ctypes import windll, byref, wintypes, WinError, POINTER
+    from ctypes import windll, byref, wintypes, WinError, POINTER  # type: ignore
     from ctypes.wintypes import HANDLE, DWORD, BOOL
 else:
     import fcntl
@@ -56,8 +58,6 @@ SIGNAL_NAME_TO_NUM = {}
 for n in dir(signal):
     if n.startswith(&#34;SIG&#34;) and &#34;_&#34; not in n:
         SIGNAL_NAME_TO_NUM[n.upper()] = getattr(signal, n)
-
-unicode = str if PYTHON3 else unicode  # noqa: F821
 
 
 class NoGdbProcessError(ValueError):
@@ -90,11 +90,11 @@ class GdbController:
 
     def __init__(
         self,
-        gdb_path=&#34;gdb&#34;,
-        gdb_args=None,
+        gdb_path: str = &#34;gdb&#34;,
+        gdb_args: Optional[List] = None,
         time_to_check_for_additional_output_sec=DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
-        rr=False,
-        verbose=False,
+        rr: bool = False,
+        verbose: bool = False,
     ):
         if gdb_args is None:
             default_gdb_args = [&#34;--nx&#34;, &#34;--quiet&#34;, &#34;--interpreter=mi2&#34;]
@@ -102,7 +102,7 @@ class GdbController:
 
         self.verbose = verbose
         self.abs_gdb_path = None  # abs path to gdb executable
-        self.cmd = []  # the shell command to run gdb
+        self.cmd = []  # type: : List[str] the shell command to run gdb
         self.time_to_check_for_additional_output_sec = (
             time_to_check_for_additional_output_sec
         )
@@ -132,7 +132,7 @@ class GdbController:
         self._attach_logger(verbose)
         self.spawn_new_gdb_subprocess()
 
-    def _attach_logger(self, verbose):
+    def _attach_logger(self, verbose: bool):
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter(&#34;%(message)s&#34;))
         unique_number = time.time()
@@ -204,10 +204,10 @@ class GdbController:
 
     def write(
         self,
-        mi_cmd_to_write,
+        mi_cmd_to_write: Union[str, List[str]],
         timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
-        raise_error_on_timeout=True,
-        read_response=True,
+        raise_error_on_timeout: bool = True,
+        read_response: bool = True,
     ):
         &#34;&#34;&#34;Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
 
@@ -229,10 +229,10 @@ class GdbController:
             timeout_sec = 0
 
         # Ensure proper type of the mi command
-        if type(mi_cmd_to_write) in [str, unicode]:
-            pass
-        elif type(mi_cmd_to_write) == list:
-            mi_cmd_to_write = &#34;\n&#34;.join(mi_cmd_to_write)
+        if isinstance(mi_cmd_to_write, str):
+            mi_cmd_to_write_str = mi_cmd_to_write
+        elif isinstance(mi_cmd_to_write, list):
+            mi_cmd_to_write_str = &#34;\n&#34;.join(mi_cmd_to_write)
         else:
             raise TypeError(
                 &#34;The gdb mi command must a be str or list. Got &#34;
@@ -241,10 +241,10 @@ class GdbController:
 
         self.logger.debug(&#34;writing: %s&#34;, mi_cmd_to_write)
 
-        if not mi_cmd_to_write.endswith(&#34;\n&#34;):
-            mi_cmd_to_write_nl = mi_cmd_to_write + &#34;\n&#34;
+        if not mi_cmd_to_write_str.endswith(&#34;\n&#34;):
+            mi_cmd_to_write_nl = mi_cmd_to_write_str + &#34;\n&#34;
         else:
-            mi_cmd_to_write_nl = mi_cmd_to_write
+            mi_cmd_to_write_nl = mi_cmd_to_write_str
 
         if USING_WINDOWS:
             # select not implemented in windows for pipes
@@ -255,10 +255,12 @@ class GdbController:
         for fileno in outputready:
             if fileno == self.stdin_fileno:
                 # ready to write
-                self.gdb_process.stdin.write(mi_cmd_to_write_nl.encode())
+                self.gdb_process.stdin.write(  # type: ignore
+                    mi_cmd_to_write_nl.encode()
+                )
                 # don&#39;t forget to flush for Python3, otherwise gdb won&#39;t realize there is data
                 # to evaluate, and we won&#39;t get a response
-                self.gdb_process.stdin.flush()
+                self.gdb_process.stdin.flush()  # type: ignore
             else:
                 self.logger.error(&#34;got unexpected fileno %d&#34; % fileno)
 
@@ -272,7 +274,7 @@ class GdbController:
 
     def get_gdb_response(
         self,
-        timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
+        timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
         raise_error_on_timeout=True,
         return_on_first_response=False,
     ):
@@ -281,10 +283,8 @@ class GdbController:
 
         Args:
             timeout_sec (float): Maximum time to wait for reponse. Must be &gt;= 0. Will return after
-            raise_error_on_timeout (bool): Whether an exception should be raised if no response was found
-            after timeout_sec
-            return_on_first_response (bool): Return as soon as at least one response from gdb has been parsed.
-            This may result in faster return times, but also may leave some arguments remaining to be parsed.
+            raise_error_on_timeout (bool): Whether an exception should be raised if no response was found after timeout_sec
+            return_on_first_response (bool): Return as soon as at least one response from gdb has been parsed. This may result in faster return times, but also may leave some arguments remaining to be parsed.
 
         Returns:
             List of parsed GDB responses, returned from gdbmiparser.parse_response, with the
@@ -591,11 +591,11 @@ Create new object, along with a gdb subprocess</p>
 
     def __init__(
         self,
-        gdb_path=&#34;gdb&#34;,
-        gdb_args=None,
+        gdb_path: str = &#34;gdb&#34;,
+        gdb_args: Optional[List] = None,
         time_to_check_for_additional_output_sec=DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
-        rr=False,
-        verbose=False,
+        rr: bool = False,
+        verbose: bool = False,
     ):
         if gdb_args is None:
             default_gdb_args = [&#34;--nx&#34;, &#34;--quiet&#34;, &#34;--interpreter=mi2&#34;]
@@ -603,7 +603,7 @@ Create new object, along with a gdb subprocess</p>
 
         self.verbose = verbose
         self.abs_gdb_path = None  # abs path to gdb executable
-        self.cmd = []  # the shell command to run gdb
+        self.cmd = []  # type: : List[str] the shell command to run gdb
         self.time_to_check_for_additional_output_sec = (
             time_to_check_for_additional_output_sec
         )
@@ -633,7 +633,7 @@ Create new object, along with a gdb subprocess</p>
         self._attach_logger(verbose)
         self.spawn_new_gdb_subprocess()
 
-    def _attach_logger(self, verbose):
+    def _attach_logger(self, verbose: bool):
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter(&#34;%(message)s&#34;))
         unique_number = time.time()
@@ -705,10 +705,10 @@ Create new object, along with a gdb subprocess</p>
 
     def write(
         self,
-        mi_cmd_to_write,
+        mi_cmd_to_write: Union[str, List[str]],
         timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
-        raise_error_on_timeout=True,
-        read_response=True,
+        raise_error_on_timeout: bool = True,
+        read_response: bool = True,
     ):
         &#34;&#34;&#34;Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
 
@@ -730,10 +730,10 @@ Create new object, along with a gdb subprocess</p>
             timeout_sec = 0
 
         # Ensure proper type of the mi command
-        if type(mi_cmd_to_write) in [str, unicode]:
-            pass
-        elif type(mi_cmd_to_write) == list:
-            mi_cmd_to_write = &#34;\n&#34;.join(mi_cmd_to_write)
+        if isinstance(mi_cmd_to_write, str):
+            mi_cmd_to_write_str = mi_cmd_to_write
+        elif isinstance(mi_cmd_to_write, list):
+            mi_cmd_to_write_str = &#34;\n&#34;.join(mi_cmd_to_write)
         else:
             raise TypeError(
                 &#34;The gdb mi command must a be str or list. Got &#34;
@@ -742,10 +742,10 @@ Create new object, along with a gdb subprocess</p>
 
         self.logger.debug(&#34;writing: %s&#34;, mi_cmd_to_write)
 
-        if not mi_cmd_to_write.endswith(&#34;\n&#34;):
-            mi_cmd_to_write_nl = mi_cmd_to_write + &#34;\n&#34;
+        if not mi_cmd_to_write_str.endswith(&#34;\n&#34;):
+            mi_cmd_to_write_nl = mi_cmd_to_write_str + &#34;\n&#34;
         else:
-            mi_cmd_to_write_nl = mi_cmd_to_write
+            mi_cmd_to_write_nl = mi_cmd_to_write_str
 
         if USING_WINDOWS:
             # select not implemented in windows for pipes
@@ -756,10 +756,12 @@ Create new object, along with a gdb subprocess</p>
         for fileno in outputready:
             if fileno == self.stdin_fileno:
                 # ready to write
-                self.gdb_process.stdin.write(mi_cmd_to_write_nl.encode())
+                self.gdb_process.stdin.write(  # type: ignore
+                    mi_cmd_to_write_nl.encode()
+                )
                 # don&#39;t forget to flush for Python3, otherwise gdb won&#39;t realize there is data
                 # to evaluate, and we won&#39;t get a response
-                self.gdb_process.stdin.flush()
+                self.gdb_process.stdin.flush()  # type: ignore
             else:
                 self.logger.error(&#34;got unexpected fileno %d&#34; % fileno)
 
@@ -773,7 +775,7 @@ Create new object, along with a gdb subprocess</p>
 
     def get_gdb_response(
         self,
-        timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
+        timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
         raise_error_on_timeout=True,
         return_on_first_response=False,
     ):
@@ -782,10 +784,8 @@ Create new object, along with a gdb subprocess</p>
 
         Args:
             timeout_sec (float): Maximum time to wait for reponse. Must be &gt;= 0. Will return after
-            raise_error_on_timeout (bool): Whether an exception should be raised if no response was found
-            after timeout_sec
-            return_on_first_response (bool): Return as soon as at least one response from gdb has been parsed.
-            This may result in faster return times, but also may leave some arguments remaining to be parsed.
+            raise_error_on_timeout (bool): Whether an exception should be raised if no response was found after timeout_sec
+            return_on_first_response (bool): Return as soon as at least one response from gdb has been parsed. This may result in faster return times, but also may leave some arguments remaining to be parsed.
 
         Returns:
             List of parsed GDB responses, returned from gdbmiparser.parse_response, with the
@@ -1006,12 +1006,10 @@ by timeout_sec, an exception is raised.</p>
 <dt><strong><code>timeout_sec</code></strong> :&ensp;<code>float</code></dt>
 <dd>Maximum time to wait for reponse. Must be &gt;= 0. Will return after</dd>
 <dt><strong><code>raise_error_on_timeout</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Whether an exception should be raised if no response was found</dd>
-<dt>after timeout_sec</dt>
+<dd>Whether an exception should be raised if no response was found after timeout_sec</dd>
 <dt><strong><code>return_on_first_response</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Return as soon as at least one response from gdb has been parsed.</dd>
+<dd>Return as soon as at least one response from gdb has been parsed. This may result in faster return times, but also may leave some arguments remaining to be parsed.</dd>
 </dl>
-<p>This may result in faster return times, but also may leave some arguments remaining to be parsed.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>List</code> of <code>parsed</code> <code>GDB</code> <code>responses</code>, <code>returned</code> <code>from</code> <code>gdbmiparser.parse_response</code>, <code>with</code> <code>the</code></dt>
@@ -1032,7 +1030,7 @@ by timeout_sec, an exception is raised.</p>
 <summary>Source code</summary>
 <pre><code class="python">def get_gdb_response(
     self,
-    timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
+    timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
     raise_error_on_timeout=True,
     return_on_first_response=False,
 ):
@@ -1041,10 +1039,8 @@ by timeout_sec, an exception is raised.</p>
 
     Args:
         timeout_sec (float): Maximum time to wait for reponse. Must be &gt;= 0. Will return after
-        raise_error_on_timeout (bool): Whether an exception should be raised if no response was found
-        after timeout_sec
-        return_on_first_response (bool): Return as soon as at least one response from gdb has been parsed.
-        This may result in faster return times, but also may leave some arguments remaining to be parsed.
+        raise_error_on_timeout (bool): Whether an exception should be raised if no response was found after timeout_sec
+        return_on_first_response (bool): Return as soon as at least one response from gdb has been parsed. This may result in faster return times, but also may leave some arguments remaining to be parsed.
 
     Returns:
         List of parsed GDB responses, returned from gdbmiparser.parse_response, with the
@@ -1248,10 +1244,10 @@ Raise NoGdbProcessError if either of the above are not true.</p></section>
 <summary>Source code</summary>
 <pre><code class="python">def write(
     self,
-    mi_cmd_to_write,
+    mi_cmd_to_write: Union[str, List[str]],
     timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
-    raise_error_on_timeout=True,
-    read_response=True,
+    raise_error_on_timeout: bool = True,
+    read_response: bool = True,
 ):
     &#34;&#34;&#34;Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
 
@@ -1273,10 +1269,10 @@ Raise NoGdbProcessError if either of the above are not true.</p></section>
         timeout_sec = 0
 
     # Ensure proper type of the mi command
-    if type(mi_cmd_to_write) in [str, unicode]:
-        pass
-    elif type(mi_cmd_to_write) == list:
-        mi_cmd_to_write = &#34;\n&#34;.join(mi_cmd_to_write)
+    if isinstance(mi_cmd_to_write, str):
+        mi_cmd_to_write_str = mi_cmd_to_write
+    elif isinstance(mi_cmd_to_write, list):
+        mi_cmd_to_write_str = &#34;\n&#34;.join(mi_cmd_to_write)
     else:
         raise TypeError(
             &#34;The gdb mi command must a be str or list. Got &#34;
@@ -1285,10 +1281,10 @@ Raise NoGdbProcessError if either of the above are not true.</p></section>
 
     self.logger.debug(&#34;writing: %s&#34;, mi_cmd_to_write)
 
-    if not mi_cmd_to_write.endswith(&#34;\n&#34;):
-        mi_cmd_to_write_nl = mi_cmd_to_write + &#34;\n&#34;
+    if not mi_cmd_to_write_str.endswith(&#34;\n&#34;):
+        mi_cmd_to_write_nl = mi_cmd_to_write_str + &#34;\n&#34;
     else:
-        mi_cmd_to_write_nl = mi_cmd_to_write
+        mi_cmd_to_write_nl = mi_cmd_to_write_str
 
     if USING_WINDOWS:
         # select not implemented in windows for pipes
@@ -1299,10 +1295,12 @@ Raise NoGdbProcessError if either of the above are not true.</p></section>
     for fileno in outputready:
         if fileno == self.stdin_fileno:
             # ready to write
-            self.gdb_process.stdin.write(mi_cmd_to_write_nl.encode())
+            self.gdb_process.stdin.write(  # type: ignore
+                mi_cmd_to_write_nl.encode()
+            )
             # don&#39;t forget to flush for Python3, otherwise gdb won&#39;t realize there is data
             # to evaluate, and we won&#39;t get a response
-            self.gdb_process.stdin.flush()
+            self.gdb_process.stdin.flush()  # type: ignore
         else:
             self.logger.error(&#34;got unexpected fileno %d&#34; % fileno)
 
