@@ -4,7 +4,6 @@
 * Drop support for 2.7, 3.4
 * Add support for 3.7, 3.8
 * Do not log in StringStream (#36)
-* Add keyword argument `return_on_first_response` to `get_gdb_response` to return as soon as a response is received and not wait until the timeout is reached (#37)
 
 ## 0.9.0.0
 * Stop buffering output
