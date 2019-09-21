@@ -24,13 +24,14 @@ def lint(session):
 
 @nox.session(python="3.7")
 def docs(session):
+    session.run("git", "checkout", "gh-pages", external=True)
+    session.run("git", "rebase", "master", external=True)
     session.install(".", "pdoc3")
     session.run(
         "pdoc", "--html", "--force", "--output-dir", "/tmp/pygdbmi_docs", "pygdbmi"
     )
     shutil.rmtree("docs", ignore_errors=True)
     shutil.move("/tmp/pygdbmi_docs/pygdbmi", "docs")
-    print("Commit these changes and push to master to update the docs")
 
 
 @nox.session(python="3.7")
