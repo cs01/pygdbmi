@@ -1,5 +1,10 @@
 # pygdbmi release history
 
+## dev
+* Drop support for 2.7, 3.4
+* Add support for 3.7, 3.8
+* Do not log in StringStream (#36)
+
 ## 0.9.0.0
 * Stop buffering output
 * Use logger in GdbController; modify `verbose` arguments.

@@ -9,10 +9,11 @@ See more at https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html#GDB_002fMI
 """
 
 import logging
+import re
+from pprint import pprint
+
 from pygdbmi.printcolor import fmt_green
 from pygdbmi.StringStream import StringStream
-from pprint import pprint
-import re
 
 _DEBUG = False
 logger = logging.getLogger(__name__)

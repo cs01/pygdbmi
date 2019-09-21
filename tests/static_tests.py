@@ -1,8 +1,9 @@
 import subprocess
 import sys
 
+
 def run(cmd):
-    print("Running %r" % ' '.join(cmd))
+    print("Running %r" % " ".join(cmd))
     subprocess.check_call(cmd)
 
 
