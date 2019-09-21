@@ -24,14 +24,22 @@ def lint(session):
 
 @nox.session(python="3.7")
 def docs(session):
-    session.run("git", "checkout", "gh-pages", external=True)
-    session.run("git", "rebase", "master", external=True)
     session.install(".", "pdoc3")
     session.run(
         "pdoc", "--html", "--force", "--output-dir", "/tmp/pygdbmi_docs", "pygdbmi"
     )
     shutil.rmtree("docs", ignore_errors=True)
     shutil.move("/tmp/pygdbmi_docs/pygdbmi", "docs")
+
+
+@nox.session(python="3.7")
+def publish_docs(session):
+    session.run("git", "checkout", "gh-pages", external=True)
+    session.run("git", "rebase", "master", external=True)
+    docs(session)
+    session.run("git", "add", "docs", external=True)
+    session.run("git", "commit", "-m", "updating docs", external=True)
+    session.run("git", "push", "origin", "gh-pages", external=True)
 
 
 @nox.session(python="3.7")
