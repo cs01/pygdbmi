@@ -4,6 +4,8 @@ include LICENSE
 exclude example.py
 exclude .flake8
 exclude noxfile.py
+exclude .coveragerc
+exclude .coverage
 
 prune tests
 prune docs

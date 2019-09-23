@@ -31,6 +31,8 @@ setup(
     url="https://github.com/cs01/pygdbmi",
     license="MIT",
     packages=find_packages(exclude=EXCLUDE_FROM_PACKAGES),
+    # https://mypy.readthedocs.io/en/latest/installed_packages.html#making-pep-561-compatible-packages
+    package_data={"pygdbmi": ["py.typed"]},
     include_package_data=True,
     keywords=["gdb", "python", "machine-interface", "parse", "frontend"],
     scripts=[],

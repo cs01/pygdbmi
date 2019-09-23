@@ -1,3 +1,11 @@
+import logging
+from typing import List
+
+from pygdbmi.constants import GDB_ESCAPE_CHAR, GDB_MI_CHAR_STRING_START
+
+logger = logging.getLogger(__name__)
+
+
 class StringStream:
     """A simple class to hold text so that when passed
     between functions, the object is passed by reference
@@ -7,12 +15,14 @@ class StringStream:
     to the project.
     """
 
-    def __init__(self, raw_text, debug=False):
-        self.raw_text = raw_text
-        self.index = 0
-        self.len = len(raw_text)
+    stream_end = ""
 
-    def read(self, count):
+    def __init__(self, raw_text: str):
+        self.raw_text = raw_text  # type: str
+        self.index = 0  # type: int
+        self.len = len(raw_text)  # type: int
+
+    def read(self, count: int) -> str:
         """Read count characters starting at self.index,
         and return those characters as a string
         """
@@ -25,57 +35,63 @@ class StringStream:
 
         return buf
 
-    def seek(self, offset):
+    def seek(self, offset: int) -> None:
         """Advance the index of this StringStream by offset characters"""
         self.index = self.index + offset
 
-    def advance_past_chars(self, chars):
-        """Advance the index past specific chars
-        Args chars (list): list of characters to advance past
+    def advance_past_chars(self, chars: List[str]) -> str:
+        """Return substring that was advanced past
 
-        Return substring that was advanced past
+        Advances past string until encountering one of chars.
         """
         start_index = self.index
         while True:
-            current_char = self.raw_text[self.index]
-            self.index += 1
-            if current_char in chars:
+            c = self.read(1)
+            if c in chars:
                 break
-
-            elif self.index == self.len:
+            elif c == StringStream.stream_end:
+                logger.error("Unexpected end of stream")
                 break
-
         return self.raw_text[start_index : self.index - 1]
 
-    def advance_past_string_with_gdb_escapes(self, chars_to_remove_gdb_escape=None):
-        """characters that gdb escapes that should not be
-        escaped by this parser
+    def advance_past_string_with_gdb_escapes(self) -> str:
+        """Return substring that was advanced past while checking for
+        gdb escaped characters
         """
 
-        if chars_to_remove_gdb_escape is None:
-            chars_to_remove_gdb_escape = ['"']
-
         buf = ""
+        c = self.read(1)
+
+        if c != GDB_MI_CHAR_STRING_START:
+            logger.error("Unexpected character %s at start (expected '\"'", c)
+            return buf
+
         while True:
-            c = self.raw_text[self.index]
-            self.index += 1
+            c = self.read(1)
 
-            if c == "\\":
-                # We are on a backslash and there is another character after the backslash
-                # to parse. Handle this case specially since gdb escaped it for us
-
-                # Get the next char that is being escaped
-                c2 = self.raw_text[self.index]
-                self.index += 1
-                # only store the escaped character in the buffer; don't store the backslash
-                # (don't leave it escaped)
+            if c == GDB_ESCAPE_CHAR:
+                # Skip this char, but store the next (escaped) char
+                # which is probably something special like a '"' or a '['
+                c2 = self.read(1)
                 buf += c2
-
             elif c == '"':
                 # Quote is closed. Exit (and don't include the end quote).
                 break
-
+            elif c == StringStream.stream_end:
+                logger.error("Unexpected end of stream")
+                break
             else:
-                # capture this character, and keep capturing
                 buf += c
+        return buf
+
+    def remove_gdb_escapes(self) -> str:
+        buf = ""
+        c = self.read(1)
+        while c:
+            if c == GDB_ESCAPE_CHAR:
+                c2 = self.read(1)
+                buf += c2
+            else:
+                buf += c
+            c = self.read(1)
         return buf

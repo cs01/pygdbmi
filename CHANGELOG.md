@@ -2,7 +2,17 @@
 
 ## dev
 * Drop support for 2.7, 3.4
-* Add support for 3.7, 3.8
+* Add support for 3.7, 3.8 (tests added to CI test matrix)
+* Make logic for retrieving output from unix and windows more similar (#37)
+* Breaking API changes to `GdbController`
+  * Removed `rr` and `verbose` arguments
+  * Removed method `spawn_new_gdb_subprocess`
+  * Do not raise `NoGdbProcessError`. Instead `OSError` is raised if file descriptors cannot be read from
+  * Remove method `verify_valid_gdb_subprocess`
+  * `stderr` is no longer managed by `GdbController`; stderr will be printed to the terminal as usual
+* Fix endless loops when trying to parse invalid data
+* Improve unit tests and test coverage (use pytest and nox)
+* Add class `GdbFileDescriptorController`
 * Do not log in StringStream (#36)
 
 ## 0.9.0.0
