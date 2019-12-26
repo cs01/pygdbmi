@@ -67,7 +67,7 @@ def test_write_no_read():
 def test_write_negative_timeout():
     gdbmi = GdbController()
     with pytest.raises(GdbTimeoutError):
-        gdbmi.write("", timeout_sec=-1)
+        gdbmi.write("", timeout_sec=-1, raise_error_on_timeout=True)
 
 
 def test_write_list():

@@ -239,7 +239,10 @@ def parse_val(stream: StringStream) -> Union[Dict, List, str]:
             # Start of a string
             return stream.advance_past_string_with_gdb_escapes()
         else:
-            logger.warning('encountered unexpected character: "%s". Continuing.' % c)
+            logger.warning(
+                'encountered unexpected character: "%s" (%s). Continuing.' % (c, ord(c))
+            )
+            break
     logger.error("Failed to parse value")
     return val
 

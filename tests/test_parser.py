@@ -8,6 +8,7 @@ from pygdbmi.gdbmiparser import (
     response_is_finished,
 )
 from pygdbmi.StringStream import StringStream
+import logging
 
 
 def test_parse_key():
@@ -47,21 +48,21 @@ def test_parse_array():
 
 
 def test_parse_bad_array(caplog):
+    caplog.set_level(logging.DEBUG)
     assert parse_array(StringStream('["1", "2"')) == ["1", "2"]
-    assert len(caplog.records) == 1
-    assert "Unexpected end of stream" in caplog.records[0].message
+    assert "Unexpected end of stream" in caplog.messages
 
 
 def test_parse_weird_array(caplog):
+    caplog.set_level(logging.DEBUG)
     assert parse_array(StringStream('["1",; "2"]')) == ["1", "2"]
-    assert len(caplog.records) == 1
-    assert "Unrecognized character when" in caplog.records[0].message
+    assert "Unrecognized character when parsing array" in caplog.messages
 
 
 def test_non_array(caplog):
+    caplog.set_level(logging.DEBUG)
     assert parse_array(StringStream('"1", "2"]')) == []
-    assert len(caplog.records) == 1
-    assert "Unexpected character at start" in caplog.records[0].message
+    assert "Unexpected character at start of array" in caplog.messages
 
 
 def test_basic_responses():

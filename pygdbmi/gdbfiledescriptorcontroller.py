@@ -17,12 +17,11 @@ class GdbFileDescriptorController:
     subprocess or pty, for example.
     """
 
-    def __init__(self, stdin: int, stdout: int, pid: int):
+    def __init__(self, stdin: int, stdout: int):
         # self.stdin = stdin
         # self.stdout = stdout
         self.stdin_fileno = stdin
         self.stdout_fileno = stdout
-        self.pid = pid
         self._raw_buffer = None  # type: Optional[bytes]
         self.attach_logger()
 
@@ -37,7 +36,7 @@ class GdbFileDescriptorController:
         self,
         mi_cmd_to_write: Union[str, List[str]],
         timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
-        raise_error_on_timeout: bool = True,
+        raise_error_on_timeout: bool = False,
         read_response: bool = True,
     ):
         """Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
@@ -59,21 +58,14 @@ class GdbFileDescriptorController:
             timeout_sec = 0
 
         if isinstance(mi_cmd_to_write, str):
-            mi_cmd_to_write_str = mi_cmd_to_write
+            mi_cmd_to_write_list = [mi_cmd_to_write]
         elif isinstance(mi_cmd_to_write, list):
-            mi_cmd_to_write_str = "\n".join(mi_cmd_to_write)
+            mi_cmd_to_write_list = mi_cmd_to_write
         else:
             raise TypeError(
                 "The gdb mi command must a be str or list. Got "
                 + str(type(mi_cmd_to_write))
             )
-
-        self.logger.debug("writing: %s", mi_cmd_to_write)
-
-        if mi_cmd_to_write_str.endswith("\n"):
-            mi_cmd_to_write_nl = mi_cmd_to_write_str
-        else:
-            mi_cmd_to_write_nl = mi_cmd_to_write_str + "\n"
 
         if USING_WINDOWS:
             # select not implemented in windows for pipes
@@ -86,7 +78,9 @@ class GdbFileDescriptorController:
 
         for fileno in ready_to_write:
             if fileno == self.stdin_fileno:
-                os.write(self.stdin_fileno, mi_cmd_to_write_nl.encode())
+                for cmd in mi_cmd_to_write_list:
+                    self.logger.debug("writing: %s", cmd)
+                    os.write(self.stdin_fileno, (cmd + "\n").encode())
             else:
                 self.logger.error("got unexpected fileno %s" % str(fileno))
 
@@ -132,7 +126,6 @@ class GdbFileDescriptorController:
 
     def _get_new_output_windows(self) -> bytes:
         try:
-            # os.fsync(self.stdout_fileno)
             return self.stdout.readline().replace(b"\r", b"\n")
         except IOError:
             return b""
@@ -146,7 +139,6 @@ class GdbFileDescriptorController:
         for fileno in events:
             # new data is ready to be read!
             if fileno == self.stdout_fileno:
-                # os.fsync(self.stdout_fileno)
                 return os.read(self.stdout_fileno, 1024)
 
             else:

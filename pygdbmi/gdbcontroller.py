@@ -38,14 +38,13 @@ class NoGdbProcessError(ValueError):
 
 class GdbController(GdbFileDescriptorController):
     """
-    Run gdb as a subprocess. Send commands and receive structured output.
-    Create new object, along with a gdb subprocess
+    Run gdb as a subprocess and provide methods to send
+    commands and receive structured output.
 
     Args:
         gdb_path (str): Command to run in shell to spawn new gdb subprocess
         gdb_args (list): Arguments to pass to shell when spawning new gdb subprocess
         time_to_check_for_additional_output_sec (float): When parsing responses, wait this amout of time before exiting (exits before timeout is reached to save time). If <= 0, full timeout time is used.
-        verbose (bool): Print verbose output if True
     Returns:
         New GdbController object
     """
@@ -80,7 +79,7 @@ class GdbController(GdbFileDescriptorController):
         self.cmd = [self.abs_gdb_path] + gdb_args
 
         stdin, stdout = self._spawn_gdb_subprocess()
-        super().__init__(stdin, stdout)
+        super().__init__(stdin.fileno(), stdout.fileno())
 
     def _attach_logger(self):
         handler = logging.StreamHandler()
