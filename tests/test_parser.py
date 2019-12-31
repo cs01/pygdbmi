@@ -50,7 +50,7 @@ def test_parse_array():
 def test_parse_bad_array(caplog):
     caplog.set_level(logging.DEBUG)
     assert parse_array(StringStream('["1", "2"')) == ["1", "2"]
-    assert "Unexpected end of stream" in caplog.messages
+    assert "Unexpected end of stream. Got ['1', '2']" in caplog.messages
 
 
 def test_parse_weird_array(caplog):

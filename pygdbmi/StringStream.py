@@ -1,5 +1,8 @@
 import logging
 from typing import List
+import traceback
+import sys
+
 
 from pygdbmi.constants import GDB_ESCAPE_CHAR, GDB_MI_CHAR_STRING_START
 
@@ -50,7 +53,6 @@ class StringStream:
             if c in chars:
                 break
             elif c == StringStream.stream_end:
-                logger.error("Unexpected end of stream")
                 break
         return self.raw_text[start_index : self.index - 1]
 
@@ -78,10 +80,18 @@ class StringStream:
                 # Quote is closed. Exit (and don't include the end quote).
                 break
             elif c == StringStream.stream_end:
-                logger.error("Unexpected end of stream")
+                print("bad", self.raw_text)
+                # try:
+                #     raise ValueError("Unexpected end of stream")
+                # except Exception:
+                #     # print(traceback.format_exc())
+                #     # or
+                #     # print(sys.exc_info()[0])
+                #     logger.error("", exc_info=True)
                 break
             else:
                 buf += c
+        print("good?", self.raw_text)
         return buf
 
     def remove_gdb_escapes(self) -> str:

@@ -238,10 +238,10 @@ def parse_val(stream: StringStream) -> Union[Dict, List, str]:
             stream.seek(-1)
             # Start of a string
             return stream.advance_past_string_with_gdb_escapes()
+        elif c == "":
+            return ""
         else:
-            logger.warning(
-                'encountered unexpected character: "%s" (%s). Continuing.' % (c, ord(c))
-            )
+            logger.warning('encountered unexpected character: "%s". Continuing.', c)
             break
     logger.error("Failed to parse value")
     return val
@@ -274,7 +274,7 @@ def parse_array(stream: StringStream) -> List[Any]:
             # that elements of this array can be also be arrays.
             break
         elif c == StringStream.stream_end:
-            logger.debug("Unexpected end of stream")
+            logger.debug("Unexpected end of stream. Got %s", arr)
             return arr
         else:
             logger.debug("Unrecognized character when parsing array")

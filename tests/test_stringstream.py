@@ -42,19 +42,16 @@ def test_stream_advance_past_end():
 def test_advance_no_infinite_loop(caplog):
     stream = StringStream("no commas here!")
     assert "no commas here!" == stream.advance_past_chars([","])
-    assert len(caplog.records) == 1
-    assert "Unexpected end of stream" in caplog.records[0].message
 
 
 def test_malformed_string(caplog):
     stream = StringStream('abc"')
     assert "" == stream.advance_past_string_with_gdb_escapes()
     assert len(caplog.records) == 1
-    assert "Unexpected character a at start (expected" in caplog.records[0].message
+    assert "Unexpected character a at start (expected '\"'" in caplog.messages
 
 
 def test_no_infinite_loop_with_gdb_escapes(caplog):
     stream = StringStream('"abc')
     assert "abc" == stream.advance_past_string_with_gdb_escapes()
-    assert len(caplog.records) == 1
-    assert "Unexpected end of stream" in caplog.records[0].message
+    assert "Unexpected end of stream" in caplog.messages

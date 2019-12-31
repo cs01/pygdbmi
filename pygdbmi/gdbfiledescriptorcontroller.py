@@ -18,8 +18,6 @@ class GdbFileDescriptorController:
     """
 
     def __init__(self, stdin: int, stdout: int):
-        # self.stdin = stdin
-        # self.stdout = stdout
         self.stdin_fileno = stdin
         self.stdout_fileno = stdout
         self._raw_buffer = None  # type: Optional[bytes]
