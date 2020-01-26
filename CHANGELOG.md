@@ -1,9 +1,20 @@
 # pygdbmi release history
 
-## dev
+## 0.9.0.3
+
 * Drop support for 2.7, 3.4
 * Add support for 3.7, 3.8
+* Add `py.typed` file so mypy can enforce type hints on `pygdbmi`
 * Do not log in StringStream (#36)
+* Updates to build and CI tests (use nox)
+* Use mkdocs and mkdocstrings
+* Doc updates
+
+## 0.9.0.2
+* More doc updates
+
+## 0.9.0.1
+* Update docs
 
 ## 0.9.0.0
 * Stop buffering output

@@ -22,14 +22,25 @@ def lint(session):
     session.run("python", "setup.py", "check", "--metadata", "--strict")
 
 
+doc_dependencies = [
+    ".",
+    "git+https://github.com/cs01/mkdocstrings.git",
+    "mkdocs",
+    "mkdocs-material",
+    "pygments",
+]
+
+
 @nox.session(python="3.7")
 def docs(session):
-    session.install(".", "pdoc3")
-    session.run(
-        "pdoc", "--html", "--force", "--output-dir", "/tmp/pygdbmi_docs", "pygdbmi"
-    )
-    shutil.rmtree("docs", ignore_errors=True)
-    shutil.move("/tmp/pygdbmi_docs/pygdbmi", "docs")
+    session.install(*doc_dependencies)
+    session.run("mkdocs", "build")
+
+
+@nox.session(python="3.7")
+def serve_docs(session):
+    session.install(*doc_dependencies)
+    session.run("mkdocs", "serve")
 
 
 @nox.session(python="3.7")
@@ -55,3 +66,4 @@ def publish(session):
     build(session)
     print("REMINDER: Has the changelog been updated?")
     session.run("python", "-m", "twine", "upload", "dist/*")
+    session.notify(publish_docs)

@@ -1,0 +1,22 @@
+site_name: pygdbmi
+site_description: Parse gdb machine interface output with Python
+
+theme:
+  name: "material"
+repo_name: cs01/pygdbmi
+repo_url: https://github.com/cs01/pygdbmi
+
+nav:
+  - Home: "README.md"
+  - Api:
+      - "gdbmiparser": "api/gdbmiparser.md"
+      - "gdbcontroller": "api/gdbcontroller.md"
+  - Changelog: "CHANGELOG.md"
+
+markdown_extensions:
+  - admonition #  note blocks, warning blocks -- https://github.com/mkdocs/mkdocs/issues/1659
+  - codehilite
+
+plugins:
+  - mkdocstrings
+  - search

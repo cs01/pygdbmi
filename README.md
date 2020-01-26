@@ -7,13 +7,13 @@ pygdbmi - Get Structured Output from GDB's Machine Interface
 <img src="https://travis-ci.org/cs01/pygdbmi.svg?branch=master" />
 </a>
 
-<a href="https://pypi.org/project/pygdbmi/">
-<img src="https://img.shields.io/badge/pypi-v0.9.0.2-blue.svg"/>
-</a>
+<a href="https://badge.fury.io/py/pygdbmi"><img src="https://badge.fury.io/py/pygdbmi.svg" alt="PyPI version" height="18"></a>
 
-**Documentation** https://cs01.github.io/pygdbmi
+</p>
 
-**Source Code** https://github.com/cs01/pygdbmi
+**Documentation** [https://cs01.github.io/pygdbmi](https://cs01.github.io/pygdbmi)
+
+**Source Code** [https://github.com/cs01/pygdbmi](https://github.com/cs01/pygdbmi)
 
 ---
 
@@ -158,11 +158,13 @@ Documentation fixes, bug fixes, performance improvements, and functional improve
 pygdbmi uses [nox](https://github.com/theacodes/nox) for automation.
 
 See available tasks with
+
 ```
 nox -l
 ```
 
 Run tests and lint with
+
 ```
 nox -s tests
 nox -s lint
@@ -177,4 +179,4 @@ nox -s lint
 
 ## Authors
 
-`pygdbmi` was written by [Chad Smith](https://grassfedcode.com) with [contributions from the community](https://github.com/cs01/pygdbmi/graphs/contributors) for which the author is very grateful. Thanks especially to @mariusmue, @bobthekingofegypt, @mouuff, and @felipesere.
+`pygdbmi` was written by [Chad Smith](https://grassfedcode.com) with [contributions from the community](https://github.com/cs01/pygdbmi/graphs/contributors). Thanks especially to @mariusmue, @bobthekingofegypt, @mouuff, and @felipesere.
