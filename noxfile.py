@@ -45,12 +45,8 @@ def serve_docs(session):
 
 @nox.session(python="3.7")
 def publish_docs(session):
-    session.run("git", "checkout", "gh-pages", external=True)
-    session.run("git", "rebase", "master", external=True)
-    docs(session)
-    session.run("git", "add", "docs", external=True)
-    session.run("git", "commit", "-m", "updating docs", external=True)
-    session.run("git", "push", "origin", "gh-pages", external=True)
+    session.install(*doc_dependencies)
+    session.run("mkdocs", "gh-deploy")
 
 
 @nox.session(python="3.7")
@@ -66,4 +62,4 @@ def publish(session):
     build(session)
     print("REMINDER: Has the changelog been updated?")
     session.run("python", "-m", "twine", "upload", "dist/*")
-    session.notify(publish_docs)
+    publish_docs(session)
