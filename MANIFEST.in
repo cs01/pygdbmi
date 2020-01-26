@@ -1,9 +1,12 @@
 include *.md
 include LICENSE
 
+graft pygdbmi
+
 exclude example.py
 exclude .flake8
 exclude noxfile.py
+exclude mkdocs.yml
 
 prune tests
 prune docs

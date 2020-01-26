@@ -1,4 +1,7 @@
-"""GdbController class to programatically run gdb and get structured output"""
+"""This module defines the `GdbController` class
+which runs gdb as a subprocess and can write to it and read from it to get
+structured output.
+"""
 
 import logging
 import os
@@ -49,20 +52,6 @@ class GdbTimeoutError(ValueError):
 
 
 class GdbController:
-    """
-    Run gdb as a subprocess. Send commands and receive structured output.
-    Create new object, along with a gdb subprocess
-
-    Args:
-        gdb_path (str): Command to run in shell to spawn new gdb subprocess
-        gdb_args (list): Arguments to pass to shell when spawning new gdb subprocess
-        time_to_check_for_additional_output_sec (float): When parsing responses, wait this amout of time before exiting (exits before timeout is reached to save time). If <= 0, full timeout time is used.
-        rr (bool): Use the `rr replay` command instead of `gdb`. See rr-project.org for more info.
-        verbose (bool): Print verbose output if True
-    Returns:
-        New GdbController object
-    """
-
     def __init__(
         self,
         gdb_path: str = "gdb",
@@ -71,6 +60,20 @@ class GdbController:
         rr: bool = False,
         verbose: bool = False,
     ):
+        """
+        Run gdb as a subprocess. Send commands and receive structured output.
+        Create new object, along with a gdb subprocess
+
+        Args:
+            gdb_path: Command to run in shell to spawn new gdb subprocess
+            gdb_args: Arguments to pass to shell when spawning new gdb subprocess
+            time_to_check_for_additional_output_sec: When parsing responses, wait this amout of time before exiting (exits before timeout is reached to save time). If <= 0, full timeout time is used.
+            rr: Use the `rr replay` command instead of `gdb`. See rr-project.org for more info.
+            verbose: Print verbose output if True
+        Returns:
+            New GdbController object
+        """
+
         if gdb_args is None:
             default_gdb_args = ["--nx", "--quiet", "--interpreter=mi2"]
             gdb_args = default_gdb_args
@@ -187,16 +190,16 @@ class GdbController:
         """Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
 
         Args:
-            mi_cmd_to_write (str or list): String to write to gdb. If list, it is joined by newlines.
-            timeout_sec (float): Maximum number of seconds to wait for response before exiting. Must be >= 0.
-            raise_error_on_timeout (bool): If read_response is True, raise error if no response is received
-            read_response (bool): Block and read response. If there is a separate thread running,
+            mi_cmd_to_write: String to write to gdb. If list, it is joined by newlines.
+            timeout_sec: Maximum number of seconds to wait for response before exiting. Must be >= 0.
+            raise_error_on_timeout: If read_response is True, raise error if no response is received
+            read_response: Block and read response. If there is a separate thread running,
             this can be false, and the reading thread read the output.
         Returns:
             List of parsed gdb responses if read_response is True, otherwise []
         Raises:
-            NoGdbProcessError if there is no gdb subprocess running
-            TypeError if mi_cmd_to_write is not valid
+            NoGdbProcessError: if there is no gdb subprocess running
+            TypeError: if mi_cmd_to_write is not valid
         """
         self.verify_valid_gdb_subprocess()
         if timeout_sec < 0:
@@ -254,17 +257,17 @@ class GdbController:
         by timeout_sec, an exception is raised.
 
         Args:
-            timeout_sec (float): Maximum time to wait for reponse. Must be >= 0. Will return after
-            raise_error_on_timeout (bool): Whether an exception should be raised if no response was found after timeout_sec
+            timeout_sec: Maximum time to wait for reponse. Must be >= 0. Will return after
+            raise_error_on_timeout: Whether an exception should be raised if no response was found after timeout_sec
 
         Returns:
             List of parsed GDB responses, returned from gdbmiparser.parse_response, with the
             additional key 'stream' which is either 'stdout' or 'stderr'
 
         Raises:
-            GdbTimeoutError if response is not received within timeout_sec
-            ValueError if select returned unexpected file number
-            NoGdbProcessError if there is no gdb subprocess running
+            GdbTimeoutError: if response is not received within timeout_sec
+            ValueError: if select returned unexpected file number
+            NoGdbProcessError: if there is no gdb subprocess running
         """
 
         self.verify_valid_gdb_subprocess()
@@ -404,12 +407,16 @@ class GdbController:
 
     def send_signal_to_gdb(self, signal_input):
         """Send signal name (case insensitive) or number to gdb subprocess
-        gdbmi.send_signal_to_gdb(2)  # valid
-        gdbmi.send_signal_to_gdb('sigint')  # also valid
-        gdbmi.send_signal_to_gdb('SIGINT')  # also valid
+        These are all valid ways to call this method:
+        ```
+        gdbmi.send_signal_to_gdb(2)
+        gdbmi.send_signal_to_gdb('sigint')
+        gdbmi.send_signal_to_gdb('SIGINT')
+        ```
 
-        raises ValueError if signal_input is invalie
-        raises NoGdbProcessError if there is no gdb process to send a signal to
+        raises:
+            ValueError: if signal_input is invalid
+            NoGdbProcessError: if there is no gdb process to send a signal to
         """
         try:
             signal = int(signal_input)
@@ -432,9 +439,8 @@ class GdbController:
         """Send SIGINT (interrupt signal) to the gdb subprocess"""
         self.send_signal_to_gdb("SIGINT")
 
-    def exit(self):
-        """Terminate gdb process
-        Returns: None"""
+    def exit(self) -> None:
+        """Terminate gdb process"""
         if self.gdb_process:
             self.gdb_process.terminate()
             self.gdb_process.communicate()
