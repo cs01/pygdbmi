@@ -293,6 +293,7 @@ class GdbController:
         timeout_time_sec = time.time() + timeout_sec
         responses = []
         while True:
+            responses_list = []
             try:
                 self.gdb_process.stdout.flush()
                 if PYTHON3:
@@ -301,7 +302,7 @@ class GdbController:
                     )
                 else:
                     raw_output = self.gdb_process.stdout.read().replace(b"\r", b"\n")
-                responses += self._get_responses_list(raw_output, "stdout")
+                responses_list = self._get_responses_list(raw_output, "stdout")
             except IOError:
                 pass
 
@@ -313,11 +314,19 @@ class GdbController:
                     )
                 else:
                     raw_output = self.gdb_process.stderr.read().replace(b"\r", b"\n")
-                responses += self._get_responses_list(raw_output, "stderr")
+                responses_list += self._get_responses_list(raw_output, "stderr")
             except IOError:
                 pass
 
-            if time.time() > timeout_time_sec:
+            responses += responses_list
+            if timeout_sec == 0:
+                break
+            elif responses_list and self._allow_overwrite_timeout_times:
+                timeout_time_sec = min(
+                    time.time() + self.time_to_check_for_additional_output_sec,
+                    timeout_time_sec,
+                )
+            elif time.time() > timeout_time_sec:
                 break
 
         return responses
