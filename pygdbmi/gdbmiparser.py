@@ -10,7 +10,7 @@ See more at https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html#GDB_002fMI
 import logging
 import re
 from pprint import pprint
-from typing import Dict
+from typing import Dict, Union
 
 from pygdbmi.printcolor import fmt_green
 from pygdbmi.StringStream import StringStream
@@ -190,7 +190,7 @@ _GDB_MI_VALUE_START_CHARS = [
 ]
 
 
-def _get_notify_msg_and_payload(result, stream):
+def _get_notify_msg_and_payload(result, stream: StringStream):
     """Get notify message and payload dict"""
     token = stream.advance_past_chars(["=", "*"])
     token = int(token) if token != "" else None
@@ -204,10 +204,11 @@ def _get_notify_msg_and_payload(result, stream):
     return token, message.strip(), payload
 
 
-def _get_result_msg_and_payload(result, stream):
+def _get_result_msg_and_payload(result, stream: StringStream):
     """Get result message and payload dict"""
 
-    groups = _GDB_MI_RESULT_RE.match(result).groups()
+    match = _GDB_MI_RESULT_RE.match(result)
+    groups = match.groups() if match else [""]
     token = int(groups[0]) if groups[0] != "" else None
     message = groups[1]
 
@@ -220,13 +221,13 @@ def _get_result_msg_and_payload(result, stream):
     return token, message, payload
 
 
-def _parse_dict(stream):
+def _parse_dict(stream: StringStream):
     """Parse dictionary, with optional starting character '{'
     return (tuple):
         Number of characters parsed from to_parse
         Parsed dictionary
     """
-    obj = {}
+    obj: Dict[str, Union[str, list]] = {}
 
     logger.debug("%s", fmt_green("parsing dict"))
 
@@ -254,7 +255,7 @@ def _parse_dict(stream):
                 # Rather than the lossy
                 #   thread-ids: {'thread-id': 2}  # '1' got overwritten!
                 if isinstance(obj[key], list):
-                    obj[key].append(val)
+                    obj[key].append(val)  # type: ignore
                 else:
                     obj[key] = [obj[key], val]
             else:
@@ -278,7 +279,7 @@ def _parse_dict(stream):
     return obj
 
 
-def _parse_key_val(stream):
+def _parse_key_val(stream: StringStream):
     """Parse key, value combination
     return (tuple):
         Parsed key (string)
@@ -296,7 +297,7 @@ def _parse_key_val(stream):
     return key, val
 
 
-def _parse_key(stream):
+def _parse_key(stream: StringStream):
     """Parse key, value combination
     returns :
         Parsed key (string)
@@ -310,7 +311,7 @@ def _parse_key(stream):
     return key
 
 
-def _parse_val(stream):
+def _parse_val(stream: StringStream):
     """Parse value from string
     returns:
         Parsed value (either a string, array, or dict)
@@ -340,10 +341,7 @@ def _parse_val(stream):
             raise ValueError("unexpected character: %s" % c)
 
         else:
-            print(
-                'pygdbmi warning: encountered unexpected character: "%s". Continuing.'
-                % c
-            )
+            logger.warn(f'unexpected character: "{c}" ({ord(c)}). Continuing.')
             val = ""  # this will be overwritten if there are more characters to be read
 
     logger.debug("parsed value:")
@@ -352,7 +350,7 @@ def _parse_val(stream):
     return val
 
 
-def _parse_array(stream):
+def _parse_array(stream: StringStream):
     """Parse an array, stream should be passed the initial [
     returns:
         Parsed array

@@ -1,5 +1,19 @@
 # pygdbmi release history
 
+## 0.10.0.0
+
+ **Breaking Changes**
+
+* Drop support for 3.5
+* Update `GdbController` API.
+* gdb mi parsing remains unchanged
+* Remove `NoGdbProcessError` error
+
+Other Changes
+
+* Add new `IoManager` class to handle more generic use-cases
+* [dev] use pytest for testing
+
 ## 0.9.0.3
 
 * Drop support for 2.7, 3.4

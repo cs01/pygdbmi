@@ -11,6 +11,7 @@ nav:
   - Api:
       - "gdbmiparser": "api/gdbmiparser.md"
       - "gdbcontroller": "api/gdbcontroller.md"
+      - "iomanager": "api/iomanager.md"
   - Changelog: "CHANGELOG.md"
 
 markdown_extensions:
