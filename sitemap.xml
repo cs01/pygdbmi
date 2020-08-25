@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <url>
-     <loc>None</loc>
-     <lastmod>2020-01-26</lastmod>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url>
+     <loc>https://cs01.github.io/pygdbmi/</loc>
+     <lastmod>2020-08-25</lastmod>
      <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>None</loc>
-     <lastmod>2020-01-26</lastmod>
+    </url><url>
+     <loc>https://cs01.github.io/pygdbmi/api/gdbmiparser/</loc>
+     <lastmod>2020-08-25</lastmod>
      <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>None</loc>
-     <lastmod>2020-01-26</lastmod>
+    </url><url>
+     <loc>https://cs01.github.io/pygdbmi/api/gdbcontroller/</loc>
+     <lastmod>2020-08-25</lastmod>
      <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>None</loc>
-     <lastmod>2020-01-26</lastmod>
+    </url><url>
+     <loc>https://cs01.github.io/pygdbmi/api/iomanager/</loc>
+     <lastmod>2020-08-25</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://cs01.github.io/pygdbmi/CHANGELOG/</loc>
+     <lastmod>2020-08-25</lastmod>
      <changefreq>daily</changefreq>
     </url>
 </urlset>
