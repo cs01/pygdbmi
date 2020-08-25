@@ -4,15 +4,16 @@
 
  **Breaking Changes**
 
-* Drop support for 3.5
-* Update `GdbController` API.
-* gdb mi parsing remains unchanged
+* Drop support for Python 3.5
+* Update `GdbController()` API. New API is `GdbController(command: Optional[List[str]], time_to_check_for_additional_output_sec: Optional[int])`.
+* `GdbController.verify_valid_gdb_subprocess()` was removed
 * Remove `NoGdbProcessError` error
 
 Other Changes
 
 * Add new `IoManager` class to handle more generic use-cases
 * [dev] use pytest for testing
+* gdb mi parsing remains unchanged
 
 ## 0.9.0.3
 
