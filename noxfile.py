@@ -54,6 +54,7 @@ def publish_docs(session):
 def build(session):
     session.install("setuptools", "wheel", "twine")
     shutil.rmtree("dist", ignore_errors=True)
+    shutil.rmtree("build", ignore_errors=True)
     session.run("python", "setup.py", "--quiet", "sdist", "bdist_wheel")
     session.run("twine", "check", "dist/*")
 
