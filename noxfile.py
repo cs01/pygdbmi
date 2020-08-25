@@ -3,15 +3,16 @@ from pathlib import Path
 import shutil
 
 nox.options.sessions = ["tests", "lint", "docs"]
+nox.options.reuse_existing_virtualenvs = True
 
 
-@nox.session(python=["3.5", "3.6", "3.7", "3.8"])
+@nox.session(python=["3.6", "3.7", "3.8"])
 def tests(session):
-    session.install(".")
-    session.run("python", "-m", "unittest", "discover")
+    session.install(".", "pytest")
+    session.run("pytest", *session.posargs)
 
 
-@nox.session(python="3.7")
+@nox.session()
 def lint(session):
     session.install(*["black", "flake8", "mypy", "check-manifest"])
     files = ["pygdbmi", "tests"] + [str(p) for p in Path(".").glob("*.py")]
@@ -24,7 +25,7 @@ def lint(session):
 
 doc_dependencies = [
     ".",
-    "git+https://github.com/cs01/mkdocstrings.git",
+    "mkdocstrings",
     "mkdocs",
     "mkdocs-material",
     "pygments",

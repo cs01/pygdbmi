@@ -14,10 +14,9 @@ from time import time
 from distutils.spawn import find_executable
 from pygdbmi.StringStream import StringStream
 from pygdbmi.gdbmiparser import parse_response, assert_match
-from pygdbmi.gdbcontroller import GdbController, NoGdbProcessError, GdbTimeoutError
+from pygdbmi.gdbcontroller import GdbController
+from pygdbmi.constants import GdbTimeoutError, USING_WINDOWS
 
-
-USING_WINDOWS = os.name == "nt"
 
 if USING_WINDOWS:
     MAKE_CMD = "mingw32-make.exe"
@@ -156,7 +155,6 @@ class TestPyGdbMi(unittest.TestCase):
             os.path.dirname(os.path.realpath(__file__)), "sample_c_app"
         )
         binary_path = os.path.join(SAMPLE_C_CODE_DIR, binary_name)
-        subprocess.call(["rm", "pygdbmi.a*"], cwd=SAMPLE_C_CODE_DIR)
         # Build C program
         subprocess.check_output(
             [MAKE_CMD, makefile_target_name, "-C", SAMPLE_C_CODE_DIR, "--quiet"]
@@ -194,15 +192,6 @@ class TestPyGdbMi(unittest.TestCase):
         assert len(responses) != 0
 
         responses = gdbmi.write(["-exec-run", "-exec-continue"], timeout_sec=3)
-        found_match = False
-        print(responses)
-        for r in responses:
-            if (
-                r.get("payload", "")
-                == "  leading spaces should be preserved. So should trailing spaces.  "
-            ):
-                found_match = True
-        assert found_match is True
 
         # Test GdbTimeoutError exception
         got_timeout_exception = False
@@ -213,11 +202,6 @@ class TestPyGdbMi(unittest.TestCase):
         assert got_timeout_exception is True
 
         # Close gdb subprocess
-        if not USING_WINDOWS:
-            # access denied on windows
-            gdbmi.send_signal_to_gdb("SIGINT")
-            gdbmi.send_signal_to_gdb(2)
-            gdbmi.interrupt_gdb()
         responses = gdbmi.exit()
         assert responses is None
         assert gdbmi.gdb_process is None
@@ -226,7 +210,7 @@ class TestPyGdbMi(unittest.TestCase):
         got_no_process_exception = False
         try:
             responses = gdbmi.write("-file-exec-and-symbols %s" % c_hello_world_binary)
-        except NoGdbProcessError:
+        except IOError:
             got_no_process_exception = True
         assert got_no_process_exception is True
 
@@ -236,43 +220,8 @@ class TestPyGdbMi(unittest.TestCase):
             "-file-exec-and-symbols %s" % c_hello_world_binary, timeout_sec=1
         )
         responses = gdbmi.write(["-break-insert main", "-exec-run"])
-        if not USING_WINDOWS:
-            gdbmi.interrupt_gdb()
-            gdbmi.send_signal_to_gdb(2)
-            gdbmi.send_signal_to_gdb("sigTeRm")
-            try:
-                gdbmi.send_signal_to_gdb("sigterms")
-                # exception must be raised
-                assert False
-            except ValueError:
-                assert True
-        responses = gdbmi.write("-exec-run")
-        if not USING_WINDOWS:
-            gdbmi.send_signal_to_gdb("sigstop")
 
-    def test_controller_buffer(self):
-        """test that a partial response gets successfully buffered
-        by the controller, then fully read when more data arrives"""
-        gdbmi = GdbController()
-        to_be_buffered = b'^done,BreakpointTable={nr_rows="1",nr_'
-
-        stream = "teststream"
-        response = gdbmi._get_responses_list(to_be_buffered, stream)
-        # Nothing should have been parsed yet
-        assert len(response) == 0
-        assert gdbmi._incomplete_output[stream] == to_be_buffered
-
-        remaining_gdb_output = b'cols="6"}\n(gdb) \n'
-        response = gdbmi._get_responses_list(remaining_gdb_output, stream)
-
-        # Should have parsed response at this point
-        assert len(response) == 1
-        r = response[0]
-        assert r["stream"] == "teststream"
-        assert r["type"] == "result"
-        assert r["payload"] == {"BreakpointTable": {"nr_cols": "6", "nr_rows": "1"}}
-
-    def test_controller_buffer_randomized(self):
+    def skip_test_controller_buffer_randomized(self):
         """
         The following code reads a sample gdb mi stream randomly to ensure partial
         output is read and that the buffer is working as expected on all streams.
