@@ -5,10 +5,10 @@ pygdbmi - Get Structured Output from GDB's Machine Interface
 <p align="center">
 
 <a href="https://github.com/cs01/pygdbmi/actions">
-<img src="https://github.com/cs01/pygdbmi/workflows/Tests/badge.svg?branch=master" alt="image" />
-</a>
+<img src="https://github.com/cs01/pygdbmi/workflows/Tests/badge.svg?branch=master" alt="Test status" /></a>
 
-<a href="https://badge.fury.io/py/pygdbmi"><img src="https://badge.fury.io/py/pygdbmi.svg" alt="PyPI version" height="18"></a>
+<a href="https://badge.fury.io/py/pygdbmi">
+<img src="https://badge.fury.io/py/pygdbmi.svg" alt="PyPI version"/></a>
 
 </p>
 
