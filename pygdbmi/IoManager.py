@@ -17,6 +17,15 @@ from pygdbmi.constants import (
     GdbTimeoutError,
 )
 
+import sys
+from subprocess import PIPE, Popen
+from threading  import Thread
+
+try:
+    from queue import Queue, Empty
+except ImportError:
+    from Queue import Queue, Empty  # python 2.x
+
 if USING_WINDOWS:
     import msvcrt
     from ctypes import windll, byref, wintypes, WinError, POINTER  # type: ignore
@@ -25,6 +34,7 @@ else:
     import fcntl
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class IoManager:
@@ -61,13 +71,22 @@ class IoManager:
         self._allow_overwrite_timeout_times = (
             self.time_to_check_for_additional_output_sec > 0
         )
-        make_non_blocking(self.stdout)
-        if self.stderr:
-            make_non_blocking(self.stderr)
 
-        # Sometimes stdout.readline() would mangle the data read from GDB.
-        # That's fixed if we pause a little.
-        self._response_windows_delay = 0.02
+        if USING_WINDOWS:
+            self.queue_stdout = Queue()
+            self.thread_stdout = Thread(target=enqueue_output, args=(self.stdout, self.queue_stdout))
+            self.thread_stdout.daemon = True # thread dies with the program
+            self.thread_stdout.start()
+
+            if self.stderr:
+                self.queue_stderr = Queue()
+                self.thread_stderr = Thread(target=enqueue_output, args=(self.stderr, self.queue_stderr))
+                self.thread_stderr.daemon = True # thread dies with the program
+                self.thread_stderr.start()
+        else:
+            fcntl.fcntl(self.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
+            if self.stderr:
+                fcntl.fcntl(self.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
 
     def get_gdb_response(
         self, timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC, raise_error_on_timeout=True
@@ -111,18 +130,17 @@ class IoManager:
         responses = []
         while True:
             responses_list = []
+
             try:
-                self.stdout.flush()
-                raw_output = self.stdout.readline().replace(b"\r", b"\n")
+                raw_output = self.queue_stdout.get_nowait()
                 responses_list = self._get_responses_list(raw_output, "stdout")
-            except IOError:
+            except Empty:
                 pass
 
             try:
-                self.stderr.flush()
-                raw_output = self.stderr.readline().replace(b"\r", b"\n")
+                raw_output = self.queue_stderr.get_nowait()
                 responses_list += self._get_responses_list(raw_output, "stderr")
-            except IOError:
+            except Empty:
                 pass
 
             responses += responses_list
@@ -135,9 +153,6 @@ class IoManager:
                 )
             elif time.time() > timeout_time_sec:
                 break
-
-            time.sleep(self._response_windows_delay)
-
         return responses
 
     def _get_responses_unix(self, timeout_sec):
@@ -326,29 +341,7 @@ def _buffer_incomplete_responses(
 
     return (raw_output, buf)
 
-
-def make_non_blocking(file_obj: io.IOBase):
-    """make file object non-blocking
-    Windows doesn't have the fcntl module, but someone on
-    stack overflow supplied this code as an answer, and it works
-    http://stackoverflow.com/a/34504971/2893090"""
-
-    if USING_WINDOWS:
-        LPDWORD = POINTER(DWORD)
-        PIPE_NOWAIT = wintypes.DWORD(0x00000001)
-
-        SetNamedPipeHandleState = windll.kernel32.SetNamedPipeHandleState
-        SetNamedPipeHandleState.argtypes = [HANDLE, LPDWORD, LPDWORD, LPDWORD]
-        SetNamedPipeHandleState.restype = BOOL
-
-        h = msvcrt.get_osfhandle(file_obj.fileno())
-
-        res = windll.kernel32.SetNamedPipeHandleState(h, byref(PIPE_NOWAIT), None, None)
-        if res == 0:
-            raise ValueError(WinError())
-
-    else:
-        # Set the file status flag (F_SETFL) on the pipes to be non-blocking
-        # so we can attempt to read from a pipe with no new data without locking
-        # the program up
-        fcntl.fcntl(file_obj, fcntl.F_SETFL, os.O_NONBLOCK)
+def enqueue_output(out, queue):
+    for line in iter(out.readline, b''):
+        queue.put(line.replace(b"\r", b"\n"))
+    out.close()
