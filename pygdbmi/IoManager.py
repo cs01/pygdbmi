@@ -65,6 +65,10 @@ class IoManager:
         if self.stderr:
             make_non_blocking(self.stderr)
 
+        # Sometimes stdout.readline() would mangle the data read from GDB.
+        # That's fixed if we pause a little.
+        self._response_windows_delay = 0.02
+
     def get_gdb_response(
         self, timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC, raise_error_on_timeout=True
     ):
@@ -131,7 +135,8 @@ class IoManager:
                 )
             elif time.time() > timeout_time_sec:
                 break
-            time.sleep(0.01)
+
+            time.sleep(self._response_windows_delay)
 
         return responses
 
