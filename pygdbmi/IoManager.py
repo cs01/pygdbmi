@@ -131,6 +131,7 @@ class IoManager:
                 )
             elif time.time() > timeout_time_sec:
                 break
+            time.sleep(0.01)
 
         return responses
 
