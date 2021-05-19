@@ -17,8 +17,6 @@ from pygdbmi.constants import (
     GdbTimeoutError,
 )
 
-import sys
-from subprocess import PIPE, Popen
 from threading import Thread
 
 try:
@@ -26,11 +24,7 @@ try:
 except ImportError:
     from Queue import Queue, Empty  # python 2.x
 
-if USING_WINDOWS:
-    import msvcrt
-    from ctypes import windll, byref, wintypes, WinError, POINTER  # type: ignore
-    from ctypes.wintypes import HANDLE, DWORD, BOOL
-else:
+if not USING_WINDOWS:
     import fcntl
 
 logger = logging.getLogger(__name__)
