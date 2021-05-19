@@ -344,4 +344,4 @@ def _buffer_incomplete_responses(
 def enqueue_output(out, queue):
     for line in iter(out.readline, b''):
         queue.put(line.replace(b"\r", b"\n"))
-    out.close()
+    # Not necessary to close, it will be done in the main process.
