@@ -19,7 +19,7 @@ from pygdbmi.constants import (
 
 import sys
 from subprocess import PIPE, Popen
-from threading  import Thread
+from threading import Thread
 
 try:
     from queue import Queue, Empty
@@ -34,6 +34,7 @@ else:
     import fcntl
 
 logger = logging.getLogger(__name__)
+
 
 class IoManager:
     def __init__(
@@ -72,14 +73,18 @@ class IoManager:
 
         if USING_WINDOWS:
             self.queue_stdout = Queue()
-            self.thread_stdout = Thread(target=enqueue_output, args=(self.stdout, self.queue_stdout))
-            self.thread_stdout.daemon = True # thread dies with the program
+            self.thread_stdout = Thread(
+                target=enqueue_output, args=(self.stdout, self.queue_stdout)
+            )
+            self.thread_stdout.daemon = True  # thread dies with the program
             self.thread_stdout.start()
 
             if self.stderr:
                 self.queue_stderr = Queue()
-                self.thread_stderr = Thread(target=enqueue_output, args=(self.stderr, self.queue_stderr))
-                self.thread_stderr.daemon = True # thread dies with the program
+                self.thread_stderr = Thread(
+                    target=enqueue_output, args=(self.stderr, self.queue_stderr)
+                )
+                self.thread_stderr.daemon = True  # thread dies with the program
                 self.thread_stderr.start()
         else:
             fcntl.fcntl(self.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
@@ -284,9 +289,7 @@ class IoManager:
         for fileno in outputready:
             if fileno == self.stdin_fileno:
                 # ready to write
-                self.stdin.write(  # type: ignore
-                    mi_cmd_to_write_nl.encode()
-                )
+                self.stdin.write(mi_cmd_to_write_nl.encode())  # type: ignore
                 # must flush, otherwise gdb won't realize there is data
                 # to evaluate, and we won't get a response
                 self.stdin.flush()  # type: ignore
@@ -339,7 +342,8 @@ def _buffer_incomplete_responses(
 
     return (raw_output, buf)
 
+
 def enqueue_output(out, queue):
-    for line in iter(out.readline, b''):
+    for line in iter(out.readline, b""):
         queue.put(line.replace(b"\r", b"\n"))
     # Not necessary to close, it will be done in the main process.

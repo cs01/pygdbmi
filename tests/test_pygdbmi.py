@@ -188,7 +188,9 @@ class TestPyGdbMi(unittest.TestCase):
         assert response["stream"] == "stdout"
         assert response["token"] is None
 
-        responses = gdbmi.write(["-file-list-exec-source-files", "-break-insert main"], timeout_sec=3)
+        responses = gdbmi.write(
+            ["-file-list-exec-source-files", "-break-insert main"], timeout_sec=3
+        )
         assert len(responses) != 0
 
         responses = gdbmi.write(["-exec-run", "-exec-continue"], timeout_sec=3)
@@ -207,7 +209,9 @@ class TestPyGdbMi(unittest.TestCase):
         assert gdbmi.gdb_process is None
 
         # Test ValueError exception
-        self.assertRaises(ValueError, gdbmi.write, "-file-exec-and-symbols %s" % c_hello_world_binary)
+        self.assertRaises(
+            ValueError, gdbmi.write, "-file-exec-and-symbols %s" % c_hello_world_binary
+        )
 
         # Respawn and test signal handling
         gdbmi.spawn_new_gdb_subprocess()
