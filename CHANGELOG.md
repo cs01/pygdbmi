@@ -1,5 +1,9 @@
 # pygdbmi release history
 
+## 0.10.0.1
+
+Refactored IOManager non-blocking reading for Windows. Fixes issue #54 : "`IoManager._get_responses_windows` mangles token when reading from stdout"
+
 ## 0.10.0.0
 
  **Breaking Changes**
