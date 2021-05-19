@@ -18,11 +18,7 @@ from pygdbmi.constants import (
 )
 
 from threading import Thread
-
-try:
-    from queue import Queue, Empty
-except ImportError:
-    from Queue import Queue, Empty  # python 2.x
+from queue import Queue, Empty
 
 if not USING_WINDOWS:
     import fcntl
@@ -66,7 +62,7 @@ class IoManager:
         )
 
         if USING_WINDOWS:
-            self.queue_stdout = Queue()
+            self.queue_stdout = Queue()  # type: Queue
             self.thread_stdout = Thread(
                 target=enqueue_output, args=(self.stdout, self.queue_stdout)
             )
@@ -74,7 +70,7 @@ class IoManager:
             self.thread_stdout.start()
 
             if self.stderr:
-                self.queue_stderr = Queue()
+                self.queue_stderr = Queue()  # type: Queue
                 self.thread_stderr = Thread(
                     target=enqueue_output, args=(self.stderr, self.queue_stderr)
                 )
