@@ -1,361 +1,589 @@
 
-<!DOCTYPE html>
-
-<html class="no-js" lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
-<meta content="Parse gdb machine interface output with Python" name="description"/>
-<link href="https://cs01.github.io/pygdbmi/api/gdbcontroller/" rel="canonical"/>
-<link href="../../assets/images/favicon.png" rel="shortcut icon"/>
-<meta content="mkdocs-1.1.2, mkdocs-material-5.5.8" name="generator"/>
-<title>gdbcontroller - pygdbmi</title>
-<link href="../../assets/stylesheets/main.01afc2df.min.css" rel="stylesheet"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
-<style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
-</head>
-<body dir="ltr">
-<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
-<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
-<label class="md-overlay" for="__drawer"></label>
-<div data-md-component="skip">
-<a class="md-skip" href="#pygdbmi.gdbcontroller">
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Parse gdb machine interface output with Python">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.5">
+    
+    
+      
+        <title>gdbcontroller - pygdbmi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.bde7dde4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ef6f36e2.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pygdbmi.gdbcontroller" class="md-skip">
           Skip to content
         </a>
-</div>
-<div data-md-component="announce">
-</div>
-<header class="md-header" data-md-component="header">
-<nav aria-label="Header" class="md-header-nav md-grid">
-<a aria-label="pygdbmi" class="md-header-nav__button md-logo" href="https://cs01.github.io/pygdbmi/" title="pygdbmi">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"></path></svg>
-</a>
-<label class="md-header-nav__button md-icon" for="__drawer">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"></path></svg>
-</label>
-<div class="md-header-nav__title" data-md-component="header-title">
-<div class="md-header-nav__ellipsis">
-<span class="md-header-nav__topic md-ellipsis">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="pygdbmi" class="md-header__button md-logo" aria-label="pygdbmi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
             pygdbmi
           </span>
-<span class="md-header-nav__topic md-ellipsis">
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
             
               gdbcontroller
             
           </span>
-</div>
-</div>
-<label class="md-header-nav__button md-icon" for="__search">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
-</label>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
 <div class="md-search" data-md-component="search" role="dialog">
-<label class="md-search__overlay" for="__search"></label>
-<div class="md-search__inner" role="search">
-<form class="md-search__form" name="search">
-<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" data-md-state="active" name="query" placeholder="Search" spellcheck="false" type="text"/>
-<label class="md-search__icon md-icon" for="__search">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</label>
-<button aria-label="Clear" class="md-search__icon md-icon" data-md-component="search-reset" tabindex="-1" type="reset">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path></svg>
-</button>
-</form>
-<div class="md-search__output">
-<div class="md-search__scrollwrap" data-md-scrollfix="">
-<div class="md-search-result" data-md-component="search-result">
-<div class="md-search-result__meta">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
             Initializing search
           </div>
-<ol class="md-search-result__list"></ol>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-</div>
-</div>
-</div>
-</div>
-<div class="md-header-nav__source">
-<a class="md-source" href="https://github.com/cs01/pygdbmi/" title="Go to repository">
-<div class="md-source__icon md-icon">
-<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"></path></svg>
-</div>
-<div class="md-source__repository">
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/cs01/pygdbmi/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
     cs01/pygdbmi
   </div>
 </a>
-</div>
-</nav>
+      </div>
+    
+  </nav>
 </header>
-<div class="md-container" data-md-component="container">
-<main class="md-main" data-md-component="main">
-<div class="md-main__inner md-grid">
-<div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
-<div class="md-sidebar__scrollwrap">
-<div class="md-sidebar__inner">
-<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
-<label class="md-nav__title" for="__drawer">
-<a aria-label="pygdbmi" class="md-nav__button md-logo" href="https://cs01.github.io/pygdbmi/" title="pygdbmi">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"></path></svg>
-</a>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="pygdbmi" class="md-nav__button md-logo" aria-label="pygdbmi" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
     pygdbmi
   </label>
-<div class="md-nav__source">
-<a class="md-source" href="https://github.com/cs01/pygdbmi/" title="Go to repository">
-<div class="md-source__icon md-icon">
-<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"></path></svg>
-</div>
-<div class="md-source__repository">
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/cs01/pygdbmi/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
     cs01/pygdbmi
   </div>
 </a>
-</div>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../.." title="Home">
-      Home
-    </a>
-</li>
-<li class="md-nav__item md-nav__item--active md-nav__item--nested">
-<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="nav-2" id="nav-2" type="checkbox"/>
-<label class="md-nav__link" for="nav-2">
-      Api
-      <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"></path></svg>
-</span>
-</label>
-<nav aria-label="Api" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="nav-2">
-<span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</span>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      <label class="md-nav__link" for="__nav_2">
         Api
+        <span class="md-nav__icon md-icon"></span>
       </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../gdbmiparser/" title="gdbmiparser">
-      gdbmiparser
-    </a>
-</li>
-<li class="md-nav__item md-nav__item--active">
-<input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
-<label class="md-nav__link md-nav__link--active" for="__toc">
+      <nav class="md-nav" aria-label="Api" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Api
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gdbmiparser/" class="md-nav__link">
+        gdbmiparser
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          gdbcontroller
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         gdbcontroller
-        <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9h14V7H3v2m0 4h14v-2H3v2m0 4h14v-2H3v2m16 0h2v-2h-2v2m0-10v2h2V7h-2m0 6h2v-2h-2v2z"></path></svg>
-</span>
-</label>
-<a class="md-nav__link md-nav__link--active" href="./" title="gdbcontroller">
-      gdbcontroller
-    </a>
-<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</span>
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller">
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller" class="md-nav__link">
     pygdbmi.gdbcontroller
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller.GdbController">
+      
+        <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller.GdbController" class="md-nav__link">
     GdbController
   </a>
-<nav aria-label="GdbController" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller.GdbController.__init__">
+  
+    <nav class="md-nav" aria-label="GdbController">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller.GdbController.__init__" class="md-nav__link">
     __init__()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller.GdbController.exit">
+        
+          <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller.GdbController.exit" class="md-nav__link">
     exit()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller.GdbController.get_gdb_response">
+        
+          <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller.GdbController.get_gdb_response" class="md-nav__link">
     get_gdb_response()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller.GdbController.spawn_new_gdb_subprocess">
+        
+          <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller.GdbController.spawn_new_gdb_subprocess" class="md-nav__link">
     spawn_new_gdb_subprocess()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller.GdbController.write">
+        
+          <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller.GdbController.write" class="md-nav__link">
     write()
   </a>
+  
 </li>
-</ul>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
-</li>
-</ul>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../iomanager/" class="md-nav__link">
+        iomanager
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CHANGELOG/" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
+
+    
+  </ul>
 </nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../iomanager/" title="iomanager">
-      iomanager
-    </a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../CHANGELOG/" title="Changelog">
-      Changelog
-    </a>
-</li>
-</ul>
-</nav>
-</div>
-</div>
-</div>
-<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
-<div class="md-sidebar__scrollwrap">
-<div class="md-sidebar__inner">
-<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</span>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller">
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller" class="md-nav__link">
     pygdbmi.gdbcontroller
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller.GdbController">
+      
+        <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller.GdbController" class="md-nav__link">
     GdbController
   </a>
-<nav aria-label="GdbController" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller.GdbController.__init__">
+  
+    <nav class="md-nav" aria-label="GdbController">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller.GdbController.__init__" class="md-nav__link">
     __init__()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller.GdbController.exit">
+        
+          <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller.GdbController.exit" class="md-nav__link">
     exit()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller.GdbController.get_gdb_response">
+        
+          <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller.GdbController.get_gdb_response" class="md-nav__link">
     get_gdb_response()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller.GdbController.spawn_new_gdb_subprocess">
+        
+          <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller.GdbController.spawn_new_gdb_subprocess" class="md-nav__link">
     spawn_new_gdb_subprocess()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#pygdbmi.gdbcontroller.GdbController.write">
+        
+          <li class="md-nav__item">
+  <a href="#pygdbmi.gdbcontroller.GdbController.write" class="md-nav__link">
     write()
   </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-</ul>
+      
+    </ul>
+  
 </nav>
-</div>
-</div>
-</div>
-<div class="md-content">
-<article class="md-content__inner md-typeset">
-<a class="md-content__button md-icon" href="https://github.com/cs01/pygdbmi/edit/master/docs/api/gdbcontroller.md" title="Edit this page">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"></path></svg>
-</a>
-<h1>gdbcontroller</h1>
-<div class="doc doc-object doc-module">
-<h2 class="hidden-toc" href="#pygdbmi.gdbcontroller" id="pygdbmi.gdbcontroller" style="visibility: hidden; width: 0; height: 0;">
-</h2>
-<div class="doc doc-contents first">
-<p>This module defines the <code>GdbController</code> class
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/cs01/pygdbmi/edit/master/docs/api/gdbcontroller.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                  <h1>gdbcontroller</h1>
+                
+                <div class="doc doc-object doc-module">
+
+<a id="pygdbmi.gdbcontroller"></a>
+    <div class="doc doc-contents first">
+
+      <p>This module defines the <code>GdbController</code> class
 which runs gdb as a subprocess and can write to it and read from it to get
 structured output.</p>
-<div class="doc doc-children">
-<div class="doc doc-object doc-class">
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
 <h2 class="doc doc-heading" id="pygdbmi.gdbcontroller.GdbController">
-<code>GdbController</code>
+        <code>GdbController</code>
+
+
+
 </h2>
-<div class="doc doc-contents">
-<div class="doc doc-children">
-<div class="doc doc-object doc-method">
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
 <h3 class="doc doc-heading" id="pygdbmi.gdbcontroller.GdbController.__init__">
-<code class="highlight language-python">
-__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_to_check_for_additional_output_sec</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span> </code>
-<span class="doc doc-properties">
-<small class="doc doc-property doc-property-special"><code>special</code></small>
-</span>
+<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_to_check_for_additional_output_sec</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
 </h3>
-<div class="doc doc-contents">
-<p>Run gdb as a subprocess. Send commands and receive structured output.
+
+    <div class="doc doc-contents ">
+
+      <p>Run gdb as a subprocess. Send commands and receive structured output.
 Create new object, along with a gdb subprocess</p>
+
 <p><strong>Parameters:</strong></p>
 <table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>command</code></td>
-<td><code>Optional[List[str]]</code></td>
-<td>
-<p>Command to run in shell to spawn new gdb subprocess</p>
-</td>
-<td><code>None</code></td>
-</tr>
-<tr>
-<td><code>time_to_check_for_additional_output_sec</code></td>
-<td><code></code></td>
-<td>
-<p>When parsing responses, wait this amout of time before exiting (exits before timeout is reached to save time). If &lt;= 0, full timeout time is used.</p>
-</td>
-<td><code>0.2</code></td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>command</code></td>
+        <td><code>Optional[List[str]]</code></td>
+        <td><p>Command to run in shell to spawn new gdb subprocess</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>time_to_check_for_additional_output_sec</code></td>
+        <td><code></code></td>
+        <td><p>When parsing responses, wait this amout of time before exiting (exits before timeout is reached to save time). If &lt;= 0, full timeout time is used.</p></td>
+        <td><code>0.2</code></td>
+      </tr>
+  </tbody>
 </table>
 <p><strong>Returns:</strong></p>
 <table>
-<thead>
-<tr>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code></code></td>
-<td>
-<p>New GdbController object</p>
-</td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code></code></td>
+      <td><p>New GdbController object</p></td>
+    </tr>
+  </tbody>
 </table>
-<details class="quote">
-<summary>Source code in <code>pygdbmi/gdbcontroller.py</code></summary>
-<div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <details class="quote">
+          <summary>Source code in <code>pygdbmi/gdbcontroller.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">command</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">time_to_check_for_additional_output_sec</span><span class="o">=</span><span class="n">DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">"""</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run gdb as a subprocess. Send commands and receive structured output.</span>
 <span class="sd">    Create new object, along with a gdb subprocess</span>
 
@@ -364,15 +592,15 @@ Create new object, along with a gdb subprocess</p>
 <span class="sd">        time_to_check_for_additional_output_sec: When parsing responses, wait this amout of time before exiting (exits before timeout is reached to save time). If &lt;= 0, full timeout time is used.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        New GdbController object</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">command</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">command</span> <span class="o">=</span> <span class="n">DEFAULT_GDB_LAUNCH_COMMAND</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([(</span><span class="s2">"--interpreter=mi"</span> <span class="ow">in</span> <span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">command</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([(</span><span class="s2">&quot;--interpreter=mi&quot;</span> <span class="ow">in</span> <span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">command</span><span class="p">]):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="s2">"Adding `--interpreter=mi3` (or similar) is recommended to get structured output. "</span>
-            <span class="o">+</span> <span class="s2">"See https://sourceware.org/gdb/onlinedocs/gdb/Mode-Options.html#Mode-Options."</span>
+            <span class="s2">&quot;Adding `--interpreter=mi3` (or similar) is recommended to get structured output. &quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;See https://sourceware.org/gdb/onlinedocs/gdb/Mode-Options.html#Mode-Options.&quot;</span>
         <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">abs_gdb_path</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># abs path to gdb executable</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="n">command</span>  <span class="c1"># type: List[str]</span>
@@ -385,92 +613,119 @@ Create new object, along with a gdb subprocess</p>
     <span class="p">)</span>
     <span class="n">gdb_path</span> <span class="o">=</span> <span class="n">command</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">gdb_path</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"a valid path to gdb must be specified"</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;a valid path to gdb must be specified&quot;</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">abs_gdb_path</span> <span class="o">=</span> <span class="n">find_executable</span><span class="p">(</span><span class="n">gdb_path</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">abs_gdb_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">'gdb executable could not be resolved from "</span><span class="si">%s</span><span class="s1">"'</span> <span class="o">%</span> <span class="n">gdb_path</span>
+                <span class="s1">&#39;gdb executable could not be resolved from &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">gdb_path</span>
             <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">abs_gdb_path</span> <span class="o">=</span> <span class="n">abs_gdb_path</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">spawn_new_gdb_subprocess</span><span class="p">()</span>
-</code></pre>
-</div>
-</details>
-</div>
-</div>
-<div class="doc doc-object doc-method">
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
 <h3 class="doc doc-heading" id="pygdbmi.gdbcontroller.GdbController.exit">
-<code class="highlight language-python">
-exit<span class="p">(</span><span class="bp">self</span><span class="p">)</span> </code>
+<code class="codehilite language-python"><span class="n">exit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
 </h3>
-<div class="doc doc-contents">
-<p>Terminate gdb process</p>
-<details class="quote">
-<summary>Source code in <code>pygdbmi/gdbcontroller.py</code></summary>
-<div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">exit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">"""Terminate gdb process"""</span>
+
+    <div class="doc doc-contents ">
+
+      <p>Terminate gdb process</p>
+
+        <details class="quote">
+          <summary>Source code in <code>pygdbmi/gdbcontroller.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">exit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Terminate gdb process&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="kc">None</span>
-</code></pre>
-</div>
-</details>
-</div>
-</div>
-<div class="doc doc-object doc-method">
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
 <h3 class="doc doc-heading" id="pygdbmi.gdbcontroller.GdbController.get_gdb_response">
-<code class="highlight language-python">
-get_gdb_response<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout_sec</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">raise_error_on_timeout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> </code>
+<code class="codehilite language-python"><span class="n">get_gdb_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout_sec</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">raise_error_on_timeout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+
 </h3>
-<div class="doc doc-contents">
-<p>Get gdb response. See IoManager.get_gdb_response() for details</p>
-<details class="quote">
-<summary>Source code in <code>pygdbmi/gdbcontroller.py</code></summary>
-<div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">get_gdb_response</span><span class="p">(</span>
+
+    <div class="doc doc-contents ">
+
+      <p>Get gdb response. See IoManager.get_gdb_response() for details</p>
+
+        <details class="quote">
+          <summary>Source code in <code>pygdbmi/gdbcontroller.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_gdb_response</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">timeout_sec</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_GDB_TIMEOUT_SEC</span><span class="p">,</span> <span class="n">raise_error_on_timeout</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">):</span>
-    <span class="sd">"""Get gdb response. See IoManager.get_gdb_response() for details"""</span>
+    <span class="sd">&quot;&quot;&quot;Get gdb response. See IoManager.get_gdb_response() for details&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">io_manager</span><span class="o">.</span><span class="n">get_gdb_response</span><span class="p">(</span><span class="n">timeout_sec</span><span class="p">,</span> <span class="n">raise_error_on_timeout</span><span class="p">)</span>
-</code></pre>
-</div>
-</details>
-</div>
-</div>
-<div class="doc doc-object doc-method">
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
 <h3 class="doc doc-heading" id="pygdbmi.gdbcontroller.GdbController.spawn_new_gdb_subprocess">
-<code class="highlight language-python">
-spawn_new_gdb_subprocess<span class="p">(</span><span class="bp">self</span><span class="p">)</span> </code>
+<code class="codehilite language-python"><span class="n">spawn_new_gdb_subprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
 </h3>
-<div class="doc doc-contents">
-<p>Spawn a new gdb subprocess with the arguments supplied to the object
+
+    <div class="doc doc-contents ">
+
+      <p>Spawn a new gdb subprocess with the arguments supplied to the object
 during initialization. If gdb subprocess already exists, terminate it before
 spanwing a new one.
 Return int: gdb process id</p>
-<details class="quote">
-<summary>Source code in <code>pygdbmi/gdbcontroller.py</code></summary>
-<div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">spawn_new_gdb_subprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">"""Spawn a new gdb subprocess with the arguments supplied to the object</span>
+
+        <details class="quote">
+          <summary>Source code in <code>pygdbmi/gdbcontroller.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">spawn_new_gdb_subprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Spawn a new gdb subprocess with the arguments supplied to the object</span>
 <span class="sd">    during initialization. If gdb subprocess already exists, terminate it before</span>
 <span class="sd">    spanwing a new one.</span>
 <span class="sd">    Return int: gdb process id</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-            <span class="s2">"Killing current gdb subprocess (pid </span><span class="si">%d</span><span class="s2">)"</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span><span class="o">.</span><span class="n">pid</span>
+            <span class="s2">&quot;Killing current gdb subprocess (pid </span><span class="si">%d</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span><span class="o">.</span><span class="n">pid</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Launching gdb: </span><span class="si">{</span><span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Launching gdb: </span><span class="si">{</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="c1"># Use pipes to the standard streams</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
@@ -483,104 +738,147 @@ Return int: gdb process id</p>
     <span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">io_manager</span> <span class="o">=</span> <span class="n">IoManager</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span><span class="o">.</span><span class="n">stdin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span><span class="o">.</span><span class="n">stderr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span><span class="o">.</span><span class="n">stdin</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_to_check_for_additional_output_sec</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdb_process</span><span class="o">.</span><span class="n">pid</span>
-</code></pre>
-</div>
-</details>
-</div>
-</div>
-<div class="doc doc-object doc-method">
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
 <h3 class="doc doc-heading" id="pygdbmi.gdbcontroller.GdbController.write">
-<code class="highlight language-python">
-write<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mi_cmd_to_write</span><span class="p">,</span> <span class="n">timeout_sec</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">raise_error_on_timeout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_response</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> </code>
+<code class="codehilite language-python"><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mi_cmd_to_write</span><span class="p">,</span> <span class="n">timeout_sec</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">raise_error_on_timeout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_response</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+
 </h3>
-<div class="doc doc-contents">
-<p>Write command to gdb. See IoManager.write() for details</p>
-<details class="quote">
-<summary>Source code in <code>pygdbmi/gdbcontroller.py</code></summary>
-<div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span>
+
+    <div class="doc doc-contents ">
+
+      <p>Write command to gdb. See IoManager.write() for details</p>
+
+        <details class="quote">
+          <summary>Source code in <code>pygdbmi/gdbcontroller.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">mi_cmd_to_write</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
     <span class="n">timeout_sec</span><span class="o">=</span><span class="n">DEFAULT_GDB_TIMEOUT_SEC</span><span class="p">,</span>
     <span class="n">raise_error_on_timeout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">read_response</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">"""Write command to gdb. See IoManager.write() for details"""</span>
+    <span class="sd">&quot;&quot;&quot;Write command to gdb. See IoManager.write() for details&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">io_manager</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
         <span class="n">mi_cmd_to_write</span><span class="p">,</span> <span class="n">timeout_sec</span><span class="p">,</span> <span class="n">raise_error_on_timeout</span><span class="p">,</span> <span class="n">read_response</span>
     <span class="p">)</span>
-</code></pre>
-</div>
-</details>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</article>
-</div>
-</div>
-</main>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
 <footer class="md-footer">
-<div class="md-footer-nav">
-<nav aria-label="Footer" class="md-footer-nav__inner md-grid">
-<a class="md-footer-nav__link md-footer-nav__link--prev" href="../gdbmiparser/" rel="prev" title="gdbmiparser">
-<div class="md-footer-nav__button md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</div>
-<div class="md-footer-nav__title">
-<div class="md-ellipsis">
-<span class="md-footer-nav__direction">
-                  Previous
-                </span>
-                gdbmiparser
-              </div>
-</div>
-</a>
-<a class="md-footer-nav__link md-footer-nav__link--next" href="../iomanager/" rel="next" title="iomanager">
-<div class="md-footer-nav__title">
-<div class="md-ellipsis">
-<span class="md-footer-nav__direction">
-                  Next
-                </span>
-                iomanager
-              </div>
-</div>
-<div class="md-footer-nav__button md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"></path></svg>
-</div>
-</a>
-</nav>
-</div>
-<div class="md-footer-meta md-typeset">
-<div class="md-footer-meta__inner md-grid">
-<div class="md-footer-copyright">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        <a href="../gdbmiparser/" class="md-footer__link md-footer__link--prev" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              gdbmiparser
+            </div>
+          </div>
+        </a>
+      
+      
+        <a href="../iomanager/" class="md-footer__link md-footer__link--next" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              iomanager
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
         
         Made with
-        <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
           Material for MkDocs
         </a>
-</div>
-</div>
-</div>
+        
+      </div>
+      
+    </div>
+  </div>
 </footer>
-</div>
-<script src="../../assets/javascripts/vendor.df0def68.min.js"></script>
-<script src="../../assets/javascripts/bundle.ba57d267.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
-<script>
-        app = initialize({
-          base: "../..",
-          features: [],
-          search: Object.assign({
-            worker: "../../assets/javascripts/worker/search.fae956e7.min.js"
-          }, typeof search !== "undefined" && search)
-        })
-      </script>
-</body>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.d351de03.min.js", "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a1609d9a.min.js"></script>
+      
+    
+  </body>
 </html>
