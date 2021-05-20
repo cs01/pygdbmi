@@ -264,9 +264,7 @@ class IoManager:
         for fileno in outputready:
             if fileno == self.stdin_fileno:
                 # ready to write
-                self.stdin.write(  # type: ignore
-                    mi_cmd_to_write_nl.encode()
-                )
+                self.stdin.write(mi_cmd_to_write_nl.encode())  # type: ignore
                 # must flush, otherwise gdb won't realize there is data
                 # to evaluate, and we won't get a response
                 self.stdin.flush()  # type: ignore
@@ -334,7 +332,7 @@ def make_non_blocking(file_obj: io.IOBase):
         SetNamedPipeHandleState.argtypes = [HANDLE, LPDWORD, LPDWORD, LPDWORD]
         SetNamedPipeHandleState.restype = BOOL
 
-        h = msvcrt.get_osfhandle(file_obj.fileno())
+        h = msvcrt.get_osfhandle(file_obj.fileno())  # type: ignore
 
         res = windll.kernel32.SetNamedPipeHandleState(h, byref(PIPE_NOWAIT), None, None)
         if res == 0:
