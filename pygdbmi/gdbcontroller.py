@@ -92,8 +92,10 @@ class GdbController:
         )
 
         self.io_manager = IoManager(
-            self.gdb_process.stdin, self.gdb_process.stdout, self.gdb_process.stderr,
-            self.time_to_check_for_additional_output_sec
+            self.gdb_process.stdin,
+            self.gdb_process.stdout,
+            self.gdb_process.stderr,
+            self.time_to_check_for_additional_output_sec,
         )
         return self.gdb_process.pid
 
