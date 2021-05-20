@@ -1,5 +1,8 @@
 # pygdbmi release history
 
+## 0.10.0.1
+* Fix bug with `time_to_check_for_additional_output_sec`, as it was not being used when passed to `GdbController`
+
 ## 0.10.0.0
 
  **Breaking Changes**
