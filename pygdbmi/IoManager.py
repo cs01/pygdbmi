@@ -333,7 +333,7 @@ def make_non_blocking(file_obj: io.IOBase):
         SetNamedPipeHandleState.argtypes = [HANDLE, LPDWORD, LPDWORD, LPDWORD]
         SetNamedPipeHandleState.restype = BOOL
 
-        h = msvcrt.get_osfhandle(file_obj.fileno())
+        h = msvcrt.get_osfhandle(file_obj.fileno())  # type: ignore
 
         res = windll.kernel32.SetNamedPipeHandleState(h, byref(PIPE_NOWAIT), None, None)
         if res == 0:
