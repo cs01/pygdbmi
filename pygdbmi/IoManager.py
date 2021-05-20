@@ -230,7 +230,6 @@ class IoManager:
         Returns:
             List of parsed gdb responses if read_response is True, otherwise []
         Raises:
-            NoGdbProcessError: if there is no gdb subprocess running
             TypeError: if mi_cmd_to_write is not valid
         """
         # self.verify_valid_gdb_subprocess()
