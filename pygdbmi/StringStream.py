@@ -1,3 +1,6 @@
+from pygdbmi.gdbescapes import advance_past_string_with_gdb_escapes
+
+
 class StringStream:
     """A simple class to hold text so that when passed
     between functions, the object is passed by reference
@@ -47,35 +50,19 @@ class StringStream:
 
         return self.raw_text[start_index : self.index - 1]
 
-    def advance_past_string_with_gdb_escapes(self, chars_to_remove_gdb_escape=None):
-        """characters that gdb escapes that should not be
-        escaped by this parser
+    def advance_past_string_with_gdb_escapes(self) -> str:
+        """Advance the index past a quoted string until the end quote is reached, and
+        return the string (after unescaping it)
+
+        Must be called only after encountering a quote character.
         """
+        assert self.index > 0 and self.raw_text[self.index - 1] == '"', (
+            "advance_past_string_with_gdb_escapes called not at the start of a string "
+            f"(at index {self.index} of text {self.raw_text!r}, "
+            f"remaining string {self.raw_text[self.index:]!r})"
+        )
 
-        if chars_to_remove_gdb_escape is None:
-            chars_to_remove_gdb_escape = ['"']
-
-        buf = ""
-        while True:
-            c = self.raw_text[self.index]
-            self.index += 1
-
-            if c == "\\":
-                # We are on a backslash and there is another character after the backslash
-                # to parse. Handle this case specially since gdb escaped it for us
-
-                # Get the next char that is being escaped
-                c2 = self.raw_text[self.index]
-                self.index += 1
-                # only store the escaped character in the buffer; don't store the backslash
-                # (don't leave it escaped)
-                buf += c2
-
-            elif c == '"':
-                # Quote is closed. Exit (and don't include the end quote).
-                break
-
-            else:
-                # capture this character, and keep capturing
-                buf += c
-        return buf
+        unescaped_str, self.index = advance_past_string_with_gdb_escapes(
+            self.raw_text, start=self.index
+        )
+        return unescaped_str

@@ -96,6 +96,58 @@ class TestPyGdbMi(unittest.TestCase):
             },
         )
 
+        # Test errors
+        assert_match(
+            parse_response(r'^error,msg="some message"'),
+            {
+                "type": "result",
+                "message": "error",
+                "payload": {"msg": "some message"},
+                "token": None,
+            },
+        )
+        assert_match(
+            parse_response(r'^error,msg="some message",code="undefined-command"'),
+            {
+                "type": "result",
+                "message": "error",
+                "payload": {"msg": "some message", "code": "undefined-command"},
+                "token": None,
+            },
+        )
+        assert_match(
+            parse_response(r'^error,msg="message\twith\nescapes"'),
+            {
+                "type": "result",
+                "message": "error",
+                "payload": {"msg": "message\twith\nescapes"},
+                "token": None,
+            },
+        )
+        assert_match(
+            parse_response(r'^error,msg="This is a double quote: <\">"'),
+            {
+                "type": "result",
+                "message": "error",
+                "payload": {"msg": 'This is a double quote: <">'},
+                "token": None,
+            },
+        )
+        assert_match(
+            parse_response(
+                r'^error,msg="This is a double quote: <\">",code="undefined-command"'
+            ),
+            {
+                "type": "result",
+                "message": "error",
+                "payload": {
+                    "msg": 'This is a double quote: <">',
+                    "code": "undefined-command",
+                },
+                "token": None,
+            },
+        )
+
         # Test a real world Dictionary
         assert_match(
             parse_response(
