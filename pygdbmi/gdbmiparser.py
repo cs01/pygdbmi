@@ -14,6 +14,7 @@ from typing import Dict, Union
 
 from pygdbmi.printcolor import fmt_green
 from pygdbmi.StringStream import StringStream
+from pygdbmi.gdbescapes import unescape
 
 _DEBUG = False
 logger = logging.getLogger(__name__)
@@ -73,7 +74,7 @@ def parse_response(gdb_mi_text: str) -> Dict:
     elif _GDB_MI_CONSOLE_RE.match(gdb_mi_text):
         match = _GDB_MI_CONSOLE_RE.match(gdb_mi_text)
         if match:
-            payload = match.groups()[0]
+            payload = unescape(match.groups()[0])
         else:
             payload = None
         return {
@@ -85,7 +86,7 @@ def parse_response(gdb_mi_text: str) -> Dict:
     elif _GDB_MI_LOG_RE.match(gdb_mi_text):
         match = _GDB_MI_LOG_RE.match(gdb_mi_text)
         if match:
-            payload = match.groups()[0]
+            payload = unescape(match.groups()[0])
         else:
             payload = None
         return {"type": "log", "message": None, "payload": payload}
@@ -93,7 +94,7 @@ def parse_response(gdb_mi_text: str) -> Dict:
     elif _GDB_MI_TARGET_OUTPUT_RE.match(gdb_mi_text):
         match = _GDB_MI_TARGET_OUTPUT_RE.match(gdb_mi_text)
         if match:
-            payload = match.groups()[0]
+            payload = unescape(match.groups()[0])
         else:
             payload = None
         return {"type": "target", "message": None, "payload": payload}

@@ -56,25 +56,25 @@ class TestPyGdbMi(unittest.TestCase):
             parse_response('~""'), {"type": "console", "payload": "", "message": None}
         )
         assert_match(
-            parse_response('~"\b\f\n\r\t""'),
+            parse_response(r'~"\b\f\n\r\t\""'),
             {"type": "console", "payload": '\b\f\n\r\t"', "message": None},
         )
         assert_match(
             parse_response('@""'), {"type": "target", "payload": "", "message": None}
         )
         assert_match(
-            parse_response('@"\b\f\n\r\t""'),
+            parse_response(r'@"\b\f\n\r\t\""'),
             {"type": "target", "payload": '\b\f\n\r\t"', "message": None},
         )
         assert_match(
             parse_response('&""'), {"type": "log", "payload": "", "message": None}
         )
         assert_match(
-            parse_response('&"\b\f\n\r\t""'),
+            parse_response(r'&"\b\f\n\r\t\""'),
             {"type": "log", "payload": '\b\f\n\r\t"', "message": None},
         )
         assert_match(
-            parse_response('&"\\"'), {"type": "log", "payload": "\\", "message": None}
+            parse_response(r'&"\\"'), {"type": "log", "payload": "\\", "message": None}
         )  # test that an escaped backslash gets captured
 
         # Test that a dictionary with repeated keys (a gdb bug) is gracefully worked-around  by pygdbmi
