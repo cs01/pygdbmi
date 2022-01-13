@@ -252,7 +252,7 @@ class TestPyGdbMi(unittest.TestCase):
                 {
                     "message": None,
                     "type": "console",
-                    "payload": u"0x00007fe2c5c58920 in __nanosleep_nocancel () at ../sysdeps/unix/syscall-template.S:81\\n",
+                    "payload": "0x00007fe2c5c58920 in __nanosleep_nocancel () at ../sysdeps/unix/syscall-template.S:81\\n",
                     "stream": stream,
                 },
             )
@@ -262,7 +262,7 @@ class TestPyGdbMi(unittest.TestCase):
                     responses[71],
                     {
                         "stream": stream,
-                        "message": u"done",
+                        "message": "done",
                         "type": "result",
                         "payload": None,
                         "token": None,
@@ -273,7 +273,7 @@ class TestPyGdbMi(unittest.TestCase):
                     {
                         "message": None,
                         "type": "output",
-                        "payload": u"The inferior program printed this! Can you still parse it?",
+                        "payload": "The inferior program printed this! Can you still parse it?",
                         "stream": stream,
                     },
                 )
@@ -281,9 +281,9 @@ class TestPyGdbMi(unittest.TestCase):
                 responses[137],
                 {
                     "stream": stream,
-                    "message": u"thread-group-exited",
+                    "message": "thread-group-exited",
                     "type": "notify",
-                    "payload": {u"exit-code": u"0", u"id": u"i1"},
+                    "payload": {"exit-code": "0", "id": "i1"},
                     "token": None,
                 },
             )
@@ -291,9 +291,9 @@ class TestPyGdbMi(unittest.TestCase):
                 responses[138],
                 {
                     "stream": stream,
-                    "message": u"thread-group-started",
+                    "message": "thread-group-started",
                     "type": "notify",
-                    "payload": {u"pid": u"48337", u"id": u"i1"},
+                    "payload": {"pid": "48337", "id": "i1"},
                     "token": None,
                 },
             )
@@ -301,9 +301,9 @@ class TestPyGdbMi(unittest.TestCase):
                 responses[139],
                 {
                     "stream": stream,
-                    "message": u"tsv-created",
+                    "message": "tsv-created",
                     "type": "notify",
-                    "payload": {u"name": "trace_timestamp", u"initial": "0"},
+                    "payload": {"name": "trace_timestamp", "initial": "0"},
                     "token": None,
                 },
             )
@@ -311,9 +311,9 @@ class TestPyGdbMi(unittest.TestCase):
                 responses[140],
                 {
                     "stream": stream,
-                    "message": u"tsv-created",
+                    "message": "tsv-created",
                     "type": "notify",
-                    "payload": {u"name": "trace_timestamp", u"initial": "0"},
+                    "payload": {"name": "trace_timestamp", "initial": "0"},
                     "token": None,
                 },
             )
