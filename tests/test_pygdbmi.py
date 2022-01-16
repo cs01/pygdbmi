@@ -13,6 +13,7 @@ import subprocess
 from time import time
 from distutils.spawn import find_executable
 from pygdbmi.StringStream import StringStream
+from pygdbmi.gdbescapes import advance_past_string_with_gdb_escapes, unescape
 from pygdbmi.gdbmiparser import parse_response, assert_match
 from pygdbmi.gdbcontroller import GdbController
 from pygdbmi.constants import GdbTimeoutError, USING_WINDOWS
@@ -55,25 +56,25 @@ class TestPyGdbMi(unittest.TestCase):
             parse_response('~""'), {"type": "console", "payload": "", "message": None}
         )
         assert_match(
-            parse_response('~"\b\f\n\r\t""'),
+            parse_response(r'~"\b\f\n\r\t\""'),
             {"type": "console", "payload": '\b\f\n\r\t"', "message": None},
         )
         assert_match(
             parse_response('@""'), {"type": "target", "payload": "", "message": None}
         )
         assert_match(
-            parse_response('@"\b\f\n\r\t""'),
+            parse_response(r'@"\b\f\n\r\t\""'),
             {"type": "target", "payload": '\b\f\n\r\t"', "message": None},
         )
         assert_match(
             parse_response('&""'), {"type": "log", "payload": "", "message": None}
         )
         assert_match(
-            parse_response('&"\b\f\n\r\t""'),
+            parse_response(r'&"\b\f\n\r\t\""'),
             {"type": "log", "payload": '\b\f\n\r\t"', "message": None},
         )
         assert_match(
-            parse_response('&"\\"'), {"type": "log", "payload": "\\", "message": None}
+            parse_response(r'&"\\"'), {"type": "log", "payload": "\\", "message": None}
         )  # test that an escaped backslash gets captured
 
         # Test that a dictionary with repeated keys (a gdb bug) is gracefully worked-around  by pygdbmi
@@ -91,6 +92,58 @@ class TestPyGdbMi(unittest.TestCase):
                     "number-of-threads": "3",
                 },
                 "message": "done",
+                "token": None,
+            },
+        )
+
+        # Test errors
+        assert_match(
+            parse_response(r'^error,msg="some message"'),
+            {
+                "type": "result",
+                "message": "error",
+                "payload": {"msg": "some message"},
+                "token": None,
+            },
+        )
+        assert_match(
+            parse_response(r'^error,msg="some message",code="undefined-command"'),
+            {
+                "type": "result",
+                "message": "error",
+                "payload": {"msg": "some message", "code": "undefined-command"},
+                "token": None,
+            },
+        )
+        assert_match(
+            parse_response(r'^error,msg="message\twith\nescapes"'),
+            {
+                "type": "result",
+                "message": "error",
+                "payload": {"msg": "message\twith\nescapes"},
+                "token": None,
+            },
+        )
+        assert_match(
+            parse_response(r'^error,msg="This is a double quote: <\">"'),
+            {
+                "type": "result",
+                "message": "error",
+                "payload": {"msg": 'This is a double quote: <">'},
+                "token": None,
+            },
+        )
+        assert_match(
+            parse_response(
+                r'^error,msg="This is a double quote: <\">",code="undefined-command"'
+            ),
+            {
+                "type": "result",
+                "message": "error",
+                "payload": {
+                    "msg": 'This is a double quote: <">',
+                    "code": "undefined-command",
+                },
                 "token": None,
             },
         )
@@ -252,7 +305,7 @@ class TestPyGdbMi(unittest.TestCase):
                 {
                     "message": None,
                     "type": "console",
-                    "payload": u"0x00007fe2c5c58920 in __nanosleep_nocancel () at ../sysdeps/unix/syscall-template.S:81\\n",
+                    "payload": "0x00007fe2c5c58920 in __nanosleep_nocancel () at ../sysdeps/unix/syscall-template.S:81\\n",
                     "stream": stream,
                 },
             )
@@ -262,7 +315,7 @@ class TestPyGdbMi(unittest.TestCase):
                     responses[71],
                     {
                         "stream": stream,
-                        "message": u"done",
+                        "message": "done",
                         "type": "result",
                         "payload": None,
                         "token": None,
@@ -273,7 +326,7 @@ class TestPyGdbMi(unittest.TestCase):
                     {
                         "message": None,
                         "type": "output",
-                        "payload": u"The inferior program printed this! Can you still parse it?",
+                        "payload": "The inferior program printed this! Can you still parse it?",
                         "stream": stream,
                     },
                 )
@@ -281,9 +334,9 @@ class TestPyGdbMi(unittest.TestCase):
                 responses[137],
                 {
                     "stream": stream,
-                    "message": u"thread-group-exited",
+                    "message": "thread-group-exited",
                     "type": "notify",
-                    "payload": {u"exit-code": u"0", u"id": u"i1"},
+                    "payload": {"exit-code": "0", "id": "i1"},
                     "token": None,
                 },
             )
@@ -291,9 +344,9 @@ class TestPyGdbMi(unittest.TestCase):
                 responses[138],
                 {
                     "stream": stream,
-                    "message": u"thread-group-started",
+                    "message": "thread-group-started",
                     "type": "notify",
-                    "payload": {u"pid": u"48337", u"id": u"i1"},
+                    "payload": {"pid": "48337", "id": "i1"},
                     "token": None,
                 },
             )
@@ -301,9 +354,9 @@ class TestPyGdbMi(unittest.TestCase):
                 responses[139],
                 {
                     "stream": stream,
-                    "message": u"tsv-created",
+                    "message": "tsv-created",
                     "type": "notify",
-                    "payload": {u"name": "trace_timestamp", u"initial": "0"},
+                    "payload": {"name": "trace_timestamp", "initial": "0"},
                     "token": None,
                 },
             )
@@ -311,9 +364,9 @@ class TestPyGdbMi(unittest.TestCase):
                 responses[140],
                 {
                     "stream": stream,
-                    "message": u"tsv-created",
+                    "message": "tsv-created",
                     "type": "notify",
-                    "payload": {u"name": "trace_timestamp", u"initial": "0"},
+                    "payload": {"name": "trace_timestamp", "initial": "0"},
                     "token": None,
                 },
             )
@@ -382,10 +435,104 @@ class TestStringStream(unittest.TestCase):
         assert_match(buf, '" g')
 
 
+class TestGdbEscapes(unittest.TestCase):
+    # Split a Unicode character into its UTF-8 bytes and encode each one as a 3-digit
+    # oct char prefixed with a "\".
+    # This is the opposite of what the gdbescapes module does.
+    GDB_ESCAPED_PIZZA = "".join(
+        rf"\{c:03o}" for c in "\N{SLICE OF PIZZA}".encode("utf-8")
+    )
+    # Similar but for a simple space.
+    # This character was chosen because, in octal, it's shorter than three digits, so we
+    # can check that unescape_gdb_mi_string handles the initial `0` correctly.
+    # Note that a space would usually not be escaped by GDB itself, but it's fine if it
+    # is.
+    GDB_ESCAPED_SPACE = rf"\{ord(' '):03o}"
+
+    def test_unescape(self) -> None:
+        """Test the unescape function"""
+
+        assert_match(unescape(r"a"), "a")
+        assert_match(unescape(r"hello world"), "hello world")
+        assert_match(unescape(r"hello\nworld"), "hello\nworld")
+        assert_match(unescape(r"quote: <\">"), 'quote: <">')
+        # UTF-8 text encoded as a sequence of octal characters.
+        assert_match(unescape(self.GDB_ESCAPED_PIZZA), "\N{SLICE OF PIZZA}")
+        # Similar but for a simple space.
+        assert_match(unescape(self.GDB_ESCAPED_SPACE), " ")
+        # Several escapes in the same string.
+        assert_match(
+            unescape(
+                fr"\tmultiple\nescapes\tin\"the\'same\"string\"foo"
+                fr"{self.GDB_ESCAPED_SPACE}bar{self.GDB_ESCAPED_PIZZA}"
+            ),
+            '\tmultiple\nescapes\tin"the\'same"string"foo bar\N{SLICE OF PIZZA}',
+        )
+
+        for bad in (r'"', r'"x', r'a"', r'a"x', r'a"x"foo'):
+            with self.assertRaisesRegex(ValueError, "Unescaped quote found"):
+                unescape(bad)
+
+        for bad in (r"\777", r"\400"):
+            with self.assertRaisesRegex(ValueError, "Invalid octal number"):
+                unescape(bad)
+
+        for bad in (r"\X", r"\1", r"\11"):
+            with self.assertRaisesRegex(ValueError, "Invalid escape character"):
+                unescape(bad)
+
+    def test_advance_past_string_with_gdb_escapes(self) -> None:
+        """Test the advance_past_string_with_gdb_escapes function"""
+
+        def assert_advance(
+            escaped_str: str, expected_unescaped_str: str, expected_after: str, **kwargs
+        ) -> None:
+            """Wrapper around advance_past_string_with_gdb_escapes to make testing
+            easier
+            """
+            (
+                actual_unescaped_str,
+                after_quote_index,
+            ) = advance_past_string_with_gdb_escapes(escaped_str, **kwargs)
+            assert_match(actual_unescaped_str, expected_unescaped_str)
+            actual_after = escaped_str[after_quote_index:]
+            assert_match(actual_after, expected_after)
+
+        assert_advance(r'a"', "a", "")
+        assert_advance(r'a"bc', "a", "bc")
+        assert_advance(r'"a"', "a", "", start=1)
+        assert_advance(r'"a"bc', "a", "bc", start=1)
+        assert_advance(r'x="a"', "a", "", start=3)
+        assert_advance(r'x="a"bc', "a", "bc", start=3)
+        # Escaped quotes.
+        assert_advance(r'\""', '"', "")
+        assert_advance(r'"\""', '"', "", start=1)
+        assert_advance(r'"\"",foo', '"', ",foo", start=1)
+        assert_advance(r'x="\""', '"', "", start=3)
+        assert_advance(r'"\"hello\"world\""', '"hello"world"', "", start=1)
+        # Other escapes.
+        assert_advance(r'\n"', "\n", "")
+        assert_advance(r'"\n"', "\n", "", start=1)
+        assert_advance(r'"\n",foo', "\n", ",foo", start=1)
+        assert_advance(r'x="\n"', "\n", "", start=3)
+        assert_advance(r'"\nhello\nworld\n"', "\nhello\nworld\n", "", start=1)
+        assert_advance(
+            fr'"I want a {self.GDB_ESCAPED_PIZZA}"something else',
+            "I want a \N{SLICE OF PIZZA}",
+            "something else",
+            start=1,
+        )
+
+        for bad in (r"", r"\"", r"a\"", r"\"a", r"a", r"a\"b"):
+            with self.assertRaisesRegex(ValueError, "Missing closing quote"):
+                advance_past_string_with_gdb_escapes(bad)
+
+
 def main():
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
+    suite.addTests(loader.loadTestsFromTestCase(TestGdbEscapes))
     suite.addTests(loader.loadTestsFromTestCase(TestStringStream))
     suite.addTests(loader.loadTestsFromTestCase(TestPyGdbMi))
     suite.addTests(loader.loadTestsFromTestCase(TestPerformance))
