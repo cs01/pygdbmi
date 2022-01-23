@@ -6,7 +6,10 @@ nox.options.sessions = ["tests", "lint", "docs"]
 nox.options.reuse_existing_virtualenvs = True
 
 
-@nox.session(python=["3.6", "3.7", "3.8"])
+# Run tests with (at least) the oldest and newest versions we support.
+# If these are modified, also modify .github/workflows/tests.yml and the list of supported versions
+# in setup.py.
+@nox.session(python=["3.7", "3.10"])
 def tests(session):
     session.install(".", "pytest")
     session.run("pytest", *session.posargs)
