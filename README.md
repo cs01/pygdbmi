@@ -180,4 +180,6 @@ nox -s lint
 
 ## Authors
 
-`pygdbmi` was written by [Chad Smith](https://grassfedcode.com) with [contributions from the community](https://github.com/cs01/pygdbmi/graphs/contributors). Thanks especially to @mariusmue, @bobthekingofegypt, @mouuff, and @felipesere.
+* [Chad Smith](https://github.com/cs01) (main author and creator).
+* [Marco Barisione](http://www.barisione.org/) (co-maintainer).
+* [The community](https://github.com/cs01/pygdbmi/graphs/contributors). Thanks especially to @mariusmue, @bobthekingofegypt, @mouuff, and @felipesere.
