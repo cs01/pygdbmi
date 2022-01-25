@@ -2,6 +2,7 @@
 
 ## dev
 * Strings containing escapes are now unescaped, both for messages in error records, which were previously mangled (#57), and textual records, which were previously left escaped (#58)
+* Dropped support for Python 3.6 and added explicit support for Python 3.9 and 3.10.
 
 ## 0.10.0.1
 * Fix bug with `time_to_check_for_additional_output_sec`, as it was not being used when passed to `GdbController`

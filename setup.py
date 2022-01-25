@@ -42,9 +42,12 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
+        # If modifying the list of supported versions, also update the versions pygdbmi is tested
+        # with, see noxfile.py and .github/workflows/tests.yml.
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
 )
