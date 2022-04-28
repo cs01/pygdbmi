@@ -463,8 +463,8 @@ class TestGdbEscapes(unittest.TestCase):
         # Several escapes in the same string.
         assert_match(
             unescape(
-                fr"\tmultiple\nescapes\tin\"the\'same\"string\"foo"
-                fr"{self.GDB_ESCAPED_SPACE}bar{self.GDB_ESCAPED_PIZZA}"
+                rf"\tmultiple\nescapes\tin\"the\'same\"string\"foo"
+                rf"{self.GDB_ESCAPED_SPACE}bar{self.GDB_ESCAPED_PIZZA}"
             ),
             '\tmultiple\nescapes\tin"the\'same"string"foo bar\N{SLICE OF PIZZA}',
         )
@@ -517,7 +517,7 @@ class TestGdbEscapes(unittest.TestCase):
         assert_advance(r'x="\n"', "\n", "", start=3)
         assert_advance(r'"\nhello\nworld\n"', "\nhello\nworld\n", "", start=1)
         assert_advance(
-            fr'"I want a {self.GDB_ESCAPED_PIZZA}"something else',
+            rf'"I want a {self.GDB_ESCAPED_PIZZA}"something else',
             "I want a \N{SLICE OF PIZZA}",
             "something else",
             start=1,
