@@ -156,7 +156,7 @@ _GDB_MI_RESULT_RE = re.compile(r"^(\d*)\^(\S+?)(,(.*))?$")
 # changes that have occurred. Those changes can either be a consequence
 # of gdb/mi commands (e.g., a breakpoint modified) or a result of target activity
 # (e.g., target stopped).
-_GDB_MI_NOTIFY_RE = re.compile(r"^(\d*)[*=](\S+?),(.*)$")
+_GDB_MI_NOTIFY_RE = re.compile(r"^(\d*)[*=](\S+?)(,(.*))*$")
 
 # https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
 # "~" string-output
@@ -193,15 +193,20 @@ _GDB_MI_VALUE_START_CHARS = [
 
 def _get_notify_msg_and_payload(result, stream: StringStream):
     """Get notify message and payload dict"""
-    token = stream.advance_past_chars(["=", "*"])
-    token = int(token) if token != "" else None
-    logger.debug("%s", fmt_green("parsing message"))
-    message = stream.advance_past_chars([","])
+    match = _GDB_MI_NOTIFY_RE.match(result)
+    groups = match.groups() if match else [""]
+    token = int(groups[0]) if groups[0] != "" else None
+    message = groups[1]
 
     logger.debug("parsed message")
     logger.debug("%s", fmt_green(message))
 
-    payload = _parse_dict(stream)
+    if groups[2] is None:
+        payload = None
+    else:
+        stream.advance_past_chars([","])
+        payload = _parse_dict(stream)
+
     return token, message.strip(), payload
 
 
