@@ -206,7 +206,7 @@ class TestPyGdbMi(unittest.TestCase):
         )
 
         assert_match(
-            parse_response('*stopped'),
+            parse_response("*stopped"),
             {
                 "type": "notify",
                 "payload": None,
