@@ -194,6 +194,7 @@ _GDB_MI_VALUE_START_CHARS = [
 def _get_notify_msg_and_payload(result, stream: StringStream):
     """Get notify message and payload dict"""
     match = _GDB_MI_NOTIFY_RE.match(result)
+    assert match is not None
     groups = match.groups()
     token = int(groups[0]) if groups[0] != "" else None
     message = groups[1]
@@ -212,8 +213,8 @@ def _get_notify_msg_and_payload(result, stream: StringStream):
 
 def _get_result_msg_and_payload(result, stream: StringStream):
     """Get result message and payload dict"""
-
     match = _GDB_MI_RESULT_RE.match(result)
+    assert match is not None
     groups = match.groups()
     token = int(groups[0]) if groups[0] != "" else None
     message = groups[1]
