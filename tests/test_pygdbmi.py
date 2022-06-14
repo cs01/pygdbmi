@@ -194,6 +194,27 @@ class TestPyGdbMi(unittest.TestCase):
             },
         )
 
+        # Test async records status changes
+        assert_match(
+            parse_response('*running,thread-id="all"'),
+            {
+                "type": "notify",
+                "payload": {"thread-id": "all"},
+                "message": "running",
+                "token": None,
+            },
+        )
+
+        assert_match(
+            parse_response('*stopped'),
+            {
+                "type": "notify",
+                "payload": None,
+                "message": "stopped",
+                "token": None,
+            },
+        )
+
     def _get_c_program(self, makefile_target_name, binary_name):
         """build c program and return path to binary"""
         find_executable(MAKE_CMD)

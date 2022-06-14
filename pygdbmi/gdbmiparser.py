@@ -149,14 +149,14 @@ def assert_match(actual_char_or_str, expected_char_or_str):
 # In addition to a number of out-of-band notifications,
 # the response to a gdb/mi command includes one of the following result indications:
 # done, running, connected, error, exit
-_GDB_MI_RESULT_RE = re.compile(r"^(\d*)\^(\S+?)(,(.*))?$")
+_GDB_MI_RESULT_RE = re.compile(r"^(\d*)\^(\S+?)(,.*)?$")
 
 # https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Async-Records.html#GDB_002fMI-Async-Records
 # Async records are used to notify the gdb/mi client of additional
 # changes that have occurred. Those changes can either be a consequence
 # of gdb/mi commands (e.g., a breakpoint modified) or a result of target activity
 # (e.g., target stopped).
-_GDB_MI_NOTIFY_RE = re.compile(r"^(\d*)[*=](\S+?)(,(.*))*$")
+_GDB_MI_NOTIFY_RE = re.compile(r"^(\d*)[*=](\S+?)(,.*)*$")
 
 # https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
 # "~" string-output
@@ -194,7 +194,7 @@ _GDB_MI_VALUE_START_CHARS = [
 def _get_notify_msg_and_payload(result, stream: StringStream):
     """Get notify message and payload dict"""
     match = _GDB_MI_NOTIFY_RE.match(result)
-    groups = match.groups() if match else [""]
+    groups = match.groups()
     token = int(groups[0]) if groups[0] != "" else None
     message = groups[1]
 
@@ -214,7 +214,7 @@ def _get_result_msg_and_payload(result, stream: StringStream):
     """Get result message and payload dict"""
 
     match = _GDB_MI_RESULT_RE.match(result)
-    groups = match.groups() if match else [""]
+    groups = match.groups()
     token = int(groups[0]) if groups[0] != "" else None
     message = groups[1]
 
