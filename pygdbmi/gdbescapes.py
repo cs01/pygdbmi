@@ -166,7 +166,13 @@ def _unescape_internal(
                     raise ValueError(
                         f"Invalid octal number {octal_number!r} in {escaped_str!r}"
                     ) from exc
-            replaced = octal_sequence_bytes.decode("utf-8")
+            try:
+                replaced = octal_sequence_bytes.decode("utf-8")
+            except UnicodeDecodeError:
+                # GDB should never generate invalid sequences but, according to #64,
+                # it can do that on Windows. In this case we just keep the sequence
+                # unchanged.
+                replaced = f"\\{escaped_octal}"
 
         elif escaped_char is not None:
             # We found a single escaped character.
