@@ -502,6 +502,9 @@ class TestGdbEscapes(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Invalid escape character"):
                 unescape(bad)
 
+        # An octal sequence that is not valid UTF-8 doesn't get changes, see #64.
+        assert_match(unescape(r"254 '\376'"), r"254 '\376'")
+
     def test_advance_past_string_with_gdb_escapes(self) -> None:
         """Test the advance_past_string_with_gdb_escapes function"""
 

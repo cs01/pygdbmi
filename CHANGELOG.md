@@ -2,6 +2,7 @@
 
 ## 0.10.0.3
 * Fixed a bug where notifications without a payload were not recognized as such
+* Invalid octal sequences produced by GDB are left unchanged instead of causing a `UnicodeDecodeError` (#64)
 
 ## 0.10.0.2
 * Strings containing escapes are now unescaped, both for messages in error records, which were previously mangled (#57), and textual records, which were previously left escaped (#58)
