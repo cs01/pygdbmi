@@ -1,0 +1,5 @@
+.
+mkdocstrings[python]
+mkdocs
+mkdocs-material
+pygments
