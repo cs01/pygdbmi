@@ -26,30 +26,25 @@ def lint(session):
     session.run("python", "setup.py", "check", "--metadata", "--strict")
 
 
-doc_dependencies = [
-    ".",
-    "mkdocstrings",
-    "mkdocs",
-    "mkdocs-material",
-    "pygments",
-]
+def install_mkdoc_dependencies(session):
+    session.install("-r", "mkdoc_requirements.txt")
 
 
-@nox.session(python="3.7")
+@nox.session
 def docs(session):
-    session.install(*doc_dependencies)
+    install_mkdoc_dependencies(session)
     session.run("mkdocs", "build")
 
 
-@nox.session(python="3.7")
+@nox.session
 def serve_docs(session):
-    session.install(*doc_dependencies)
+    install_mkdoc_dependencies(session)
     session.run("mkdocs", "serve")
 
 
-@nox.session(python="3.7")
+@nox.session
 def publish_docs(session):
-    session.install(*doc_dependencies)
+    install_mkdoc_dependencies(session)
     session.run("mkdocs", "gh-deploy")
 
 
