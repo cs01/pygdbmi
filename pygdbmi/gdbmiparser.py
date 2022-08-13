@@ -16,6 +16,13 @@ from pygdbmi.printcolor import fmt_green
 from pygdbmi.StringStream import StringStream
 from pygdbmi.gdbescapes import unescape
 
+
+__all__ = [
+    "parse_response",
+    "response_is_finished",
+]
+
+
 _DEBUG = False
 logger = logging.getLogger(__name__)
 

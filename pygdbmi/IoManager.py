@@ -24,6 +24,13 @@ if USING_WINDOWS:
 else:
     import fcntl
 
+
+__all__ = [
+    "IoManager",
+    "make_non_blocking",
+]
+
+
 logger = logging.getLogger(__name__)
 
 
