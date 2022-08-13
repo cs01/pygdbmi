@@ -2,6 +2,12 @@
 
 ## dev
 
+**Breaking changes**
+
+- Removed `pygdbmi.IoManager.make_non_blocking` from the public API; it's unrelated and was not meant to be public
+
+Other changes
+
 - Fixed a bug where notifications without a payload were not recognized as such
 - Invalid octal sequences produced by GDB are left unchanged instead of causing a `UnicodeDecodeError` (#64)
 
