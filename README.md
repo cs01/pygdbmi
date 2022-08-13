@@ -171,6 +171,11 @@ nox -s tests
 nox -s lint
 ```
 
+## Similar projects
+
+- [tsgdbmi](https://github.com/Guyutongxue/tsgdbmi) A port of pygdbmi to TypeScript
+- [danielzfranklin/gdbmi](https://github.com/danielzfranklin/gdbmi) A port of pygdbmi to Rust
+
 ## Projects Using pygdbmi
 
 - [gdbgui](https://github.com/cs01/gdbgui) implements a browser-based frontend to gdb, using pygdbmi on the backend
@@ -180,6 +185,6 @@ nox -s lint
 
 ## Authors
 
-* [Chad Smith](https://github.com/cs01) (main author and creator).
-* [Marco Barisione](http://www.barisione.org/) (co-maintainer).
-* [The community](https://github.com/cs01/pygdbmi/graphs/contributors). Thanks especially to @mariusmue, @bobthekingofegypt, @mouuff, and @felipesere.
+- [Chad Smith](https://github.com/cs01) (main author and creator).
+- [Marco Barisione](http://www.barisione.org/) (co-maintainer).
+- [The community](https://github.com/cs01/pygdbmi/graphs/contributors). Thanks especially to @mariusmue, @bobthekingofegypt, @mouuff, and @felipesere.
