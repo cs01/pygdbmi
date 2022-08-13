@@ -12,9 +12,10 @@ import unittest
 import subprocess
 from time import time
 from distutils.spawn import find_executable
+from pprint import pprint
 from pygdbmi.StringStream import StringStream
 from pygdbmi.gdbescapes import advance_past_string_with_gdb_escapes, unescape
-from pygdbmi.gdbmiparser import parse_response, assert_match
+from pygdbmi.gdbmiparser import parse_response
 from pygdbmi.gdbcontroller import GdbController
 from pygdbmi.constants import GdbTimeoutError, USING_WINDOWS
 
@@ -23,6 +24,18 @@ if USING_WINDOWS:
     MAKE_CMD = "mingw32-make.exe"
 else:
     MAKE_CMD = "make"
+
+
+def assert_match(actual_char_or_str, expected_char_or_str):
+    """If values don't match, print them and raise a ValueError, otherwise, continue.
+    Raises: ValueError if arguments do not match"""
+    if expected_char_or_str != actual_char_or_str:
+        print("Expected")
+        pprint(expected_char_or_str)
+        print("")
+        print("Got")
+        pprint(actual_char_or_str)
+        raise ValueError()
 
 
 class TestPyGdbMi(unittest.TestCase):
