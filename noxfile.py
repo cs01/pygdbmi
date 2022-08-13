@@ -1,3 +1,4 @@
+import itertools
 import nox  # type: ignore
 from pathlib import Path
 import shutil
@@ -15,13 +16,37 @@ def tests(session):
     session.run("pytest", *session.posargs)
 
 
+LINTED_PATHS = set(
+    str(p.resolve())
+    for p in itertools.chain(
+        # All top-level Python files.
+        Path(".").glob("*.py"),
+        # Plus Python files in these specified directories.
+        *(Path(d).glob("**/*.py") for d in ("pygdbmi", "tests"))
+    )
+)
+
+
+# `format` is a builtin so the function is named differently.
+@nox.session(name="format")
+def format_(session):
+    """Re-format all Python source files or, if positionals are passed, only the
+    specified files."""
+    files = LINTED_PATHS
+    if session.posargs:
+        # Only use positional arguments which are linted files.
+        files = files & {str(Path(f).resolve()) for f in session.posargs}
+
+    session.install("black", "flake8", "mypy", "check-manifest")
+    session.run("black", *files)
+
+
 @nox.session()
 def lint(session):
     session.install(*["black", "flake8", "mypy", "check-manifest"])
-    files = ["pygdbmi", "tests"] + [str(p) for p in Path(".").glob("*.py")]
-    session.run("black", "--check", *files)
-    session.run("flake8", *files)
-    session.run("mypy", *files)  #
+    session.run("black", "--check", *LINTED_PATHS)
+    session.run("flake8", *LINTED_PATHS)
+    session.run("mypy", *LINTED_PATHS)
     session.run("check-manifest")
     session.run("python", "setup.py", "check", "--metadata", "--strict")
 

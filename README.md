@@ -171,6 +171,18 @@ nox -s tests
 nox -s lint
 ```
 
+To format code using the correct settings use
+
+```
+nox -s format
+```
+
+Or, to format only specified files, use
+
+```
+nox -s format -- example.py pygdbmi/IoManager.py
+```
+
 ## Similar projects
 
 - [tsgdbmi](https://github.com/Guyutongxue/tsgdbmi) A port of pygdbmi to TypeScript
