@@ -10,7 +10,6 @@ See more at https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html#GDB_002fMI
 import functools
 import logging
 import re
-from pprint import pprint
 from typing import Callable, Dict, List, Match, Optional, Pattern, Tuple, Union
 
 from pygdbmi.printcolor import fmt_green
@@ -78,19 +77,6 @@ def response_is_finished(gdb_mi_text: str) -> bool:
         True if gdb response is finished
     """
     return _GDB_MI_RESPONSE_FINISHED_RE.match(gdb_mi_text) is not None
-
-
-def assert_match(actual_char_or_str, expected_char_or_str):
-    # Skip: If values don't match, print them and raise a ValueError, otherwise,
-    # continue
-    # Raises: ValueError if arguments do not match"""
-    if expected_char_or_str != actual_char_or_str:
-        print("Expected")
-        pprint(expected_char_or_str)
-        print("")
-        print("Got")
-        pprint(actual_char_or_str)
-        raise ValueError()
 
 
 # ========================================================================
