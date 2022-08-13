@@ -25,10 +25,7 @@ else:
     import fcntl
 
 
-__all__ = [
-    "IoManager",
-    "make_non_blocking",
-]
+__all__ = ["IoManager"]
 
 
 logger = logging.getLogger(__name__)
@@ -68,9 +65,9 @@ class IoManager:
         self._allow_overwrite_timeout_times = (
             self.time_to_check_for_additional_output_sec > 0
         )
-        make_non_blocking(self.stdout)
+        _make_non_blocking(self.stdout)
         if self.stderr:
-            make_non_blocking(self.stderr)
+            _make_non_blocking(self.stderr)
 
     def get_gdb_response(
         self, timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC, raise_error_on_timeout=True
@@ -325,7 +322,7 @@ def _buffer_incomplete_responses(
     return (raw_output, buf)
 
 
-def make_non_blocking(file_obj: io.IOBase):
+def _make_non_blocking(file_obj: io.IOBase):
     """make file object non-blocking
     Windows doesn't have the fcntl module, but someone on
     stack overflow supplied this code as an answer, and it works
