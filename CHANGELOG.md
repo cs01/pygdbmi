@@ -16,6 +16,7 @@ Internal changes
 - Update and freeze dependencies for documentation generation
 - Refactored the code to parse MI records to decrease the number of regex matches to perform
 - Added `__all__` to all modules, which means that star imports (like `from pygdbmi.gdbmiparser import *`) will not pollute the namespace with modules used by pygdbmi itself
+- Added `nox -s format` to re-format the source code using the correct options
 
 ## 0.10.0.2
 
