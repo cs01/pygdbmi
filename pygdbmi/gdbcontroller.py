@@ -13,6 +13,10 @@ from pygdbmi.constants import (
     DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
 )
 
+
+__all__ = ["GdbController"]
+
+
 DEFAULT_GDB_LAUNCH_COMMAND = ["gdb", "--nx", "--quiet", "--interpreter=mi3"]
 logger = logging.getLogger(__name__)
 

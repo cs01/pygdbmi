@@ -6,6 +6,12 @@ import re
 from typing import Iterator, Tuple
 
 
+__all__ = [
+    "advance_past_string_with_gdb_escapes",
+    "unescape",
+]
+
+
 def unescape(escaped_str: str) -> str:
     """Unescape a string escaped by GDB in MI mode.
 

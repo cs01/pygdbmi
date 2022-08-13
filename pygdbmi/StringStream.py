@@ -1,6 +1,9 @@
 from pygdbmi.gdbescapes import advance_past_string_with_gdb_escapes
 
 
+__all__ = ["StringStream"]
+
+
 class StringStream:
     """A simple class to hold text so that when passed
     between functions, the object is passed by reference
