@@ -12,9 +12,9 @@ import logging
 import re
 from typing import Callable, Dict, List, Match, Optional, Pattern, Tuple, Union
 
+from pygdbmi.gdbescapes import unescape
 from pygdbmi.printcolor import fmt_green
 from pygdbmi.StringStream import StringStream
-from pygdbmi.gdbescapes import unescape
 
 
 __all__ = [

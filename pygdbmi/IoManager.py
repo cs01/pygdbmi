@@ -3,13 +3,14 @@ which manages I/O for file objects connected to an existing gdb process
 or pty.
 """
 import io
+import logging
+import os
 import select
 import time
 from pprint import pformat
-from typing import Union, List, Optional, Dict, Any, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 from pygdbmi import gdbmiparser
-import os
-import logging
 from pygdbmi.constants import (
     DEFAULT_GDB_TIMEOUT_SEC,
     DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
@@ -17,10 +18,11 @@ from pygdbmi.constants import (
     GdbTimeoutError,
 )
 
+
 if USING_WINDOWS:
     import msvcrt
-    from ctypes import windll, byref, wintypes, WinError, POINTER  # type: ignore
-    from ctypes.wintypes import HANDLE, DWORD, BOOL
+    from ctypes import POINTER, WinError, byref, windll, wintypes  # type: ignore
+    from ctypes.wintypes import BOOL, DWORD, HANDLE
 else:
     import fcntl
 

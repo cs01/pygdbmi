@@ -8,16 +8,17 @@ Run from top level directory: ./tests/test_app.py
 
 import os
 import random
-import unittest
 import subprocess
-from time import time
+import unittest
 from distutils.spawn import find_executable
 from pprint import pprint
-from pygdbmi.StringStream import StringStream
+from time import time
+
+from pygdbmi.constants import USING_WINDOWS, GdbTimeoutError
+from pygdbmi.gdbcontroller import GdbController
 from pygdbmi.gdbescapes import advance_past_string_with_gdb_escapes, unescape
 from pygdbmi.gdbmiparser import parse_response
-from pygdbmi.gdbcontroller import GdbController
-from pygdbmi.constants import GdbTimeoutError, USING_WINDOWS
+from pygdbmi.StringStream import StringStream
 
 
 if USING_WINDOWS:

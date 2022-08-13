@@ -3,11 +3,13 @@
 """
 Run with `python -m example`
 """
-import subprocess
 import os
+import subprocess
 import sys
-from pygdbmi.gdbcontroller import GdbController
 from distutils.spawn import find_executable
+
+from pygdbmi.gdbcontroller import GdbController
+
 
 SAMPLE_C_CODE_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "tests", "sample_c_app"
