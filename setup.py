@@ -7,6 +7,7 @@ from codecs import open
 
 from setuptools import find_packages, setup  # type: ignore
 
+
 EXCLUDE_FROM_PACKAGES = ["tests"]
 CURDIR = os.path.abspath(os.path.dirname(__file__))
 README = io.open("README.md", "r", encoding="utf-8").read()

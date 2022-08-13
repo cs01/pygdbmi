@@ -1,7 +1,9 @@
 import itertools
-import nox  # type: ignore
-from pathlib import Path
 import shutil
+from pathlib import Path
+
+import nox  # type: ignore
+
 
 nox.options.sessions = ["tests", "lint", "docs"]
 nox.options.reuse_existing_virtualenvs = True

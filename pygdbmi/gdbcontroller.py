@@ -6,12 +6,13 @@ structured output.
 import logging
 import subprocess
 from distutils.spawn import find_executable
-from typing import Union, List, Optional
-from pygdbmi.IoManager import IoManager
+from typing import List, Optional, Union
+
 from pygdbmi.constants import (
     DEFAULT_GDB_TIMEOUT_SEC,
     DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
 )
+from pygdbmi.IoManager import IoManager
 
 
 __all__ = ["GdbController"]

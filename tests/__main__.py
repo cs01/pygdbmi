@@ -1,3 +1,4 @@
-from . import test_pygdbmi, static_tests
+from . import static_tests, test_pygdbmi
+
 
 exit(test_pygdbmi.main() + static_tests.main())
