@@ -26,6 +26,8 @@ LINTED_PATHS = set(
     )
 )
 
+ISORT_OPTIONS = ["--profile", "black", "--lines-after-imports", "2"]
+
 
 # `format` is a builtin so the function is named differently.
 @nox.session(name="format")
@@ -37,13 +39,15 @@ def format_(session):
         # Only use positional arguments which are linted files.
         files = files & {str(Path(f).resolve()) for f in session.posargs}
 
-    session.install("black", "flake8", "mypy", "check-manifest")
+    session.install("isort", "black", "flake8", "mypy", "check-manifest")
+    session.run("isort", *ISORT_OPTIONS, *files)
     session.run("black", *files)
 
 
 @nox.session()
 def lint(session):
-    session.install(*["black", "flake8", "mypy", "check-manifest"])
+    session.install("isort", "black", "flake8", "mypy", "check-manifest")
+    session.run("isort", "--check-only", *ISORT_OPTIONS, *LINTED_PATHS)
     session.run("black", "--check", *LINTED_PATHS)
     session.run("flake8", *LINTED_PATHS)
     session.run("mypy", *LINTED_PATHS)
