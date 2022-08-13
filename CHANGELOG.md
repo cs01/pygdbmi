@@ -8,6 +8,7 @@
 Internal changes
 
 - Update and freeze dependencies for documentation generation
+- Refactored the code to parse MI records to decrease the number of regex matches to perform
 
 ## 0.10.0.2
 

@@ -7,10 +7,11 @@ structured objects.
 See more at https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html#GDB_002fMI
 """
 
+import functools
 import logging
 import re
 from pprint import pprint
-from typing import Dict, Union
+from typing import Callable, Dict, List, Match, Optional, Pattern, Tuple, Union
 
 from pygdbmi.printcolor import fmt_green
 from pygdbmi.StringStream import StringStream
@@ -53,59 +54,18 @@ def parse_response(gdb_mi_text: str) -> Dict:
     """
     stream = StringStream(gdb_mi_text, debug=_DEBUG)
 
-    if _GDB_MI_NOTIFY_RE.match(gdb_mi_text):
-        token, message, payload = _get_notify_msg_and_payload(gdb_mi_text, stream)
-        return {
-            "type": "notify",
-            "message": message,
-            "payload": payload,
-            "token": token,
-        }
+    for pattern, parser in _GDB_MI_PATTERNS_AND_PARSERS:
+        match = pattern.match(gdb_mi_text)
+        if match is not None:
+            return parser(match, stream)
 
-    elif _GDB_MI_RESULT_RE.match(gdb_mi_text):
-        token, message, payload = _get_result_msg_and_payload(gdb_mi_text, stream)
-        return {
-            "type": "result",
-            "message": message,
-            "payload": payload,
-            "token": token,
-        }
-
-    elif _GDB_MI_CONSOLE_RE.match(gdb_mi_text):
-        match = _GDB_MI_CONSOLE_RE.match(gdb_mi_text)
-        if match:
-            payload = unescape(match.groups()[0])
-        else:
-            payload = None
-        return {
-            "type": "console",
-            "message": None,
-            "payload": payload,
-        }
-
-    elif _GDB_MI_LOG_RE.match(gdb_mi_text):
-        match = _GDB_MI_LOG_RE.match(gdb_mi_text)
-        if match:
-            payload = unescape(match.groups()[0])
-        else:
-            payload = None
-        return {"type": "log", "message": None, "payload": payload}
-
-    elif _GDB_MI_TARGET_OUTPUT_RE.match(gdb_mi_text):
-        match = _GDB_MI_TARGET_OUTPUT_RE.match(gdb_mi_text)
-        if match:
-            payload = unescape(match.groups()[0])
-        else:
-            payload = None
-        return {"type": "target", "message": None, "payload": payload}
-
-    elif response_is_finished(gdb_mi_text):
-        return {"type": "done", "message": None, "payload": None}
-
-    else:
-        # This was not gdb mi output, so it must have just been printed by
-        # the inferior program that's being debugged
-        return {"type": "output", "message": None, "payload": gdb_mi_text}
+    # This was not gdb mi output, so it must have just been printed by
+    # the inferior program that's being debugged
+    return {
+        "type": "output",
+        "message": None,
+        "payload": gdb_mi_text,
+    }
 
 
 def response_is_finished(gdb_mi_text: str) -> bool:
@@ -117,11 +77,7 @@ def response_is_finished(gdb_mi_text: str) -> bool:
     Returns:
         True if gdb response is finished
     """
-    if _GDB_MI_RESPONSE_FINISHED_RE.match(gdb_mi_text):
-        return True
-
-    else:
-        return False
+    return _GDB_MI_RESPONSE_FINISHED_RE.match(gdb_mi_text) is not None
 
 
 def assert_match(actual_char_or_str, expected_char_or_str):
@@ -142,42 +98,149 @@ def assert_match(actual_char_or_str, expected_char_or_str):
 # ========================================================================
 
 
-# GDB machine interface output patterns to match
-# https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
+def _parse_mi_notify(match: Match, stream: StringStream):
+    """Parser function for matches against a notify record.
 
-# https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Result-Records.html#GDB_002fMI-Result-Records
-# In addition to a number of out-of-band notifications,
-# the response to a gdb/mi command includes one of the following result indications:
-# done, running, connected, error, exit
-_GDB_MI_RESULT_RE = re.compile(r"^(\d*)\^(\S+?)(,.*)?$")
+    See _GDB_MI_PATTERNS_AND_PARSERS for details."""
+    message = match["message"]
+    logger.debug("parsed message")
+    logger.debug("%s", fmt_green(message))
 
-# https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Async-Records.html#GDB_002fMI-Async-Records
-# Async records are used to notify the gdb/mi client of additional
-# changes that have occurred. Those changes can either be a consequence
-# of gdb/mi commands (e.g., a breakpoint modified) or a result of target activity
-# (e.g., target stopped).
-_GDB_MI_NOTIFY_RE = re.compile(r"^(\d*)[*=](\S+?)(,.*)*$")
+    return {
+        "type": "notify",
+        "message": message.strip(),
+        "payload": _extract_payload(match, stream),
+        "token": _extract_token(match),
+    }
 
-# https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
-# "~" string-output
-# The console output stream contains text that should be displayed
-# in the CLI console window. It contains the textual responses to CLI commands.
-_GDB_MI_CONSOLE_RE = re.compile(r'~"(.*)"', re.DOTALL)
 
-# https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
-# "&" string-output
-# The log stream contains debugging messages being produced by gdb's internals.
-_GDB_MI_LOG_RE = re.compile(r'&"(.*)"', re.DOTALL)
+def _parse_mi_result(match: Match, stream: StringStream):
+    """Parser function for matches against a result record.
 
-# https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
-# "@" string-output
-# The target output stream contains any textual output from the
-# running target. This is only present when GDB's event loop is truly asynchronous,
-# which is currently only the case for remote targets.
-_GDB_MI_TARGET_OUTPUT_RE = re.compile(r'@"(.*)"', re.DOTALL)
+    See _GDB_MI_PATTERNS_AND_PARSERS for details."""
+    return {
+        "type": "result",
+        "message": match["message"],
+        "payload": _extract_payload(match, stream),
+        "token": _extract_token(match),
+    }
 
-# Response finished
+
+def _parse_mi_output(match: Match, stream: StringStream, output_type: str):
+    """Parser function for matches against a console, log or target record.
+
+    The record type must be specified in output_type.
+
+    See _GDB_MI_PATTERNS_AND_PARSERS for details."""
+    return {
+        "type": output_type,
+        "message": None,
+        "payload": unescape(match["payload"]),
+    }
+
+
+def _parse_mi_finished(match: Match, stream: StringStream):
+    """Parser function for matches against a finished record.
+
+    See _GDB_MI_PATTERNS_AND_PARSERS for details."""
+    return {
+        "type": "done",
+        "message": None,
+        "payload": None,
+    }
+
+
+def _extract_token(match: Match) -> Optional[int]:
+    """Extract a token from a match against a regular expression which included
+    _GDB_MI_COMPONENT_TOKEN."""
+    token = match["token"]
+    return int(token) if token is not None else None
+
+
+def _extract_payload(match: Match, stream: StringStream) -> Optional[Dict]:
+    """Extract a token from a match against a regular expression which included
+    _GDB_MI_COMPONENT_PAYLOAD."""
+    if match["payload"] is None:
+        return None
+
+    stream.advance_past_chars([","])
+    return _parse_dict(stream)
+
+
+# A regular expression matching a response finished record.
 _GDB_MI_RESPONSE_FINISHED_RE = re.compile(r"^\(gdb\)\s*$")
+
+# Regular expression identifying a token in a MI record.
+_GDB_MI_COMPONENT_TOKEN = r"(?P<token>\d+)?"
+# Regular expression identifying a payload in a MI record.
+_GDB_MI_COMPONENT_PAYLOAD = r"(?P<payload>,.*)?"
+
+# The type of the functions which parse MI records as used by
+# _GDB_MI_PATTERNS_AND_PARSERS.
+_PARSER_FUNCTION = Callable[[Match, StringStream], Dict]
+
+# A list where each item is a tuple of:
+# - A compiled regular expression matching a MI record.
+# - A function which is called if the regex matched with the match and a StringStream.
+#   It must return a dictionary with details on the MI record..
+#
+# For more details on the MI , see
+# https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
+#
+# The order matters as items are iterated in ordered and that stops once a match is
+# found.
+_GDB_MI_PATTERNS_AND_PARSERS: List[Tuple[Pattern, _PARSER_FUNCTION]] = [
+    # https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Result-Records.html#GDB_002fMI-Result-Records
+    # In addition to a number of out-of-band notifications,
+    # the response to a gdb/mi command includes one of the following result indications:
+    # done, running, connected, error, exit
+    (
+        re.compile(
+            rf"^{_GDB_MI_COMPONENT_TOKEN}\^(?P<message>\S+?){_GDB_MI_COMPONENT_PAYLOAD}$"
+        ),
+        _parse_mi_result,
+    ),
+    # https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Async-Records.html#GDB_002fMI-Async-Records
+    # Async records are used to notify the gdb/mi client of additional
+    # changes that have occurred. Those changes can either be a consequence
+    # of gdb/mi commands (e.g., a breakpoint modified) or a result of target activity
+    # (e.g., target stopped).
+    (
+        re.compile(
+            rf"^{_GDB_MI_COMPONENT_TOKEN}[*=](?P<message>\S+?){_GDB_MI_COMPONENT_PAYLOAD}$"
+        ),
+        _parse_mi_notify,
+    ),
+    # https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
+    # "~" string-output
+    # The console output stream contains text that should be displayed
+    # in the CLI console window. It contains the textual responses to CLI commands.
+    (
+        re.compile(r'~"(?P<payload>.*)"', re.DOTALL),
+        functools.partial(_parse_mi_output, output_type="console"),
+    ),
+    # https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
+    # "&" string-output
+    # The log stream contains debugging messages being produced by gdb's internals.
+    (
+        re.compile(r'&"(?P<payload>.*)"', re.DOTALL),
+        functools.partial(_parse_mi_output, output_type="log"),
+    ),
+    # https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Stream-Records.html#GDB_002fMI-Stream-Records
+    # "@" string-output
+    # The target output stream contains any textual output from the
+    # running target. This is only present when GDB's event loop is truly asynchronous,
+    # which is currently only the case for remote targets.
+    (
+        re.compile(r'@"(?P<payload>.*)"', re.DOTALL),
+        functools.partial(_parse_mi_output, output_type="target"),
+    ),
+    (
+        _GDB_MI_RESPONSE_FINISHED_RE,
+        _parse_mi_finished,
+    ),
+]
+
 
 _WHITESPACE = [" ", "\t", "\r", "\n"]
 
@@ -189,43 +252,6 @@ _GDB_MI_VALUE_START_CHARS = [
     _GDB_MI_CHAR_ARRAY_START,
     _GDB_MI_CHAR_STRING_START,
 ]
-
-
-def _get_notify_msg_and_payload(result, stream: StringStream):
-    """Get notify message and payload dict"""
-    match = _GDB_MI_NOTIFY_RE.match(result)
-    assert match is not None
-    groups = match.groups()
-    token = int(groups[0]) if groups[0] != "" else None
-    message = groups[1]
-
-    logger.debug("parsed message")
-    logger.debug("%s", fmt_green(message))
-
-    if groups[2] is None:
-        payload = None
-    else:
-        stream.advance_past_chars([","])
-        payload = _parse_dict(stream)
-
-    return token, message.strip(), payload
-
-
-def _get_result_msg_and_payload(result, stream: StringStream):
-    """Get result message and payload dict"""
-    match = _GDB_MI_RESULT_RE.match(result)
-    assert match is not None
-    groups = match.groups()
-    token = int(groups[0]) if groups[0] != "" else None
-    message = groups[1]
-
-    if groups[2] is None:
-        payload = None
-    else:
-        stream.advance_past_chars([","])
-        payload = _parse_dict(stream)
-
-    return token, message, payload
 
 
 def _parse_dict(stream: StringStream):
