@@ -10,6 +10,7 @@ Other changes
 
 - Fixed a bug where notifications without a payload were not recognized as such
 - Invalid octal sequences produced by GDB are left unchanged instead of causing a `UnicodeDecodeError` (#64)
+- Fix IoManager not to mangle tokens when reading from stdout on Windows (#55)
 
 Internal changes
 
