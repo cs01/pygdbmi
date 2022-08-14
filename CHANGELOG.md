@@ -10,6 +10,7 @@ Other changes
 
 - Fixed a bug where notifications without a payload were not recognized as such
 - Invalid octal sequences produced by GDB are left unchanged instead of causing a `UnicodeDecodeError` (#64)
+- Fix a crash on Windows by waiting for the GDB process to exit in `GdbController.exit`
 
 Internal changes
 
