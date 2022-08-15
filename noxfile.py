@@ -48,7 +48,16 @@ def format_(session):
 
 @nox.session()
 def lint(session):
-    session.install("isort", "black", "flake8", "mypy", "check-manifest")
+    session.install(
+        # Packages needed as they are used directly.
+        "black",
+        "check-manifest",
+        "flake8",
+        "isort",
+        "mypy",
+        # Packages needed to provide types for mypy.
+        "pytest",
+    )
     session.run("isort", "--check-only", *ISORT_OPTIONS, *LINTED_PATHS)
     session.run("black", "--check", *LINTED_PATHS)
     session.run("flake8", *LINTED_PATHS)
