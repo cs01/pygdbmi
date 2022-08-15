@@ -10,7 +10,7 @@ See more at https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html#GDB_002fMI
 import functools
 import logging
 import re
-from typing import Callable, Dict, List, Match, Optional, Pattern, Tuple, Union
+from typing import Any, Callable, Dict, List, Match, Optional, Pattern, Tuple, Union
 
 from pygdbmi.gdbescapes import unescape
 from pygdbmi.printcolor import fmt_green
@@ -27,7 +27,7 @@ _DEBUG = False
 logger = logging.getLogger(__name__)
 
 
-def _setup_logger(logger, debug):
+def _setup_logger(logger: logging.Logger, debug: bool) -> None:
     logger.propagate = False
 
     handler = logging.StreamHandler()
@@ -91,7 +91,7 @@ def response_is_finished(gdb_mi_text: str) -> bool:
 # ========================================================================
 
 
-def _parse_mi_notify(match: Match, stream: StringStream):
+def _parse_mi_notify(match: Match, stream: StringStream) -> Dict:
     """Parser function for matches against a notify record.
 
     See _GDB_MI_PATTERNS_AND_PARSERS for details."""
@@ -107,7 +107,7 @@ def _parse_mi_notify(match: Match, stream: StringStream):
     }
 
 
-def _parse_mi_result(match: Match, stream: StringStream):
+def _parse_mi_result(match: Match, stream: StringStream) -> Dict:
     """Parser function for matches against a result record.
 
     See _GDB_MI_PATTERNS_AND_PARSERS for details."""
@@ -119,7 +119,7 @@ def _parse_mi_result(match: Match, stream: StringStream):
     }
 
 
-def _parse_mi_output(match: Match, stream: StringStream, output_type: str):
+def _parse_mi_output(match: Match, stream: StringStream, output_type: str) -> Dict:
     """Parser function for matches against a console, log or target record.
 
     The record type must be specified in output_type.
@@ -132,7 +132,7 @@ def _parse_mi_output(match: Match, stream: StringStream, output_type: str):
     }
 
 
-def _parse_mi_finished(match: Match, stream: StringStream):
+def _parse_mi_finished(match: Match, stream: StringStream) -> Dict:
     """Parser function for matches against a finished record.
 
     See _GDB_MI_PATTERNS_AND_PARSERS for details."""
@@ -247,13 +247,13 @@ _GDB_MI_VALUE_START_CHARS = [
 ]
 
 
-def _parse_dict(stream: StringStream):
+def _parse_dict(stream: StringStream) -> Dict:
     """Parse dictionary, with optional starting character '{'
     return (tuple):
         Number of characters parsed from to_parse
         Parsed dictionary
     """
-    obj: Dict[str, Union[str, list]] = {}
+    obj: Dict[str, Union[str, list, dict]] = {}
 
     logger.debug("%s", fmt_green("parsing dict"))
 
@@ -305,7 +305,7 @@ def _parse_dict(stream: StringStream):
     return obj
 
 
-def _parse_key_val(stream: StringStream):
+def _parse_key_val(stream: StringStream) -> Tuple[str, Union[str, List, Dict]]:
     """Parse key, value combination
     return (tuple):
         Parsed key (string)
@@ -323,7 +323,7 @@ def _parse_key_val(stream: StringStream):
     return key, val
 
 
-def _parse_key(stream: StringStream):
+def _parse_key(stream: StringStream) -> str:
     """Parse key, value combination
     returns :
         Parsed key (string)
@@ -337,13 +337,15 @@ def _parse_key(stream: StringStream):
     return key
 
 
-def _parse_val(stream: StringStream):
+def _parse_val(stream: StringStream) -> Union[str, List, Dict]:
     """Parse value from string
     returns:
         Parsed value (either a string, array, or dict)
     """
 
     logger.debug("parsing value")
+
+    val: Any
 
     while True:
         c = stream.read(1)
@@ -376,7 +378,7 @@ def _parse_val(stream: StringStream):
     return val
 
 
-def _parse_array(stream: StringStream):
+def _parse_array(stream: StringStream) -> list:
     """Parse an array, stream should be passed the initial [
     returns:
         Parsed array

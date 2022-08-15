@@ -1,3 +1,5 @@
+from typing import List
+
 from pygdbmi.gdbescapes import advance_past_string_with_gdb_escapes
 
 
@@ -13,12 +15,12 @@ class StringStream:
     to the project.
     """
 
-    def __init__(self, raw_text, debug=False):
+    def __init__(self, raw_text: str, debug: bool = False) -> None:
         self.raw_text = raw_text
         self.index = 0
         self.len = len(raw_text)
 
-    def read(self, count):
+    def read(self, count: int) -> str:
         """Read count characters starting at self.index,
         and return those characters as a string
         """
@@ -31,11 +33,11 @@ class StringStream:
 
         return buf
 
-    def seek(self, offset):
+    def seek(self, offset: int) -> None:
         """Advance the index of this StringStream by offset characters"""
         self.index = self.index + offset
 
-    def advance_past_chars(self, chars):
+    def advance_past_chars(self, chars: List[str]) -> str:
         """Advance the index past specific chars
         Args chars (list): list of characters to advance past
 

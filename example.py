@@ -25,14 +25,13 @@ else:
     MAKE_CMD = "make"
 
 
-def main(verbose=True):
+def main() -> None:
     """Build and debug an application programatically
 
     For a list of GDB MI commands, see https://www.sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI.html
     """
 
     # Build C program
-    find_executable(MAKE_CMD)
     if not find_executable(MAKE_CMD):
         print(
             'Could not find executable "%s". Ensure it is installed and on your $PATH.'
@@ -42,7 +41,7 @@ def main(verbose=True):
     subprocess.check_output([MAKE_CMD, "-C", SAMPLE_C_CODE_DIR, "--quiet"])
 
     # Initialize object that manages gdb subprocess
-    gdbmi = GdbController(verbose=verbose)
+    gdbmi = GdbController()
 
     # Send gdb commands. Gdb machine interface commands are easier to script around,
     # hence the name "machine interface".

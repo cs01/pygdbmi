@@ -2,7 +2,8 @@ import itertools
 import shutil
 from pathlib import Path
 
-import nox  # type: ignore
+import nox
+from nox.sessions import Session
 
 
 nox.options.sessions = ["tests", "lint", "docs"]
@@ -13,7 +14,7 @@ nox.options.reuse_existing_virtualenvs = True
 # If these are modified, also modify .github/workflows/tests.yml and the list of supported versions
 # in setup.py.
 @nox.session(python=["3.7", "3.10"])
-def tests(session):
+def tests(session: Session) -> None:
     session.install(".", "pytest")
     session.run("pytest", *session.posargs)
 
@@ -33,7 +34,7 @@ ISORT_OPTIONS = ["--profile", "black", "--lines-after-imports", "2"]
 
 # `format` is a builtin so the function is named differently.
 @nox.session(name="format")
-def format_(session):
+def format_(session: Session) -> None:
     """Re-format all Python source files or, if positionals are passed, only the
     specified files."""
     files = LINTED_PATHS
@@ -47,7 +48,7 @@ def format_(session):
 
 
 @nox.session()
-def lint(session):
+def lint(session: Session) -> None:
     session.install(
         # Packages needed as they are used directly.
         "black",
@@ -56,6 +57,7 @@ def lint(session):
         "isort",
         "mypy",
         # Packages needed to provide types for mypy.
+        "nox",
         "pytest",
     )
     session.run("isort", "--check-only", *ISORT_OPTIONS, *LINTED_PATHS)
@@ -66,30 +68,30 @@ def lint(session):
     session.run("python", "setup.py", "check", "--metadata", "--strict")
 
 
-def install_mkdoc_dependencies(session):
+def install_mkdoc_dependencies(session: Session) -> None:
     session.install("-r", "mkdoc_requirements.txt")
 
 
 @nox.session
-def docs(session):
+def docs(session: Session) -> None:
     install_mkdoc_dependencies(session)
     session.run("mkdocs", "build")
 
 
 @nox.session
-def serve_docs(session):
+def serve_docs(session: Session) -> None:
     install_mkdoc_dependencies(session)
     session.run("mkdocs", "serve")
 
 
 @nox.session
-def publish_docs(session):
+def publish_docs(session: Session) -> None:
     install_mkdoc_dependencies(session)
     session.run("mkdocs", "gh-deploy")
 
 
 @nox.session(python="3.7")
-def build(session):
+def build(session: Session) -> None:
     session.install("setuptools", "wheel", "twine")
     shutil.rmtree("dist", ignore_errors=True)
     shutil.rmtree("build", ignore_errors=True)
@@ -98,7 +100,7 @@ def build(session):
 
 
 @nox.session(python="3.7")
-def publish(session):
+def publish(session: Session) -> None:
     build(session)
     print("REMINDER: Has the changelog been updated?")
     session.run("python", "-m", "twine", "upload", "dist/*")

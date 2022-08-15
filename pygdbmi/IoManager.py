@@ -2,13 +2,12 @@
 which manages I/O for file objects connected to an existing gdb process
 or pty.
 """
-import io
 import logging
 import os
 import select
 import time
 from pprint import pformat
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import IO, Any, Dict, List, Optional, Tuple, Union
 
 from pygdbmi import gdbmiparser
 from pygdbmi.constants import (
@@ -36,11 +35,11 @@ logger = logging.getLogger(__name__)
 class IoManager:
     def __init__(
         self,
-        stdin: io.BufferedWriter,
-        stdout: io.BufferedReader,
-        stderr: Optional[io.BufferedReader],
-        time_to_check_for_additional_output_sec=DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
-    ):
+        stdin: IO[bytes],
+        stdout: IO[bytes],
+        stderr: Optional[IO[bytes]],
+        time_to_check_for_additional_output_sec: float = DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
+    ) -> None:
         """
         Manage I/O for file objects created before calling this class
         This can be useful if the gdb process is managed elsewhere, or if a
@@ -72,8 +71,10 @@ class IoManager:
             _make_non_blocking(self.stderr)
 
     def get_gdb_response(
-        self, timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC, raise_error_on_timeout=True
-    ):
+        self,
+        timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
+        raise_error_on_timeout: bool = True,
+    ) -> List[Dict]:
         """Get response from GDB, and block while doing so. If GDB does not have any response ready to be read
         by timeout_sec, an exception is raised.
 
@@ -107,7 +108,7 @@ class IoManager:
         else:
             return retval
 
-    def _get_responses_windows(self, timeout_sec):
+    def _get_responses_windows(self, timeout_sec: float) -> List[Dict]:
         """Get responses on windows. Assume no support for select and use a while loop."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
@@ -120,12 +121,13 @@ class IoManager:
             except IOError:
                 pass
 
-            try:
-                self.stderr.flush()
-                raw_output = self.stderr.readline().replace(b"\r", b"\n")
-                responses_list += self._get_responses_list(raw_output, "stderr")
-            except IOError:
-                pass
+            if self.stderr is not None:
+                try:
+                    self.stderr.flush()
+                    raw_output = self.stderr.readline().replace(b"\r", b"\n")
+                    responses_list += self._get_responses_list(raw_output, "stderr")
+                except IOError:
+                    pass
 
             responses += responses_list
             if timeout_sec == 0:
@@ -140,7 +142,7 @@ class IoManager:
 
         return responses
 
-    def _get_responses_unix(self, timeout_sec):
+    def _get_responses_unix(self, timeout_sec: float) -> List[Dict]:
         """Get responses on unix-like system. Use select to wait for output."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
@@ -158,6 +160,7 @@ class IoManager:
                     stream = "stdout"
 
                 elif fileno == self.stderr_fileno:
+                    assert self.stderr is not None
                     self.stderr.flush()
                     raw_output = self.stderr.read()
                     stream = "stderr"
@@ -222,10 +225,10 @@ class IoManager:
     def write(
         self,
         mi_cmd_to_write: Union[str, List[str]],
-        timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
+        timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
         raise_error_on_timeout: bool = True,
         read_response: bool = True,
-    ):
+    ) -> List[Dict]:
         """Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
 
         Args:
@@ -324,7 +327,7 @@ def _buffer_incomplete_responses(
     return (raw_output, buf)
 
 
-def _make_non_blocking(file_obj: io.IOBase):
+def _make_non_blocking(file_obj: IO) -> None:
     """make file object non-blocking
     Windows doesn't have the fcntl module, but someone on
     stack overflow supplied this code as an answer, and it works
