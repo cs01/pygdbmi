@@ -19,6 +19,7 @@ Internal changes
 - Added `__all__` to all modules, which means that star imports (like `from pygdbmi.gdbmiparser import *`) will not pollute the namespace with modules used by pygdbmi itself
 - Added `nox -s format` to re-format the source code using the correct options
 - Reformatted all imports with `isort`, and use it as part of `nox -s lint` and `nox -s format`
+- Excluded some common backup and cache files from `MANIFEST.in` to prevent unwanted files to be included which causes `check-manifest` to fail
 
 ## 0.10.0.2
 
