@@ -171,6 +171,14 @@ nox -s tests
 nox -s lint
 ```
 
+Positional arguments passed to `nox -s tests` are passed directly to `pytest`. For instance, to run only the parse tests use
+
+```
+nox -s tests -- tests/test_gdbmiparser.py
+```
+
+See [`pytest`'s documentation](https://docs.pytest.org/) for more details on how to run tests.
+
 To format code using the correct settings use
 
 ```
