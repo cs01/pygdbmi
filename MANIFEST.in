@@ -8,6 +8,7 @@ exclude .flake8
 exclude noxfile.py
 exclude mkdocs.yml
 exclude __pycache__
+exclude mypy.ini
 exclude *.in
 exclude *.txt
 exclude *.pyc

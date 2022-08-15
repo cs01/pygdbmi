@@ -6,7 +6,7 @@ structured output.
 import logging
 import subprocess
 from distutils.spawn import find_executable
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from pygdbmi.constants import (
     DEFAULT_GDB_TIMEOUT_SEC,
@@ -26,8 +26,8 @@ class GdbController:
     def __init__(
         self,
         command: Optional[List[str]] = None,
-        time_to_check_for_additional_output_sec=DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
-    ):
+        time_to_check_for_additional_output_sec: float = DEFAULT_TIME_TO_CHECK_FOR_ADDITIONAL_OUTPUT_SEC,
+    ) -> None:
         """
         Run gdb as a subprocess. Send commands and receive structured output.
         Create new object, along with a gdb subprocess
@@ -48,11 +48,11 @@ class GdbController:
                 + "See https://sourceware.org/gdb/onlinedocs/gdb/Mode-Options.html#Mode-Options."
             )
         self.abs_gdb_path = None  # abs path to gdb executable
-        self.command = command  # type: List[str]
+        self.command: List[str] = command
         self.time_to_check_for_additional_output_sec = (
             time_to_check_for_additional_output_sec
         )
-        self.gdb_process = None
+        self.gdb_process: Optional[subprocess.Popen] = None
         self._allow_overwrite_timeout_times = (
             self.time_to_check_for_additional_output_sec > 0
         )
@@ -72,7 +72,7 @@ class GdbController:
 
         self.spawn_new_gdb_subprocess()
 
-    def spawn_new_gdb_subprocess(self):
+    def spawn_new_gdb_subprocess(self) -> int:
         """Spawn a new gdb subprocess with the arguments supplied to the object
         during initialization. If gdb subprocess already exists, terminate it before
         spanwing a new one.
@@ -96,6 +96,8 @@ class GdbController:
             bufsize=0,
         )
 
+        assert self.gdb_process.stdin is not None
+        assert self.gdb_process.stdout is not None
         self.io_manager = IoManager(
             self.gdb_process.stdin,
             self.gdb_process.stdout,
@@ -105,18 +107,20 @@ class GdbController:
         return self.gdb_process.pid
 
     def get_gdb_response(
-        self, timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC, raise_error_on_timeout=True
-    ):
+        self,
+        timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
+        raise_error_on_timeout: bool = True,
+    ) -> List[Dict]:
         """Get gdb response. See IoManager.get_gdb_response() for details"""
         return self.io_manager.get_gdb_response(timeout_sec, raise_error_on_timeout)
 
     def write(
         self,
         mi_cmd_to_write: Union[str, List[str]],
-        timeout_sec=DEFAULT_GDB_TIMEOUT_SEC,
+        timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
         raise_error_on_timeout: bool = True,
         read_response: bool = True,
-    ):
+    ) -> List[Dict]:
         """Write command to gdb. See IoManager.write() for details"""
         return self.io_manager.write(
             mi_cmd_to_write, timeout_sec, raise_error_on_timeout, read_response

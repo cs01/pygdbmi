@@ -11,6 +11,7 @@ Other changes
 - Fixed a bug where notifications without a payload were not recognized as such
 - Invalid octal sequences produced by GDB are left unchanged instead of causing a `UnicodeDecodeError` (#64)
 - Fix a crash on Windows by waiting for the GDB process to exit in `GdbController.exit`
+- Added type annotations to the whole public API
 - Updated the examples in `README.md` to use the current API and show the results printed by this version of pygdbmi (#69)
 
 Internal changes
@@ -21,6 +22,7 @@ Internal changes
 - Added `nox -s format` to re-format the source code using the correct options
 - Reformatted all imports with `isort`, and use it as part of `nox -s lint` and `nox -s format`
 - Converted tests to use pytest's test structure rather than the unittest-based one
+- Added mypy configuration to detect more problems and to force all code to be annotated
 - Excluded some common backup and cache files from `MANIFEST.in` to prevent unwanted files to be included which causes `check-manifest` to fail
 
 ## 0.10.0.2
