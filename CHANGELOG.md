@@ -11,6 +11,7 @@ Other changes
 - Fixed a bug where notifications without a payload were not recognized as such
 - Invalid octal sequences produced by GDB are left unchanged instead of causing a `UnicodeDecodeError` (#64)
 - Fix a crash on Windows by waiting for the GDB process to exit in `GdbController.exit`
+- Updated the examples in `README.md` to use the current API and show the results printed by this version of pygdbmi (#69)
 
 Internal changes
 

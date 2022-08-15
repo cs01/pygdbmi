@@ -79,19 +79,22 @@ from pygdbmi import gdbmiparser
 from pprint import pprint
 response = gdbmiparser.parse_response('^done,bkpt={number="1",type="breakpoint",disp="keep", enabled="y",addr="0x08048564",func="main",file="myprog.c",fullname="/home/myprog.c",line="68",thread-groups=["i1"],times="0"')
 pprint(response)
-> {'message': 'done',
-'payload': {'bkpt': {'addr': '0x08048564',
-                      'disp': 'keep',
-                      'enabled': 'y',
-                      'file': 'myprog.c',
-                      'fullname': '/home/myprog.c',
-                      'func': 'main',
-                      'line': '68',
-                      'number': '1',
-                      'thread-groups': ['i1'],
-                      'times': '0',
-                      'type': 'breakpoint'}},
- 'type': 'result'}
+pprint(response)
+# Prints:
+# {'message': 'done',
+#  'payload': {'bkpt': {'addr': '0x08048564',
+#                       'disp': 'keep',
+#                       'enabled': 'y',
+#                       'file': 'myprog.c',
+#                       'fullname': '/home/myprog.c',
+#                       'func': 'main',
+#                       'line': '68',
+#                       'number': '1',
+#                       'thread-groups': ['i1'],
+#                       'times': '0',
+#                       'type': 'breakpoint'}},
+#  'token': None,
+#  'type': 'result'}
 ```
 
 ## Programmatic Control Over gdb
@@ -104,15 +107,21 @@ from pprint import pprint
 
 # Start gdb process
 gdbmi = GdbController()
-print(gdbmi.get_subprocess_cmd())  # print actual command run as subprocess
-
+print(gdbmi.command)  # print actual command run as subprocess
 # Load binary a.out and get structured response
 response = gdbmi.write('-file-exec-file a.out')
 pprint(response)
-[{'message': u'thread-group-added',
-  'payload': {u'id': u'i1'},
-  'type': 'notify'},
- {'message': u'done', 'payload': None, 'type': 'result'}]
+# Prints:
+# [{'message': 'thread-group-added',
+#   'payload': {'id': 'i1'},
+#   'stream': 'stdout',
+#   'token': None,
+#   'type': 'notify'},
+#  {'message': 'done',
+#   'payload': None,
+#   'stream': 'stdout',
+#   'token': None,
+#   'type': 'result'}]
 ```
 
 Now do whatever you want with gdb. All gdb commands, as well as gdb [machine interface commands](<(https://sourceware.org/gdb/onlinedocs/gdb/GDB_002fMI-Input-Syntax.html#GDB_002fMI-Input-Syntax)>) are acceptable. gdb mi commands give better structured output that is machine readable, rather than gdb console output. mi commands begin with a `-`.
