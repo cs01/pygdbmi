@@ -210,6 +210,7 @@ nox -s format -- example.py pygdbmi/IoManager.py
 - [gdbgui](https://github.com/cs01/gdbgui) implements a browser-based frontend to gdb, using pygdbmi on the backend
 - [PINCE](https://github.com/korcankaraokcu/PINCE) is a gdb frontend that aims to provide a reverse engineering tool and a reusable library focused on games. It uses pygdbmi to parse gdb/mi based output for some functions
 - [avatar²](https://github.com/avatartwo/avatar2) is an orchestration framework for reversing and analysing firmware of embedded devices. It utilizes pygdbmi for internal communication to different analysis targets.
+- [UDB](https://undo.io/udb) is a proprietary time-travel debugger for C and C++ based on GDB. It uses pygdbmi in its extensive test suite to parse the debugger's output.
 - Know of another project? Create a PR and add it here.
 
 ## Authors
