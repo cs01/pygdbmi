@@ -23,6 +23,7 @@ Internal changes
 - Reformatted all imports with `isort`, and use it as part of `nox -s lint` and `nox -s format`
 - Converted tests to use pytest's test structure rather than the unittest-based one
 - Added mypy configuration to detect more problems and to force all code to be annotated
+- Added a test for `example.py`
 - Excluded some common backup and cache files from `MANIFEST.in` to prevent unwanted files to be included which causes `check-manifest` to fail
 
 ## 0.10.0.2
