@@ -7,8 +7,8 @@ Run from top level directory: ./tests/test_app.py
 
 import os
 import random
+import shutil
 import subprocess
-from distutils.spawn import find_executable
 
 import pytest
 
@@ -24,7 +24,7 @@ else:
 
 def _get_c_program(makefile_target_name: str, binary_name: str) -> str:
     """build c program and return path to binary"""
-    if not find_executable(MAKE_CMD):
+    if not shutil.which(MAKE_CMD):
         raise AssertionError(
             'Could not find executable "%s". Ensure it is installed and on your $PATH.'
             % MAKE_CMD
