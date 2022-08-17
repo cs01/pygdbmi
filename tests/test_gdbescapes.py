@@ -9,7 +9,7 @@ from pygdbmi.gdbescapes import advance_past_string_with_gdb_escapes, unescape
 # Split a Unicode character into its UTF-8 bytes and encode each one as a 3-digit
 # oct char prefixed with a "\".
 # This is the opposite of what the gdbescapes module does.
-GDB_ESCAPED_PIZZA = "".join(rf"\{c:03o}" for c in "\N{SLICE OF PIZZA}".encode("utf-8"))
+GDB_ESCAPED_PIZZA = "".join(rf"\{c:03o}" for c in "\N{SLICE OF PIZZA}".encode())
 # Similar but for a simple space.
 # This character was chosen because, in octal, it's shorter than three digits, so we
 # can check that unescape_gdb_mi_string handles the initial `0` correctly.

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import io
 import os
 import re
 from codecs import open
@@ -10,9 +9,9 @@ from setuptools import find_packages, setup  # type: ignore
 
 EXCLUDE_FROM_PACKAGES = ["tests"]
 CURDIR = os.path.abspath(os.path.dirname(__file__))
-README = io.open("README.md", "r", encoding="utf-8").read()
+README = open("README.md", encoding="utf-8").read()
 
-with open("pygdbmi/__init__.py", "r") as fd:
+with open("pygdbmi/__init__.py") as fd:
     matches = re.search(
         r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE
     )

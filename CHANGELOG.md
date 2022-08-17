@@ -24,6 +24,7 @@ Internal changes
 - Converted tests to use pytest's test structure rather than the unittest-based one
 - Added mypy configuration to detect more problems and to force all code to be annotated
 - Added a test for `example.py`
+- Ran [`pyupgrade`](https://github.com/asottile/pyupgrade) (with option `--py37-plus`) on the codebase to convert to Python 3.7 idioms
 - Excluded some common backup and cache files from `MANIFEST.in` to prevent unwanted files to be included which causes `check-manifest` to fail
 
 ## 0.10.0.2

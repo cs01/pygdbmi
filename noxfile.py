@@ -19,7 +19,7 @@ def tests(session: Session) -> None:
     session.run("pytest", *session.posargs)
 
 
-LINTED_PATHS = set(
+LINTED_PATHS = {
     str(p.resolve())
     for p in itertools.chain(
         # All top-level Python files.
@@ -27,7 +27,7 @@ LINTED_PATHS = set(
         # Plus Python files in these specified directories.
         *(Path(d).glob("**/*.py") for d in ("pygdbmi", "tests"))
     )
-)
+}
 
 ISORT_OPTIONS = ["--profile", "black", "--lines-after-imports", "2"]
 
