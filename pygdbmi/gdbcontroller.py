@@ -4,8 +4,8 @@ structured output.
 """
 
 import logging
+import shutil
 import subprocess
-from distutils.spawn import find_executable
 from typing import Dict, List, Optional, Union
 
 from pygdbmi.constants import (
@@ -61,7 +61,7 @@ class GdbController:
             raise ValueError("a valid path to gdb must be specified")
 
         else:
-            abs_gdb_path = find_executable(gdb_path)
+            abs_gdb_path = shutil.which(gdb_path)
             if abs_gdb_path is None:
                 raise ValueError(
                     'gdb executable could not be resolved from "%s"' % gdb_path

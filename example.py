@@ -4,9 +4,9 @@
 Run with `python -m example`
 """
 import os
+import shutil
 import subprocess
 import sys
-from distutils.spawn import find_executable
 
 from pygdbmi.gdbcontroller import GdbController
 
@@ -32,7 +32,7 @@ def main() -> None:
     """
 
     # Build C program
-    if not find_executable(MAKE_CMD):
+    if not shutil.which(MAKE_CMD):
         print(
             'Could not find executable "%s". Ensure it is installed and on your $PATH.'
             % MAKE_CMD
