@@ -118,7 +118,7 @@ class IoManager:
                 self.stdout.flush()
                 raw_output = self.stdout.readline().replace(b"\r", b"\n")
                 responses_list = self._get_responses_list(raw_output, "stdout")
-            except IOError:
+            except OSError:
                 pass
 
             if self.stderr is not None:
@@ -126,7 +126,7 @@ class IoManager:
                     self.stderr.flush()
                     raw_output = self.stderr.readline().replace(b"\r", b"\n")
                     responses_list += self._get_responses_list(raw_output, "stderr")
-                except IOError:
+                except OSError:
                     pass
 
             responses += responses_list

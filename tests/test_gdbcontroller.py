@@ -85,7 +85,7 @@ def test_controller() -> None:
     got_no_process_exception = False
     try:
         responses = gdbmi.write("-file-exec-and-symbols %s" % c_hello_world_binary)
-    except IOError:
+    except OSError:
         got_no_process_exception = True
     assert got_no_process_exception is True
 

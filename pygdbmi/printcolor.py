@@ -18,32 +18,32 @@ def print_red(x: Any) -> None:
     if USING_WINDOWS:
         print(x)
     else:
-        print("\033[91m {}\033[00m".format(x))
+        print(f"\033[91m {x}\033[00m")
 
 
 def print_green(x: Any) -> None:
     if USING_WINDOWS:
         print(x)
     else:
-        print("\033[92m {}\033[00m".format(x))
+        print(f"\033[92m {x}\033[00m")
 
 
 def print_cyan(x: Any) -> None:
     if USING_WINDOWS:
         print(x)
     else:
-        print("\033[96m {}\033[00m".format(x))
+        print(f"\033[96m {x}\033[00m")
 
 
 def fmt_green(x: Any) -> str:
     if USING_WINDOWS:
         return x
     else:
-        return "\033[92m {}\033[00m".format(x)
+        return f"\033[92m {x}\033[00m"
 
 
 def fmt_cyan(x: Any) -> str:
     if USING_WINDOWS:
         return x
     else:
-        return "\033[96m {}\033[00m".format(x)
+        return f"\033[96m {x}\033[00m"
