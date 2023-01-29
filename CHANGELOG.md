@@ -1,6 +1,6 @@
 # pygdbmi release history
 
-## dev
+## 0.11.0.0
 
 **Breaking changes**
 
