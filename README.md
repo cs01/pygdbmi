@@ -200,6 +200,57 @@ Or, to format only specified files, use
 nox -s format -- example.py pygdbmi/IoManager.py
 ```
 
+### Making a release
+
+Only maintainers of the [pygdbmi package on PyPi](https://pypi.org/project/pygdbmi/) can make a release.
+
+In the following steps, replace these strings with the correct values:
+
+- `<REMOTE>` is the name of the remote for the main pygdbmi repository (for instance, `origin`)
+- `<VERSION>` is the version number chosen in step 2.
+
+To make a release:
+
+1. Checkout the `master` branch and pull from the main repository with `git pull <REMOTE> master`
+2. Decide the version number for the new release; we follow
+   [Semantic Versioning](https://semver.org/) but prefixing the version with `0.`: given a version
+   number _0.SECOND.THIRD.FOURTH_, increment the:
+   - _SECOND_ component when you make incompatible API changes
+   - _THIRD_ component when you add functionality in a backwards compatible manner
+   - _FOURTH_ component when you make backwards compatible bug fixes
+3. Update `CHANGELOG.md` to list the chosen version number instead of `## dev`
+4. Update `__version__` in `pygdbmi/__init__.py` to the chosen version number
+5. Create a branch, for instance using `git checkout -b before-release-<VERSION>`
+6. Commit your changes, for instance using `git commit -a -m 'Bump version to <VERSION> for release'`
+7. Check that the docs look fine by serving them locally with `nox -s serve_docs`
+8. Push the branch, for instance with `git push --set-upstream <REMOTE> before-release-<VERSION>`
+9. If tests pass on the PR you created, you can merge into `master`
+10. Go to the [new release page](https://github.com/cs01/pygdbmi/releases/new) and prepare the
+    release:
+    - Add a tag in the form `v<VERSION>` (for example `v0.1.2.3`)
+    - Set the title to `pygdbmi v<VERSION>` (for example `pygdbmi v0.1.2.3`)
+    - Copy and paste the section for the new release only from `CHANGELOG.md` excluding the line
+      with the version number
+    - Press “Publish release”
+10. Publish the release to PyPI with `nox -s publish`
+11. Publish the docs with `nox -s publish_docs`
+11. Verify that the [PyPi page for pygdbmi](https://pypi.org/project/pygdbmi/) looks correct
+12. Verify that the [published docs](https://cs01.github.io/pygdbmi/) look correct
+13. Prepare for changes for the next release by adding something like this above the previous
+    entries in `CHANGELOG.md` (where `<VERSION+1>` is `<VERSION>` with the last digit increaded
+    by 1):
+
+    ```
+    ## <VERSION+1>.dev0
+
+    - *Replace this line with new entries*
+    ```
+
+14. Create a branch for the changes with `git checkout -b after-release-<VERSION>`
+15. Commit the change with `git commit -m 'Prepare for work on the next release' CHANGELOG.md`
+16. Push the branch with `git push --set-upstream <REMOTE> after-release-<VERSION>`
+17. If tests pass, merge into `master`
+
 ## Similar projects
 
 - [tsgdbmi](https://github.com/Guyutongxue/tsgdbmi) A port of pygdbmi to TypeScript
