@@ -1,5 +1,9 @@
 # pygdbmi release history
 
+## <0.11.0.1>.dev0
+
+- *Replace this line with new entries*
+
 ## 0.11.0.0
 
 **Breaking changes**
