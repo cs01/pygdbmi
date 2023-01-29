@@ -27,6 +27,7 @@ Internal changes
 - Replaced uses of `distutils.spawn.find_executable`, which is deprecated, with `shutil.which`
 - Ran [`pyupgrade`](https://github.com/asottile/pyupgrade) (with option `--py37-plus`) on the codebase to convert to Python 3.7 idioms
 - Excluded some common backup and cache files from `MANIFEST.in` to prevent unwanted files to be included which causes `check-manifest` to fail
+- Fix `.flake8` to not cause errors with some versions of the `flake8` tool
 
 ## 0.10.0.2
 
