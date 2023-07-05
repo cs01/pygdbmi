@@ -262,6 +262,7 @@ To make a release:
 - [PINCE](https://github.com/korcankaraokcu/PINCE) is a gdb frontend that aims to provide a reverse engineering tool and a reusable library focused on games. It uses pygdbmi to parse gdb/mi based output for some functions
 - [avatar²](https://github.com/avatartwo/avatar2) is an orchestration framework for reversing and analysing firmware of embedded devices. It utilizes pygdbmi for internal communication to different analysis targets.
 - [UDB](https://undo.io/udb) is a proprietary time-travel debugger for C and C++ based on GDB. It uses pygdbmi in its extensive test suite to parse the debugger's output.
+- [pwndbg-gui](https://github.com/AlEscher/pwndbg-gui) is a user-friendly graphical interface for [pwndbg](https://github.com/pwndbg/pwndbg), a tool that simplifies exploit development and reverse engineering with GDB. It uses pygdbmi to interact with GDB and get structured responses.
 - Know of another project? Create a PR and add it here.
 
 ## Authors
