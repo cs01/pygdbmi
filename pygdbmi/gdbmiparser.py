@@ -12,9 +12,9 @@ import logging
 import re
 from typing import Any, Callable, Dict, List, Match, Optional, Pattern, Tuple, Union
 
-from pygdbmi.gdbescapes import unescape
-from pygdbmi.printcolor import fmt_green
-from pygdbmi.StringStream import StringStream
+from .gdbescapes import unescape
+from .printcolor import fmt_green
+from .StringStream import StringStream
 
 
 __all__ = [
@@ -162,6 +162,7 @@ def _extract_payload(match: Match, stream: StringStream) -> Optional[Dict]:
 
 # A regular expression matching a response finished record.
 _GDB_MI_RESPONSE_FINISHED_RE = re.compile(r"^\(gdb\)\s*$")
+# _GDB_MI_RESPONSE_FINISHED_RE = re.compile(r"^\^done*$")
 
 # Regular expression identifying a token in a MI record.
 _GDB_MI_COMPONENT_TOKEN = r"(?P<token>\d+)?"

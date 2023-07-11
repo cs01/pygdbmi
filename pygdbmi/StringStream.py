@@ -1,6 +1,6 @@
 from typing import List
 
-from pygdbmi.gdbescapes import advance_past_string_with_gdb_escapes
+from .gdbescapes import advance_past_string_with_gdb_escapes
 
 
 __all__ = ["StringStream"]
