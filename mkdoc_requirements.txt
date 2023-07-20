@@ -50,9 +50,7 @@ mkdocstrings-python==0.7.1
     # via mkdocstrings
 packaging==21.3
     # via mkdocs
-    .
-    # via -r mkdoc_requirements.in
-pygments==2.12.0
+pygments==2.15.0
     # via
     #   -r mkdoc_requirements.in
     #   mkdocs-material
@@ -70,6 +68,8 @@ pyyaml==6.0
     #   pyyaml-env-tag
 pyyaml-env-tag==0.1
     # via mkdocs
+sanitized-package @ file:///home/dependabot/dependabot-updater/tmp/dependabot_20230720-7-ybzgdi
+    # via -r mkdoc_requirements.in
 six==1.16.0
     # via python-dateutil
 watchdog==2.1.9
