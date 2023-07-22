@@ -9,6 +9,7 @@ import os
 import random
 import shutil
 import subprocess
+import time
 
 import pytest
 
@@ -95,6 +96,26 @@ def test_controller() -> None:
         "-file-exec-and-symbols %s" % c_hello_world_binary, timeout_sec=1
     )
     responses = gdbmi.write(["-break-insert main", "-exec-run"])
+
+
+def test_return_on_first_response() -> None:
+    gdbmi = GdbController(time_to_check_for_additional_output_sec=0)
+    c_hello_world_binary = _get_c_program("hello", "pygdbmiapp.a")
+
+    if USING_WINDOWS:
+        c_hello_world_binary = c_hello_world_binary.replace("\\", "/")
+    # Load the binary and its symbols in the gdb subprocess
+    responses = gdbmi.write(
+        "-file-exec-and-symbols %s" % c_hello_world_binary, timeout_sec=1
+    )
+    responses = gdbmi.write(
+        "-file-exec-and-symbols %s" % c_hello_world_binary, timeout_sec=1
+    )
+    timeout_sec = 10.0
+    start_time = time.time()
+    responses = gdbmi.write("stepi", timeout_sec=timeout_sec, return_on_first_response=True)
+    endtime = time.time()
+    assert(start_time + timeout_sec > endtime)
 
 
 @pytest.mark.skip()

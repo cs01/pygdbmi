@@ -74,6 +74,7 @@ class IoManager:
         self,
         timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
         raise_error_on_timeout: bool = True,
+        return_on_first_response: bool = False,
     ) -> List[Dict]:
         """Get response from GDB, and block while doing so. If GDB does not have any response ready to be read
         by timeout_sec, an exception is raised.
@@ -96,9 +97,9 @@ class IoManager:
             timeout_sec = 0
 
         if USING_WINDOWS:
-            retval = self._get_responses_windows(timeout_sec)
+            retval = self._get_responses_windows(timeout_sec, return_on_first_response)
         else:
-            retval = self._get_responses_unix(timeout_sec)
+            retval = self._get_responses_unix(timeout_sec, return_on_first_response)
 
         if not retval and raise_error_on_timeout:
             raise GdbTimeoutError(
@@ -108,7 +109,9 @@ class IoManager:
         else:
             return retval
 
-    def _get_responses_windows(self, timeout_sec: float) -> List[Dict]:
+    def _get_responses_windows(
+        self, timeout_sec: float, return_on_first_response: bool
+    ) -> List[Dict]:
         """Get responses on windows. Assume no support for select and use a while loop."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
@@ -132,6 +135,8 @@ class IoManager:
             responses += responses_list
             if timeout_sec == 0:
                 break
+            elif return_on_first_response is True and responses:
+                break
             elif responses_list and self._allow_overwrite_timeout_times:
                 timeout_time_sec = min(
                     time.time() + self.time_to_check_for_additional_output_sec,
@@ -142,7 +147,9 @@ class IoManager:
 
         return responses
 
-    def _get_responses_unix(self, timeout_sec: float) -> List[Dict]:
+    def _get_responses_unix(
+        self, timeout_sec: float, return_on_first_response: bool
+    ) -> List[Dict]:
         """Get responses on unix-like system. Use select to wait for output."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
@@ -174,7 +181,8 @@ class IoManager:
 
             if timeout_sec == 0:  # just exit immediately
                 break
-
+            elif return_on_first_response is True and responses:
+                break
             elif responses_list and self._allow_overwrite_timeout_times:
                 # update timeout time to potentially be closer to now to avoid lengthy wait times when nothing is being output by gdb
                 timeout_time_sec = min(
@@ -197,7 +205,10 @@ class IoManager:
         """
         responses: List[Dict[Any, Any]] = []
 
-        (_new_output, self._incomplete_output[stream],) = _buffer_incomplete_responses(
+        (
+            _new_output,
+            self._incomplete_output[stream],
+        ) = _buffer_incomplete_responses(
             raw_output, self._incomplete_output.get(stream)
         )
 
@@ -228,6 +239,7 @@ class IoManager:
         timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
         raise_error_on_timeout: bool = True,
         read_response: bool = True,
+        return_on_first_response: bool = False,
     ) -> List[Dict]:
         """Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
 
@@ -282,7 +294,9 @@ class IoManager:
 
         if read_response is True:
             return self.get_gdb_response(
-                timeout_sec=timeout_sec, raise_error_on_timeout=raise_error_on_timeout
+                timeout_sec=timeout_sec,
+                raise_error_on_timeout=raise_error_on_timeout,
+                return_on_first_response=return_on_first_response,
             )
 
         else:
