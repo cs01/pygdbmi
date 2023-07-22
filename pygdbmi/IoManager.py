@@ -109,7 +109,9 @@ class IoManager:
         else:
             return retval
 
-    def _get_responses_windows(self, timeout_sec: float, return_on_first_response: bool) -> List[Dict]:
+    def _get_responses_windows(
+        self, timeout_sec: float, return_on_first_response: bool
+    ) -> List[Dict]:
         """Get responses on windows. Assume no support for select and use a while loop."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
@@ -145,7 +147,9 @@ class IoManager:
 
         return responses
 
-    def _get_responses_unix(self, timeout_sec: float, return_on_first_response: bool) -> List[Dict]:
+    def _get_responses_unix(
+        self, timeout_sec: float, return_on_first_response: bool
+    ) -> List[Dict]:
         """Get responses on unix-like system. Use select to wait for output."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
@@ -201,7 +205,10 @@ class IoManager:
         """
         responses: List[Dict[Any, Any]] = []
 
-        (_new_output, self._incomplete_output[stream],) = _buffer_incomplete_responses(
+        (
+            _new_output,
+            self._incomplete_output[stream],
+        ) = _buffer_incomplete_responses(
             raw_output, self._incomplete_output.get(stream)
         )
 
@@ -232,7 +239,7 @@ class IoManager:
         timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
         raise_error_on_timeout: bool = True,
         read_response: bool = True,
-        return_on_first_response: bool = False
+        return_on_first_response: bool = False,
     ) -> List[Dict]:
         """Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
 
@@ -289,7 +296,7 @@ class IoManager:
             return self.get_gdb_response(
                 timeout_sec=timeout_sec,
                 raise_error_on_timeout=raise_error_on_timeout,
-                return_on_first_response=return_on_first_response
+                return_on_first_response=return_on_first_response,
             )
 
         else:

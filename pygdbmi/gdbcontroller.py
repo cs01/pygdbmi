@@ -110,10 +110,12 @@ class GdbController:
         self,
         timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
         raise_error_on_timeout: bool = True,
-        return_on_first_response: bool = False
+        return_on_first_response: bool = False,
     ) -> List[Dict]:
         """Get gdb response. See IoManager.get_gdb_response() for details"""
-        return self.io_manager.get_gdb_response(timeout_sec, raise_error_on_timeout, return_on_first_response)
+        return self.io_manager.get_gdb_response(
+            timeout_sec, raise_error_on_timeout, return_on_first_response
+        )
 
     def write(
         self,
@@ -121,7 +123,7 @@ class GdbController:
         timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
         raise_error_on_timeout: bool = True,
         read_response: bool = True,
-        return_on_first_response: bool = False
+        return_on_first_response: bool = False,
     ) -> List[Dict]:
         """Write command to gdb. See IoManager.write() for details"""
         return self.io_manager.write(
@@ -129,7 +131,7 @@ class GdbController:
             timeout_sec=timeout_sec,
             raise_error_on_timeout=raise_error_on_timeout,
             read_response=read_response,
-            return_on_first_response=return_on_first_response
+            return_on_first_response=return_on_first_response,
         )
 
     def exit(self) -> None:
