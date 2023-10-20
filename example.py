@@ -49,7 +49,7 @@ def main() -> None:
     # Responses are returned after writing, by default.
 
     # Load the file
-    responses = gdbmi.write("-file-exec-and-symbols %s" % SAMPLE_C_BINARY)
+    responses = gdbmi.write("-file-exec-and-symbols %s" % SAMPLE_C_BINARY, timeout_sec=10)
     # Get list of source files used to compile the binary
     responses = gdbmi.write("-file-list-exec-source-files")
     # Add breakpoint
