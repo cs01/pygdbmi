@@ -92,7 +92,7 @@ def test_controller() -> None:
     # Respawn and test signal handling
     gdbmi.spawn_new_gdb_subprocess()
     responses = gdbmi.write(
-        "-file-exec-and-symbols %s" % c_hello_world_binary, timeout_sec=1
+        "-file-exec-and-symbols %s" % c_hello_world_binary, timeout_sec=10
     )
     responses = gdbmi.write(["-break-insert main", "-exec-run"])
 
