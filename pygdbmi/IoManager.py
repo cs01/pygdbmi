@@ -74,6 +74,7 @@ class IoManager:
         self,
         timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
         raise_error_on_timeout: bool = True,
+        return_on_result: bool = False,
     ) -> List[Dict]:
         """Get response from GDB, and block while doing so. If GDB does not have any response ready to be read
         by timeout_sec, an exception is raised.
@@ -81,6 +82,9 @@ class IoManager:
         Args:
             timeout_sec: Maximum time to wait for reponse. Must be >= 0. Will return after
             raise_error_on_timeout: Whether an exception should be raised if no response was found after timeout_sec
+            return_on_result: Whether to return when a response of type 'result' was received.
+                If return_on_result and raise_error_on_timeout, will raise an exception if no response of
+                type 'result' was received.
 
         Returns:
             List of parsed GDB responses, returned from gdbmiparser.parse_response, with the
@@ -96,19 +100,30 @@ class IoManager:
             timeout_sec = 0
 
         if USING_WINDOWS:
-            retval = self._get_responses_windows(timeout_sec)
+            retval = self._get_responses_windows(timeout_sec, return_on_result)
         else:
-            retval = self._get_responses_unix(timeout_sec)
+            retval = self._get_responses_unix(timeout_sec, return_on_result)
 
         if not retval and raise_error_on_timeout:
             raise GdbTimeoutError(
                 "Did not get response from gdb after %s seconds" % timeout_sec
             )
 
-        else:
-            return retval
+        if (
+            return_on_result
+            and raise_error_on_timeout
+            and not any(response["type"] == "result" for response in retval)
+        ):
+            raise GdbTimeoutError(
+                "Did not get a 'result' response from gdb after %s seconds"
+                % timeout_sec
+            )
 
-    def _get_responses_windows(self, timeout_sec: float) -> List[Dict]:
+        return retval
+
+    def _get_responses_windows(
+        self, timeout_sec: float, return_on_result: bool
+    ) -> List[Dict]:
         """Get responses on windows. Assume no support for select and use a while loop."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
@@ -130,19 +145,29 @@ class IoManager:
                     pass
 
             responses += responses_list
+
+            if return_on_result and any(
+                response["type"] == "result" for response in (responses_list or [])
+            ):
+                break
+
             if timeout_sec == 0:
                 break
+
             elif responses_list and self._allow_overwrite_timeout_times:
                 timeout_time_sec = min(
                     time.time() + self.time_to_check_for_additional_output_sec,
                     timeout_time_sec,
                 )
+
             elif time.time() > timeout_time_sec:
                 break
 
         return responses
 
-    def _get_responses_unix(self, timeout_sec: float) -> List[Dict]:
+    def _get_responses_unix(
+        self, timeout_sec: float, return_on_result: bool
+    ) -> List[Dict]:
         """Get responses on unix-like system. Use select to wait for output."""
         timeout_time_sec = time.time() + timeout_sec
         responses = []
@@ -171,6 +196,11 @@ class IoManager:
                     )
                 responses_list = self._get_responses_list(raw_output, stream)
                 responses += responses_list
+
+            if return_on_result and any(
+                response["type"] == "result" for response in (responses_list or [])
+            ):
+                break
 
             if timeout_sec == 0:  # just exit immediately
                 break
@@ -230,6 +260,7 @@ class IoManager:
         mi_cmd_to_write: Union[str, List[str]],
         timeout_sec: float = DEFAULT_GDB_TIMEOUT_SEC,
         raise_error_on_timeout: bool = True,
+        return_on_result: bool = False,
         read_response: bool = True,
     ) -> List[Dict]:
         """Write to gdb process. Block while parsing responses from gdb for a maximum of timeout_sec.
@@ -238,6 +269,9 @@ class IoManager:
             mi_cmd_to_write: String to write to gdb. If list, it is joined by newlines.
             timeout_sec: Maximum number of seconds to wait for response before exiting. Must be >= 0.
             raise_error_on_timeout: If read_response is True, raise error if no response is received
+            return_on_result: Whether to return when a response of type 'result' was received.
+                If return_on_result and raise_error_on_timeout, will raise an exception if no response of
+                type 'result' was received.
             read_response: Block and read response. If there is a separate thread running, this can be false, and the reading thread read the output.
         Returns:
             List of parsed gdb responses if read_response is True, otherwise []
@@ -285,7 +319,9 @@ class IoManager:
 
         if read_response is True:
             return self.get_gdb_response(
-                timeout_sec=timeout_sec, raise_error_on_timeout=raise_error_on_timeout
+                timeout_sec=timeout_sec,
+                raise_error_on_timeout=raise_error_on_timeout,
+                return_on_result=return_on_result,
             )
 
         else:
