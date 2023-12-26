@@ -197,7 +197,10 @@ class IoManager:
         """
         responses: List[Dict[Any, Any]] = []
 
-        (_new_output, self._incomplete_output[stream],) = _buffer_incomplete_responses(
+        (
+            _new_output,
+            self._incomplete_output[stream],
+        ) = _buffer_incomplete_responses(
             raw_output, self._incomplete_output.get(stream)
         )
 
