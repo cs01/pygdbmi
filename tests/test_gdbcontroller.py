@@ -9,6 +9,7 @@ import os
 import random
 import shutil
 import subprocess
+import time
 
 import pytest
 
@@ -67,6 +68,22 @@ def test_controller() -> None:
     assert response["payload"] == {"id": "i1"}
     assert response["stream"] == "stdout"
     assert response["token"] is None
+
+    # Verify exits quickly if return_on_result is True
+    t0 = time.monotonic()
+    responses = gdbmi.write(["-rubbish"], return_on_result=True)
+    t1 = time.monotonic()
+    duration = t1 - t0
+    assert len(responses) != 0
+    assert duration < 0.01
+
+    # Verify waits for timeout if return_on_result is not set
+    t0 = time.monotonic()
+    responses = gdbmi.write(["-rubbish"])
+    t1 = time.monotonic()
+    duration = t1 - t0
+    assert len(responses) != 0
+    assert duration >= 0.2
 
     responses = gdbmi.write(["-file-list-exec-source-files", "-break-insert main"])
     assert len(responses) != 0

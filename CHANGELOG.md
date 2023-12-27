@@ -3,6 +3,8 @@
 ## <0.11.0.1>.dev0
 
 - *Replace this line with new entries*
+- Added a flag `return_on_result`, which causes an immediate return when a response of type 'result' is received,
+instead of waiting until the timeout passes.
 
 ## 0.11.0.0
 

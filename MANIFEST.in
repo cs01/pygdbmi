@@ -7,13 +7,13 @@ exclude example.py
 exclude .flake8
 exclude noxfile.py
 exclude mkdocs.yml
-exclude __pycache__
+global-exclude __pycache__
 exclude mypy.ini
 exclude *.in
 exclude *.txt
-exclude *.pyc
-exclude *.sw[po]
-exclude *~
+global-exclude *.pyc
+global-exclude *.sw[po]
+global-exclude *~
 
 prune tests
 prune docs
