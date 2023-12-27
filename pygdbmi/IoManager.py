@@ -205,7 +205,11 @@ class IoManager:
             if timeout_sec == 0:  # just exit immediately
                 break
 
-            elif responses_list and self._allow_overwrite_timeout_times:
+            elif (
+                responses_list
+                and self._allow_overwrite_timeout_times
+                and not return_on_result
+            ):
                 # update timeout time to potentially be closer to now to avoid lengthy wait times when nothing is being output by gdb
                 timeout_time_sec = min(
                     time.time() + self.time_to_check_for_additional_output_sec,
